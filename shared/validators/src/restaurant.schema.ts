@@ -73,13 +73,13 @@ export const restaurantRegistrationSchema = z
     address: restaurantAddressSchema,
 
     branding: z.object({
-      logoUrl: optionalUrlSchema,
-      bannerUrl: optionalUrlSchema,
+      logo: optionalUrlSchema,
+      banner: optionalUrlSchema,
     }),
 
     verification: z.object({
-      businessLicenseUrl: optionalUrlSchema,
-      ownerIdDocumentUrl: optionalUrlSchema,
+      businessLicense: optionalUrlSchema,
+      ownerIdDocument: optionalUrlSchema,
     }),
   })
   .refine((data) => data.owner.password === data.owner.confirmPassword, {

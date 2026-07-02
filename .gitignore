@@ -125,3 +125,7 @@ Thumbs.db
 # =========================
 .vercel/
 .netlify/
+
+# Keep built shared validators package
+!shared/validators/dist/
+!shared/validators/dist/**

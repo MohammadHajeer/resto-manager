@@ -30,12 +30,6 @@ export const customerRegistrationSchema = z
 export const updateProfileSchema = z.object({
   name: nameSchema.optional(),
   phone: phoneSchema.optional().or(z.literal("")),
-  image: z
-    .string()
-    .trim()
-    .url("Invalid image URL")
-    .optional()
-    .or(z.literal("")),
 });
 
 export type LoginInput = z.infer<typeof loginSchema>;

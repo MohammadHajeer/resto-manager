@@ -19,7 +19,7 @@ export default function GuestRoute({ children }: GuestRouteProps) {
   }
 
   if (data?.session) {
-    const userRole = (data?.user as any)?.role;
+    const userRole = data?.user.role;
     const redirectPath = getDashboardPath(userRole);
     return <Navigate to={redirectPath} replace />;
   }
