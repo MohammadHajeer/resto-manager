@@ -16,6 +16,7 @@ type TextFieldProps<TFieldValues extends FieldValues> = {
   required?: boolean;
   disabled?: boolean;
   className?: string;
+  autoComplete?: string;
 };
 
 export function TextField<TFieldValues extends FieldValues>({
@@ -27,6 +28,7 @@ export function TextField<TFieldValues extends FieldValues>({
   required = false,
   disabled = false,
   className = "",
+  autoComplete,
 }: TextFieldProps<TFieldValues>) {
   const inputId = useId();
 
@@ -49,6 +51,7 @@ export function TextField<TFieldValues extends FieldValues>({
             value={String(field.value ?? "")}
             type={type}
             disabled={disabled}
+            autoComplete={autoComplete}
             placeholder={placeholder}
             aria-invalid={Boolean(fieldState.error)}
             aria-describedby={fieldState.error ? `${inputId}-error` : undefined}

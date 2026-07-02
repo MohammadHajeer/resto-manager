@@ -1,154 +1,17 @@
-import { useState } from "react";
 import {
-  Search,
-  ShoppingCart,
-  User as UserIcon,
   ArrowRight,
   Sparkles,
   CheckCircle,
   ChevronRight,
   Plus,
   TrendingUp,
-  Menu as MenuIcon,
   FileText,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export default function LandingPage() {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
   return (
     <div className="w-full min-h-screen bg-background text-on-background selection:bg-primary selection:text-white flex flex-col font-sans">
-      {/* TopNavBar */}
-      <header className="sticky top-0 z-50 flex justify-between items-center w-full px-4 md:px-12 h-16 bg-white/80 backdrop-blur-md border-b border-gray-200/60 transition-all duration-300">
-        <div className="flex items-center gap-8">
-          <Link
-            to="/"
-            className="text-xl font-bold text-primary tracking-tight"
-            style={{ color: "#008a66" }}
-          >
-            RestoManager
-          </Link>
-          <nav className="hidden md:flex items-center gap-6">
-            <a
-              href="#home"
-              className="text-primary font-bold border-b-2 border-primary text-xs tracking-wide py-1 hover:opacity-80 transition-opacity"
-              style={{ color: "#008a66", borderColor: "#008a66" }}
-            >
-              Home
-            </a>
-            <a
-              href="#features"
-              className="text-gray-600 font-medium text-xs tracking-wide py-1 hover:text-primary transition-colors"
-            >
-              Features
-            </a>
-            <a
-              href="#about"
-              className="text-gray-600 font-medium text-xs tracking-wide py-1 hover:text-primary transition-colors"
-            >
-              About
-            </a>
-          </nav>
-        </div>
-
-        <div className="flex items-center gap-4">
-          <div className="hidden md:flex items-center bg-gray-100 px-3.5 py-1.5 rounded-full border border-gray-200">
-            <Search size={16} className="text-gray-400" />
-            <input
-              className="bg-transparent border-none focus:outline-none text-xs w-32 ml-1 text-slate-800 placeholder-slate-400"
-              placeholder="Search..."
-              type="text"
-            />
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              className="text-gray-600 p-2 hover:bg-gray-100 rounded-full transition-colors relative"
-              aria-label="Cart"
-            >
-              <ShoppingCart size={18} />
-              <span
-                className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full"
-                style={{ backgroundColor: "#008a66" }}
-              ></span>
-            </button>
-            <Link
-              to="/login"
-              className="text-gray-600 p-2 hover:bg-gray-100 rounded-full transition-colors"
-              aria-label="Profile"
-            >
-              <UserIcon size={18} />
-            </Link>
-            <Link
-              to="/login"
-              className="hidden lg:block text-gray-600 font-bold text-xs px-4 py-2 hover:text-primary transition-all"
-            >
-              Login
-            </Link>
-            <Link
-              to="/register"
-              className="bg-primary text-white text-xs font-bold px-5 py-2.5 rounded-full hover:bg-emerald-800 active:scale-95 transition-all shadow-sm"
-              style={{ backgroundColor: "#008a66" }}
-            >
-              Get Started
-            </Link>
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden text-gray-600 p-2 hover:bg-gray-100 rounded-full transition-colors"
-              aria-label="Toggle Menu"
-            >
-              <MenuIcon size={20} />
-            </button>
-          </div>
-        </div>
-      </header>
-
-      {/* Mobile Menu */}
-      {isMobileMenuOpen && (
-        <div className="md:hidden bg-white border-b border-gray-200 p-4 space-y-3 transition-all duration-300">
-          <a
-            href="#home"
-            onClick={() => setIsMobileMenuOpen(false)}
-            className="block text-sm font-semibold text-primary px-3 py-2 bg-emerald-50 rounded-lg"
-            style={{ color: "#008a66" }}
-          >
-            Home
-          </a>
-          <a
-            href="#features"
-            onClick={() => setIsMobileMenuOpen(false)}
-            className="block text-sm font-medium text-gray-600 px-3 py-2 hover:bg-gray-50 rounded-lg"
-          >
-            Features
-          </a>
-          <a
-            href="#about"
-            onClick={() => setIsMobileMenuOpen(false)}
-            className="block text-sm font-medium text-gray-600 px-3 py-2 hover:bg-gray-50 rounded-lg"
-          >
-            About
-          </a>
-          <div className="pt-2 border-t border-gray-200 flex flex-col gap-2">
-            <Link
-              to="/login"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="text-center font-semibold text-gray-600 text-sm py-2"
-            >
-              Login
-            </Link>
-            <Link
-              to="/register"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="text-center font-bold text-white text-sm py-2.5 rounded-lg"
-              style={{ backgroundColor: "#008a66" }}
-            >
-              Get Started
-            </Link>
-          </div>
-        </div>
-      )}
-
       {/* Hero Section */}
       <section
         className="relative overflow-hidden pt-12 pb-24 px-4 md:px-12"
@@ -179,7 +42,7 @@ export default function LandingPage() {
 
             <div className="flex flex-wrap gap-4">
               <Link
-                to="/register"
+                to="/restaurant/register"
                 className="text-white text-sm font-bold px-8 py-4 rounded-full hover:bg-emerald-800 transition-all shadow-md flex items-center gap-2 group"
                 style={{ backgroundColor: "#008a66" }}
               >
@@ -455,7 +318,7 @@ export default function LandingPage() {
                   every shift, reducing waste and burnout.
                 </p>
                 <Link
-                  to="/register"
+                  to="/restaurant/register"
                   className="inline-flex items-center gap-1 text-emerald-200 font-bold text-xs hover:translate-x-1.5 transition-transform"
                 >
                   Explore Labor Management <ChevronRight size={16} />
@@ -617,7 +480,7 @@ export default function LandingPage() {
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
               <Link
-                to="/register"
+                to="/restaurant/register"
                 className="bg-white font-bold px-8 py-4 rounded-full hover:bg-emerald-50 transition-all shadow-md text-sm text-emerald-800"
               >
                 Get Started Now
@@ -633,133 +496,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-slate-900 text-white pt-20 pb-10 px-4 md:px-12 mt-auto">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
-            <div className="space-y-6 text-left">
-              <Link
-                to="/"
-                className="text-xl font-bold text-primary block"
-                style={{ color: "#008a66" }}
-              >
-                RestoManager
-              </Link>
-              <p className="text-xs text-slate-400 leading-relaxed max-w-xs">
-                Empowering the culinary world with professional tools that
-                bridge the gap between passion and profitability.
-              </p>
-              <div className="flex gap-4">
-                <a
-                  className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center hover:bg-emerald-600 transition-colors text-white"
-                  href="#"
-                  aria-label="Website"
-                >
-                  <span className="text-xs">🌐</span>
-                </a>
-                <a
-                  className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center hover:bg-emerald-600 transition-colors text-white"
-                  href="#"
-                  aria-label="Share"
-                >
-                  <span className="text-xs">🔗</span>
-                </a>
-              </div>
-            </div>
-
-            <div className="text-left">
-              <h5 className="text-sm font-bold text-white mb-6">Product</h5>
-              <ul className="space-y-4 text-xs font-medium text-slate-400">
-                <li>
-                  <Link
-                    to="/register"
-                    className="hover:text-white transition-colors"
-                  >
-                    Order Management
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/register"
-                    className="hover:text-white transition-colors"
-                  >
-                    Menu Builder
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/register"
-                    className="hover:text-white transition-colors"
-                  >
-                    POS Integration
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/login"
-                    className="hover:text-white transition-colors"
-                  >
-                    Analytics
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            <div className="text-left">
-              <h5 className="text-sm font-bold text-white mb-6">Company</h5>
-              <ul className="space-y-4 text-xs font-medium text-slate-400">
-                <li>
-                  <a
-                    className="hover:text-white transition-colors"
-                    href="#about"
-                  >
-                    About Us
-                  </a>
-                </li>
-                <li>
-                  <a
-                    className="hover:text-white transition-colors"
-                    href="#features"
-                  >
-                    Careers
-                  </a>
-                </li>
-                <li>
-                  <a className="hover:text-white transition-colors" href="#">
-                    Privacy Policy
-                  </a>
-                </li>
-                <li>
-                  <a className="hover:text-white transition-colors" href="#">
-                    Terms of Service
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            <div className="text-left space-y-4">
-              <h5 className="text-sm font-bold text-white">Stay Updated</h5>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Get the latest restaurant management insights delivered weekly.
-              </p>
-            </div>
-          </div>
-
-          <div className="pt-8 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="flex gap-8 text-xs text-slate-400 font-medium">
-              <a className="hover:text-white transition-colors" href="#">
-                Help Center
-              </a>
-              <a className="hover:text-white transition-colors" href="#">
-                Support
-              </a>
-              <a className="hover:text-white transition-colors" href="#">
-                API Docs
-              </a>
-            </div>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }
