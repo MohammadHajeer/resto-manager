@@ -16,7 +16,7 @@ export const auth = betterAuth({
     client: authMongoClient,
   }),
 
-  trustedOrigins: [process.env.CLIENT_URL ?? "http://localhost:5173"],
+  trustedOrigins: [process.env.CLIENT_URL ?? "http://localhost:5173", "http://localhost:5174"],
 
   emailAndPassword: {
     enabled: true,
