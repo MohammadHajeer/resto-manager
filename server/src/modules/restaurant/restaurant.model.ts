@@ -178,8 +178,6 @@ const restaurantSchema = new Schema(
   },
 );
 
-restaurantSchema.index({ ownerId: 1 });
-restaurantSchema.index({ status: 1 });
 restaurantSchema.index({ name: "text", description: "text" });
 
 type RestaurantDocument = InferSchemaType<typeof restaurantSchema>;

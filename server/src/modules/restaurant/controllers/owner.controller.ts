@@ -5,6 +5,8 @@ import {
 } from "@restomanager/validators";
 import { Restaurant } from "../restaurant.model.js";
 import { auth, authDb } from "@/lib/auth.js";
+import { getPublicFileUrl, uploadFileToSupabase } from "@/utils/storage.js";
+import { sendResponse } from "@/utils/sendResponse.js";
 
 type AuthedRequest = Request & {
   auth?: {
@@ -23,13 +25,35 @@ function createSlug(value: string) {
     .replace(/^-+|-+$/g, "");
 }
 
+type RestaurantRegisterFiles = {
+  logo?: Express.Multer.File[];
+  banner?: Express.Multer.File[];
+  businessLicense?: Express.Multer.File[];
+  ownerIdDocument?: Express.Multer.File[];
+};
+
 export const registerRestaurant = async (
   req: Request,
   res: Response,
   next: NextFunction,
 ) => {
   try {
-    const input = restaurantRegistrationSchema.parse(req.body);
+    const parsedBody = JSON.parse(req.body.data);
+    const input = restaurantRegistrationSchema.parse(parsedBody);
+
+    const files = req.files as RestaurantRegisterFiles | undefined;
+
+    const logoFile = files?.logo?.[0];
+    const bannerFile = files?.banner?.[0];
+    const businessLicenseFile = files?.businessLicense?.[0];
+    const ownerIdDocumentFile = files?.ownerIdDocument?.[0];
+
+    if (!businessLicenseFile || !ownerIdDocumentFile) {
+      return sendResponse(res, 400, {
+        success: false,
+        message: "Business license and owner ID document are required",
+      });
+    }
 
     const slug = input.restaurant.slug
       ? createSlug(input.restaurant.slug)
@@ -38,7 +62,8 @@ export const registerRestaurant = async (
     const existingRestaurant = await Restaurant.findOne({ slug });
 
     if (existingRestaurant) {
-      return res.status(409).json({
+      return sendResponse(res, 409, {
+        success: false,
         message: "Restaurant slug already exists",
       });
     }
@@ -48,10 +73,54 @@ export const registerRestaurant = async (
     });
 
     if (existingUser) {
-      return res.status(409).json({
+      return sendResponse(res, 409, {
+        success: false,
         message: "A user with this email already exists",
       });
     }
+
+    const publicBucket =
+      process.env.SUPABASE_PUBLIC_BUCKET ?? "restaurant-images";
+
+    const privateBucket =
+      process.env.SUPABASE_PRIVATE_BUCKET ?? "restaurant-documents";
+
+    const folder = `restaurants/${slug}`;
+
+    let logoUrl: string | null = null;
+    let bannerUrl: string | null = null;
+
+    if (logoFile) {
+      const logoPath = await uploadFileToSupabase({
+        bucket: publicBucket,
+        folder: `${folder}/branding`,
+        file: logoFile,
+      });
+
+      logoUrl = getPublicFileUrl(publicBucket, logoPath);
+    }
+
+    if (bannerFile) {
+      const bannerPath = await uploadFileToSupabase({
+        bucket: publicBucket,
+        folder: `${folder}/branding`,
+        file: bannerFile,
+      });
+
+      bannerUrl = getPublicFileUrl(publicBucket, bannerPath);
+    }
+
+    const businessLicensePath = await uploadFileToSupabase({
+      bucket: privateBucket,
+      folder: `${folder}/documents`,
+      file: businessLicenseFile,
+    });
+
+    const ownerIdDocumentPath = await uploadFileToSupabase({
+      bucket: privateBucket,
+      folder: `${folder}/documents`,
+      file: ownerIdDocumentFile,
+    });
 
     const signUpResult = await auth.api.signUpEmail({
       body: {
@@ -82,8 +151,8 @@ export const registerRestaurant = async (
       description: input.restaurant.description,
       cuisineTypes: input.restaurant.cuisineTypes,
 
-      logoUrl: input.branding.logoUrl ?? null,
-      bannerUrl: input.branding.bannerUrl ?? null,
+      logoUrl,
+      bannerUrl,
 
       contact: {
         phone: input.contact.phone,
@@ -102,15 +171,16 @@ export const registerRestaurant = async (
       isOpen: false,
 
       verification: {
-        businessLicenseUrl: input.verification.businessLicenseUrl ?? null,
-        ownerIdDocumentUrl: input.verification.ownerIdDocumentUrl ?? null,
+        businessLicensePath,
+        ownerIdDocumentPath,
         submittedAt: new Date(),
       },
     });
 
-    res.status(201).json({
+    sendResponse(res, 201, {
+      success: true,
       message: "Restaurant registration submitted successfully",
-      restaurant,
+      data: restaurant,
     });
   } catch (error) {
     next(error);

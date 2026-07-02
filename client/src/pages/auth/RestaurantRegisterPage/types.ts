@@ -46,9 +46,7 @@ const restaurantRegisterBaseSchema = restaurantRegistrationSchema.extend({
   brandPrimaryColor: z
     .string()
     .regex(/^#[0-9a-fA-F]{6}$/, "Enter a valid hex color"),
-  agreeToTerms: z.boolean().refine(Boolean, {
-    message: "You must agree to the Terms of Service",
-  }),
+
 });
 
 export const restaurantRegisterFormSchema = z.preprocess((value) => {
@@ -91,7 +89,6 @@ export type PersistedRestaurantRegisterValues = Omit<
 export type RestaurantRegisterSubmitData = RestaurantRegistrationInput & {
   uploads: RestaurantRegisterFormValues["uploads"];
   brandPrimaryColor: string;
-  agreeToTerms: boolean;
 };
 
 export const totalSteps = 4;
@@ -124,7 +121,6 @@ export const stepFields: Record<
     "uploads.banner",
     "uploads.businessLicense",
     "brandPrimaryColor",
-    "agreeToTerms",
   ],
   4: [],
 };
@@ -176,7 +172,6 @@ export const defaultValues: RestaurantRegisterFormValues = {
     businessLicense: null,
   },
   brandPrimaryColor: "#00694d",
-  agreeToTerms: false,
 };
 
 export function sanitizeForPersistence(
@@ -257,6 +252,5 @@ export function toSubmitData(
     verification: data.verification,
     uploads: data.uploads,
     brandPrimaryColor: data.brandPrimaryColor,
-    agreeToTerms: data.agreeToTerms,
   };
 }

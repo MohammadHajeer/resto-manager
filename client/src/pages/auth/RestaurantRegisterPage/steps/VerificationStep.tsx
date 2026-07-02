@@ -143,49 +143,15 @@ export function VerificationStep({
             />
 
             <div className="flex items-start gap-3 rounded-lg border border-primary/20 bg-primary/5 p-4">
-              <Info className="mt-0.5 h-5 w-5 text-primary" aria-hidden="true" />
+              <Info
+                className="mt-0.5 h-5 w-5 text-primary"
+                aria-hidden="true"
+              />
               <p className="text-sm leading-5 text-primary">
                 Your information is encrypted and will only be used for identity
                 and business verification.
               </p>
             </div>
-
-            <Controller
-              control={control}
-              name="agreeToTerms"
-              render={({ field, fieldState }) => (
-                <div className="space-y-2">
-                  <div className="flex items-start gap-3 py-2">
-                    <input
-                      type="checkbox"
-                      id="terms"
-                      checked={field.value}
-                      onChange={(event) => field.onChange(event.target.checked)}
-                      className="mt-0.5 h-4 w-4 rounded border-input accent-primary focus:ring-2 focus:ring-ring"
-                    />
-                    <label
-                      className="select-none text-sm leading-5 text-muted-foreground"
-                      htmlFor="terms"
-                    >
-                      I agree to the{" "}
-                      <a className="text-primary underline font-medium" href="#">
-                        Terms of Service
-                      </a>{" "}
-                      and{" "}
-                      <a className="text-primary underline font-medium" href="#">
-                        Privacy Policy
-                      </a>
-                      .
-                    </label>
-                  </div>
-                  {fieldState.error && (
-                    <p className="text-sm text-destructive">
-                      {fieldState.error.message}
-                    </p>
-                  )}
-                </div>
-              )}
-            />
           </div>
         </div>
       </div>

@@ -26,6 +26,7 @@ import {
   totalSteps,
   type RestaurantRegisterFormValues,
 } from "./types";
+import { api } from "@/lib/axios";
 
 function hasNestedError(
   errors: FieldErrors<RestaurantRegisterFormValues>,
@@ -99,15 +100,23 @@ function RestaurantRegisterPage() {
       setStoredStep(currentStep - 1);
     }
   };
-
-  const onSubmit: SubmitHandler<RestaurantRegisterFormValues> = (data) => {
+  const onSubmit: SubmitHandler<RestaurantRegisterFormValues> = async (
+    data,
+  ) => {
     const cleanData = toSubmitData(data);
 
-    console.log("Submitting restaurant registration data:", cleanData);
+    const formData = new FormData();
 
-    // NOW you can send the cleanData to your backend or API for processing
+    formData.append("data", JSON.stringify(cleanData));
+
+    try {
+      const response = await api.post("/owner/register", formData);
+
+      console.log(response.data);
+    } catch (error) {
+      console.error("Error submitting restaurant registration:", error);
+    }
   };
-
   const onInvalid: SubmitErrorHandler<RestaurantRegisterFormValues> = (
     errors,
   ) => {
