@@ -10,15 +10,21 @@
     "preview": "vite preview"
   },
   "dependencies": {
+<<<<<<< Updated upstream
     "@base-ui/react": "^1.6.0",
+=======
+>>>>>>> Stashed changes
     "@fontsource-variable/inter": "^5.2.8",
     "@hookform/resolvers": "^5.4.0",
     "@restomanager/validators": "file:../shared/validators",
     "@supabase/supabase-js": "^2.110.0",
     "@tailwindcss/vite": "^4.3.2",
     "better-auth": "^1.6.23",
+<<<<<<< Updated upstream
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+=======
+>>>>>>> Stashed changes
     "lucide-react": "^1.23.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
