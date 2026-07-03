@@ -5,9 +5,13 @@ import type { RestaurantRegisterFormValues } from "../types";
 
 type RestaurantDetailsStepProps = {
   control: Control<RestaurantRegisterFormValues>;
+  disabled?: boolean;
 };
 
-export function RestaurantDetailsStep({ control }: RestaurantDetailsStepProps) {
+export function RestaurantDetailsStep({
+  control,
+  disabled = false,
+}: RestaurantDetailsStepProps) {
   return (
     <section className="animate-fade-in">
       <div className="mb-8">
@@ -27,6 +31,7 @@ export function RestaurantDetailsStep({ control }: RestaurantDetailsStepProps) {
             placeholder="Gourmet Bistro Inc."
             className="md:col-span-2"
             required
+            disabled={disabled}
           />
           <TextareaField
             control={control}
@@ -35,6 +40,7 @@ export function RestaurantDetailsStep({ control }: RestaurantDetailsStepProps) {
             placeholder="Describe your food, atmosphere, and service style."
             className="md:col-span-2"
             required
+            disabled={disabled}
           />
           <TextField
             control={control}
@@ -42,6 +48,7 @@ export function RestaurantDetailsStep({ control }: RestaurantDetailsStepProps) {
             label="Cuisine Type"
             placeholder="e.g., Italian, Fusion, Vegan"
             required
+            disabled={disabled}
           />
           <TextField
             control={control}
@@ -50,6 +57,7 @@ export function RestaurantDetailsStep({ control }: RestaurantDetailsStepProps) {
             label="Restaurant Phone"
             placeholder="+1 (555) 111-2222"
             required
+            disabled={disabled}
           />
           <TextField
             control={control}
@@ -57,6 +65,7 @@ export function RestaurantDetailsStep({ control }: RestaurantDetailsStepProps) {
             type="email"
             label="Restaurant Email"
             placeholder="hello@restaurant.com"
+            disabled={disabled}
           />
           <TextField
             control={control}
@@ -64,6 +73,7 @@ export function RestaurantDetailsStep({ control }: RestaurantDetailsStepProps) {
             label="City"
             placeholder="New York"
             required
+            disabled={disabled}
           />
           <TextField
             control={control}
@@ -71,6 +81,7 @@ export function RestaurantDetailsStep({ control }: RestaurantDetailsStepProps) {
             label="Street"
             placeholder="123 Culinary Ave"
             required
+            disabled={disabled}
           />
           <TextField
             control={control}
@@ -78,12 +89,14 @@ export function RestaurantDetailsStep({ control }: RestaurantDetailsStepProps) {
             label="Building"
             placeholder="Building A"
             required
+            disabled={disabled}
           />
           <TextField
             control={control}
             name="address.floor"
             label="Floor"
             placeholder="Ground floor"
+            disabled={disabled}
           />
           <TextField
             control={control}
@@ -91,6 +104,7 @@ export function RestaurantDetailsStep({ control }: RestaurantDetailsStepProps) {
             type="url"
             label="Location URL"
             placeholder="https://maps.example.com/your-location"
+            disabled={disabled}
           />
       </div>
     </section>

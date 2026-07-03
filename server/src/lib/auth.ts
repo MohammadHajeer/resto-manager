@@ -11,12 +11,16 @@ if (!mongoUri) {
 export const authMongoClient = new MongoClient(mongoUri);
 export const authDb = authMongoClient.db();
 
+const isDev = process.env.NODE_ENV !== "production";
+
 export const auth = betterAuth({
   database: mongodbAdapter(authDb, {
     client: authMongoClient,
   }),
 
-  trustedOrigins: [process.env.CLIENT_URL ?? "http://localhost:5173", "http://localhost:5174"],
+  trustedOrigins: isDev
+    ? ["http://localhost:*", "http://127.0.0.1:*"]
+    : [process.env.CLIENT_URL!],
 
   emailAndPassword: {
     enabled: true,

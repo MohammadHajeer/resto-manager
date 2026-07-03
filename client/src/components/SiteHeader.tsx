@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
-import { LogOut, Menu, ShoppingCart, UserRound, X } from "lucide-react";
+import { Menu, ShoppingCart, UserRound, X } from "lucide-react";
 import {
   getDashboardPath,
   normalizeRole,
@@ -8,6 +8,7 @@ import {
 } from "../auth/auth-types";
 import { authClient } from "../lib/auth-client";
 import { Button } from "./ui/button";
+import { LogoutButton } from "./LogoutButton";
 
 const roleLinks: Record<UserRole, Array<{ label: string; to: string }>> = {
   customer: [
@@ -77,15 +78,7 @@ export function SiteHeader() {
               >
                 {user.name?.[0]?.toUpperCase() ?? "U"}
               </Link>
-              <Button
-                variant="ghost"
-                size="icon"
-                nativeButton={false}
-                aria-label="Log out"
-                onClick={() => authClient.signOut()}
-              >
-                <LogOut aria-hidden="true" />
-              </Button>
+              <LogoutButton />
             </>
           ) : (
             <div className="hidden items-center gap-1 sm:flex">

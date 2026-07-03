@@ -1,4 +1,11 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+  Outlet,
+} from "react-router-dom";
+import { Toaster } from "sonner";
 
 // Layouts
 import PublicLayout from "./layouts/PublicLayout";
@@ -39,6 +46,7 @@ import EditMenuItemPage from "./pages/owner/EditMenuItemPage";
 import OwnerOrdersPage from "./pages/owner/OwnerOrdersPage";
 import OwnerOrderDetailsPage from "./pages/owner/OwnerOrderDetailsPage";
 import OwnerSettingsPage from "./pages/owner/OwnerSettingsPage";
+import OwnerPendingPage from "./pages/owner/OwnerPendingPage";
 
 // Pages: Admin
 import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
@@ -50,6 +58,7 @@ import AdminOrdersPage from "./pages/admin/AdminOrdersPage";
 
 // Pages: Shared
 import NotFoundPage from "./pages/shared/NotFoundPage";
+import RequireApprovedOwner from "./routes/RequireApprovedOwner";
 
 export default function App() {
   return (
@@ -70,10 +79,19 @@ export default function App() {
         {/* Public & Customer Browsing Routes */}
         <Route element={<PublicLayout />}>
           <Route path="/" element={<LandingPage />} />
-          <Route path="/restaurant/register" element={<RestaurantRegisterPage />} />
+          <Route
+            path="/restaurant/register"
+            element={<RestaurantRegisterPage />}
+          />
           <Route path="/restaurants" element={<RestaurantListingPage />} />
-          <Route path="/restaurants/:restaurantSlug" element={<RestaurantMenuPage />} />
-          <Route path="/restaurants/:restaurantSlug/items/:itemSlug" element={<MenuItemDetailsPage />} />
+          <Route
+            path="/restaurants/:restaurantSlug"
+            element={<RestaurantMenuPage />}
+          />
+          <Route
+            path="/restaurants/:restaurantSlug/items/:itemSlug"
+            element={<MenuItemDetailsPage />}
+          />
         </Route>
 
         {/* Protected Customer Routes */}
@@ -88,10 +106,16 @@ export default function App() {
         >
           <Route path="/cart" element={<CartPage />} />
           <Route path="/checkout" element={<CheckoutPage />} />
-          <Route path="/orders/success/:orderId" element={<OrderConfirmationPage />} />
+          <Route
+            path="/orders/success/:orderId"
+            element={<OrderConfirmationPage />}
+          />
           <Route path="/profile" element={<CustomerProfilePage />} />
           <Route path="/orders" element={<CustomerOrderHistoryPage />} />
-          <Route path="/orders/:orderId" element={<CustomerOrderDetailsPage />} />
+          <Route
+            path="/orders/:orderId"
+            element={<CustomerOrderDetailsPage />}
+          />
         </Route>
 
         {/* Protected Owner Routes */}
@@ -99,20 +123,38 @@ export default function App() {
           element={
             <ProtectedRoute>
               <RoleRoute allowedRoles={["restaurant_owner"]}>
-                <OwnerLayout />
+                <Outlet />
               </RoleRoute>
             </ProtectedRoute>
           }
         >
-          <Route path="/owner" element={<Navigate to="/owner/dashboard" replace />} />
-          <Route path="/owner/dashboard" element={<OwnerDashboardPage />} />
-          <Route path="/owner/profile" element={<RestaurantProfilePage />} />
-          <Route path="/owner/menu" element={<MenuManagementPage />} />
-          <Route path="/owner/menu/new" element={<AddMenuItemPage />} />
-          <Route path="/owner/menu/:menuItemId/edit" element={<EditMenuItemPage />} />
-          <Route path="/owner/orders" element={<OwnerOrdersPage />} />
-          <Route path="/owner/orders/:orderId" element={<OwnerOrderDetailsPage />} />
-          <Route path="/owner/settings" element={<OwnerSettingsPage />} />
+          <Route path="/owner/pending" element={<OwnerPendingPage />} />
+          <Route
+            element={
+              <RequireApprovedOwner>
+                <OwnerLayout />
+              </RequireApprovedOwner>
+            }
+          >
+            <Route
+              path="/owner"
+              element={<Navigate to="/owner/dashboard" replace />}
+            />
+            <Route path="/owner/dashboard" element={<OwnerDashboardPage />} />
+            <Route path="/owner/profile" element={<RestaurantProfilePage />} />
+            <Route path="/owner/menu" element={<MenuManagementPage />} />
+            <Route path="/owner/menu/new" element={<AddMenuItemPage />} />
+            <Route
+              path="/owner/menu/:menuItemId/edit"
+              element={<EditMenuItemPage />}
+            />
+            <Route path="/owner/orders" element={<OwnerOrdersPage />} />
+            <Route
+              path="/owner/orders/:orderId"
+              element={<OwnerOrderDetailsPage />}
+            />
+            <Route path="/owner/settings" element={<OwnerSettingsPage />} />
+          </Route>
         </Route>
 
         {/* Protected Admin Routes */}
@@ -125,11 +167,17 @@ export default function App() {
             </ProtectedRoute>
           }
         >
-          <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+          <Route
+            path="/admin"
+            element={<Navigate to="/admin/dashboard" replace />}
+          />
           <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
           <Route path="/admin/restaurants" element={<AdminRestaurantsPage />} />
           <Route path="/admin/approvals" element={<AdminApprovalsPage />} />
-          <Route path="/admin/approvals/:restaurantId" element={<AdminRestaurantReviewPage />} />
+          <Route
+            path="/admin/approvals/:restaurantId"
+            element={<AdminRestaurantReviewPage />}
+          />
           <Route path="/admin/users" element={<AdminUsersPage />} />
           <Route path="/admin/orders" element={<AdminOrdersPage />} />
         </Route>
@@ -139,6 +187,7 @@ export default function App() {
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>
+      <Toaster richColors position="bottom-right" />
     </BrowserRouter>
   );
 }

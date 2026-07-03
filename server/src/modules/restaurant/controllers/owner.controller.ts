@@ -7,6 +7,7 @@ import { Restaurant } from "../restaurant.model.js";
 import { auth, authDb } from "@/lib/auth.js";
 import { getPublicFileUrl, uploadFileToSupabase } from "@/utils/storage.js";
 import { sendResponse } from "@/utils/sendResponse.js";
+import { ObjectId } from "mongodb";
 
 type AuthedRequest = Request & {
   auth?: {
@@ -134,7 +135,7 @@ export const registerRestaurant = async (
     const ownerId = signUpResult.user.id;
 
     await authDb.collection("user").updateOne(
-      { id: ownerId },
+      { _id: new ObjectId(ownerId) },
       {
         $set: {
           role: "restaurant_owner",
@@ -326,6 +327,50 @@ export const toggleMyRestaurantOpenStatus = async (
     res.status(200).json({
       message: isOpen ? "Restaurant is now open" : "Restaurant is now closed",
       restaurant,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getOwnerRestaurantStatus = async (
+  req: AuthedRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const ownerId = req.auth?.user?.id;
+
+    if (!ownerId) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+
+    const restaurant = await Restaurant.findOne({ ownerId }).select(
+      "name slug status verification createdAt updatedAt",
+    );
+
+    if (!restaurant) {
+      return res.status(404).json({
+        success: false,
+        message: "Restaurant registration was not found.",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Restaurant status fetched successfully.",
+      data: {
+        restaurantId: restaurant._id,
+        name: restaurant.name,
+        slug: restaurant.slug,
+        status: restaurant.status,
+        rejectionReason: restaurant.verification?.rejectionReason ?? null,
+        createdAt: restaurant.createdAt,
+        updatedAt: restaurant.updatedAt,
+      },
     });
   } catch (error) {
     next(error);

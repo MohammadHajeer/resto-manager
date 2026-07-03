@@ -1,8 +1,7 @@
-import { Controller, type Control } from "react-hook-form";
+import type { Control } from "react-hook-form";
 import type { Accept } from "react-dropzone";
 import { IdCard, Info } from "lucide-react";
 import { FileUpload } from "../../../../components/form/FileUpload";
-import { TextField } from "../../../../components/form/TextField";
 import { DEFAULT_BANNER, type RestaurantRegisterFormValues } from "../types";
 
 const IMAGE_ACCEPT: Accept = {
@@ -18,12 +17,12 @@ const LICENSE_ACCEPT: Accept = {
 
 type VerificationStepProps = {
   control: Control<RestaurantRegisterFormValues>;
-  brandPrimaryColor: string;
+  disabled?: boolean;
 };
 
 export function VerificationStep({
   control,
-  brandPrimaryColor,
+  disabled = false,
 }: VerificationStepProps) {
   return (
     <section className="animate-fade-in">
@@ -40,7 +39,7 @@ export function VerificationStep({
         <div className="space-y-6">
           <div>
             <h3 className="text-base font-semibold text-foreground">
-              Logo &amp; Brand Color
+              Restaurant Logo
             </h3>
             <p className="mt-1 text-sm text-muted-foreground">
               Recommended logo size is 500x500px.
@@ -54,46 +53,9 @@ export function VerificationStep({
             accept={IMAGE_ACCEPT}
             buttonText="Drop your logo here or browse"
             variant="logo"
+            disabled={disabled}
           />
 
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-foreground">
-              Brand Primary Color
-            </label>
-            <div className="flex gap-4">
-              <Controller
-                control={control}
-                name="brandPrimaryColor"
-                render={({ field, fieldState }) => (
-                  <div className="space-y-2">
-                    <input
-                      {...field}
-                      type="color"
-                      className={`h-11 w-14 cursor-pointer rounded-lg border bg-background p-1 ${
-                        fieldState.error ? "border-destructive" : "border-input"
-                      }`}
-                    />
-                    {fieldState.error && (
-                      <p className="text-sm text-destructive">
-                        {fieldState.error.message}
-                      </p>
-                    )}
-                  </div>
-                )}
-              />
-              <TextField
-                control={control}
-                name="brandPrimaryColor"
-                label="Brand color hex"
-                placeholder="#00694D"
-                className="flex-1 [&>label]:sr-only"
-              />
-            </div>
-            <div
-              className="h-2 rounded-full border border-border"
-              style={{ backgroundColor: brandPrimaryColor }}
-            />
-          </div>
         </div>
 
         <div className="space-y-6 md:border-l md:border-border md:pl-8">
@@ -114,6 +76,7 @@ export function VerificationStep({
             buttonText="Upload Banner"
             fallbackPreview={DEFAULT_BANNER}
             variant="banner"
+            disabled={disabled}
           />
         </div>
 
@@ -140,6 +103,20 @@ export function VerificationStep({
               maxSize={10 * 1024 * 1024}
               invalidTypeMessage="Please upload a PDF, JPG, PNG, or WEBP file"
               buttonText="Upload Business License (PDF, JPG, PNG)"
+              required
+              disabled={disabled}
+            />
+
+            <FileUpload
+              control={control}
+              name="uploads.ownerIdDocument"
+              label="Owner ID Document"
+              accept={LICENSE_ACCEPT}
+              maxSize={10 * 1024 * 1024}
+              invalidTypeMessage="Please upload a PDF, JPG, PNG, or WEBP file"
+              buttonText="Upload Owner ID Document (PDF, JPG, PNG)"
+              required
+              disabled={disabled}
             />
 
             <div className="flex items-start gap-3 rounded-lg border border-primary/20 bg-primary/5 p-4">

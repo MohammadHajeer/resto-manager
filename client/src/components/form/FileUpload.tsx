@@ -252,7 +252,8 @@ function FileUploadControl({
         <div className="flex flex-wrap items-center gap-3">
           <button
             type="button"
-            className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:text-primary/80"
+            disabled={isDisabled}
+            className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:text-primary/80 disabled:cursor-not-allowed disabled:opacity-50"
             onClick={() => {
               setDropError(null);
               onChange(null);
