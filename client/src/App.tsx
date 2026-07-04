@@ -11,15 +11,13 @@ import { Toaster } from "sonner";
 import PublicLayout from "./layouts/PublicLayout";
 import CustomerLayout from "./layouts/CustomerLayout";
 import { DashboardLayout } from "./components/layouts/DashboardLayout";
-import {
-  adminNavItems,
-  ownerNavItems,
-} from "./config/dashboard-navigation";
+import { adminNavItems, ownerNavItems } from "./config/dashboard-navigation";
 
 // Route Guards
 import ProtectedRoute from "./routes/ProtectedRoute";
 import RoleRoute from "./routes/RoleRoute";
 import GuestRoute from "./routes/GuestRoute";
+import RequireApprovedOwner from "./routes/RequireApprovedOwner";
 
 // Pages: Public
 import LandingPage from "./pages/public/LandingPage";
@@ -48,7 +46,6 @@ import AddMenuItemPage from "./pages/owner/AddMenuItemPage";
 import EditMenuItemPage from "./pages/owner/EditMenuItemPage";
 import OwnerOrdersPage from "./pages/owner/OwnerOrdersPage";
 import OwnerOrderDetailsPage from "./pages/owner/OwnerOrderDetailsPage";
-import OwnerSettingsPage from "./pages/owner/OwnerSettingsPage";
 import OwnerPendingPage from "./pages/owner/OwnerPendingPage";
 
 // Pages: Admin
@@ -57,11 +54,9 @@ import AdminRestaurantsPage from "./pages/admin/AdminRestaurantsPage";
 import AdminApprovalsPage from "./pages/admin/AdminApprovalsPage";
 import AdminRestaurantReviewPage from "./pages/admin/AdminRestaurantReviewPage";
 import AdminUsersPage from "./pages/admin/AdminUsersPage";
-import AdminOrdersPage from "./pages/admin/AdminOrdersPage";
 
 // Pages: Shared
 import NotFoundPage from "./pages/shared/NotFoundPage";
-import RequireApprovedOwner from "./routes/RequireApprovedOwner";
 
 export default function App() {
   return (
@@ -161,7 +156,6 @@ export default function App() {
               path="/owner/orders/:orderId"
               element={<OwnerOrderDetailsPage />}
             />
-            <Route path="/owner/settings" element={<OwnerSettingsPage />} />
           </Route>
         </Route>
 
@@ -192,7 +186,6 @@ export default function App() {
             element={<AdminRestaurantReviewPage />}
           />
           <Route path="/admin/users" element={<AdminUsersPage />} />
-          <Route path="/admin/orders" element={<AdminOrdersPage />} />
         </Route>
 
         {/* Fallback Catch-All Route */}
