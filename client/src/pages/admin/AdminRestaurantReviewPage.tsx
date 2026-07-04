@@ -9,6 +9,7 @@ import {
   FileText,
   IdCard,
   ImageIcon,
+  LoaderCircle,
   Mail,
   MapPin,
   Phone,
@@ -17,10 +18,27 @@ import {
   UserRound,
   XCircle,
 } from "lucide-react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { toast } from "sonner";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { useRestaurantById } from "@/hooks/admin/useAdminRestaurants";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  useApproveRestaurant,
+  useRejectRestaurant,
+  useRestaurantById,
+} from "@/hooks/admin/useAdminRestaurants";
 import type { AdminRestaurantDetails } from "@/services/admin.service";
 
 type DocumentKey = "businessLicense" | "ownerIdDocument";
@@ -248,21 +266,75 @@ function ReviewPageSkeleton() {
 
 export default function AdminRestaurantReviewPage() {
   const { restaurantId } = useParams<{ restaurantId: string }>();
+  const navigate = useNavigate();
   const [selectedDocument, setSelectedDocument] =
     useState<DocumentKey>("businessLicense");
+  const [approveDialogOpen, setApproveDialogOpen] = useState(false);
+  const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
+  const [rejectionReason, setRejectionReason] = useState("");
+  const [rejectionReasonError, setRejectionReasonError] = useState("");
   const {
     data: restaurant,
     isLoading,
     isError,
     refetch,
   } = useRestaurantById(restaurantId ?? "");
+  const approveRestaurant = useApproveRestaurant();
+  const rejectRestaurant = useRejectRestaurant();
+  const isMutating = approveRestaurant.isPending || rejectRestaurant.isPending;
 
-  const handleApprove = () => {
-    // TODO: implement approve restaurant functionality.
+  const handleApproveRestaurant = () => {
+    if (!restaurant?._id) return;
+
+    approveRestaurant.mutate(restaurant._id, {
+      onSuccess: () => {
+        setApproveDialogOpen(false);
+        toast.success("Restaurant approved successfully.");
+        navigate("/admin/approvals");
+      },
+      onError: () => {
+        toast.error("Failed to approve restaurant. Please try again.");
+      },
+    });
   };
 
-  const handleReject = () => {
-    // TODO: implement reject restaurant functionality.
+  const handleRejectRestaurant = () => {
+    if (!restaurant?._id) return;
+
+    const trimmedReason = rejectionReason.trim();
+    if (!trimmedReason) {
+      setRejectionReasonError("A rejection reason is required.");
+      return;
+    }
+
+    rejectRestaurant.mutate(
+      {
+        restaurantId: restaurant._id,
+        rejectionReason: trimmedReason,
+      },
+      {
+        onSuccess: () => {
+          setRejectDialogOpen(false);
+          setRejectionReason("");
+          setRejectionReasonError("");
+          toast.success("Restaurant rejected successfully.");
+          navigate("/admin/approvals");
+        },
+        onError: () => {
+          toast.error("Failed to reject restaurant. Please try again.");
+        },
+      },
+    );
+  };
+
+  const handleRejectDialogChange = (nextOpen: boolean) => {
+    if (rejectRestaurant.isPending) return;
+
+    setRejectDialogOpen(nextOpen);
+    if (!nextOpen) {
+      setRejectionReason("");
+      setRejectionReasonError("");
+    }
   };
 
   if (isLoading) return <ReviewPageSkeleton />;
@@ -371,21 +443,29 @@ export default function AdminRestaurantReviewPage() {
           <Button
             type="button"
             variant="destructive"
-            disabled={restaurant.status !== "pending"}
-            onClick={handleReject}
+            disabled={restaurant.status !== "pending" || isMutating}
+            onClick={() => setRejectDialogOpen(true)}
             className="rounded-md"
           >
-            <XCircle aria-hidden="true" />
-            Reject
+            {rejectRestaurant.isPending ? (
+              <LoaderCircle className="animate-spin" aria-hidden="true" />
+            ) : (
+              <XCircle aria-hidden="true" />
+            )}
+            {rejectRestaurant.isPending ? "Rejecting..." : "Reject"}
           </Button>
           <Button
             type="button"
-            disabled={restaurant.status !== "pending"}
-            onClick={handleApprove}
+            disabled={restaurant.status !== "pending" || isMutating}
+            onClick={() => setApproveDialogOpen(true)}
             className="rounded-md"
           >
-            <CheckCircle2 aria-hidden="true" />
-            Approve
+            {approveRestaurant.isPending ? (
+              <LoaderCircle className="animate-spin" aria-hidden="true" />
+            ) : (
+              <CheckCircle2 aria-hidden="true" />
+            )}
+            {approveRestaurant.isPending ? "Approving..." : "Approve"}
           </Button>
         </div>
       </header>
@@ -574,6 +654,147 @@ export default function AdminRestaurantReviewPage() {
           </div>
         </section>
       </div>
+
+      <AlertDialog
+        open={approveDialogOpen}
+        onOpenChange={(nextOpen) => {
+          if (!approveRestaurant.isPending) setApproveDialogOpen(nextOpen);
+        }}
+      >
+        <AlertDialogContent className="max-w-[calc(100%-2rem)] gap-0 overflow-hidden rounded-lg border border-border bg-card p-0 text-card-foreground shadow-xl sm:max-w-md">
+          <AlertDialogHeader className="gap-2 p-6 sm:gap-x-4">
+            <AlertDialogMedia className="mb-1 size-12 bg-primary/10 text-primary sm:mb-0">
+              <CheckCircle2 className="size-5" aria-hidden="true" />
+            </AlertDialogMedia>
+            <AlertDialogTitle className="text-xl font-semibold text-foreground">
+              Approve restaurant?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="leading-6 text-muted-foreground">
+              Are you sure you want to approve this restaurant? Once approved,
+              the owner will be able to access the restaurant dashboard and
+              start managing the restaurant.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <AlertDialogFooter className="border-t border-border bg-muted/30 p-4 sm:px-6">
+            <AlertDialogCancel
+              size="lg"
+              disabled={approveRestaurant.isPending}
+              className="rounded-md"
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              size="lg"
+              disabled={approveRestaurant.isPending}
+              onClick={(event) => {
+                event.preventDefault();
+                handleApproveRestaurant();
+              }}
+              className="rounded-md"
+            >
+              {approveRestaurant.isPending ? (
+                <>
+                  <LoaderCircle className="animate-spin" aria-hidden="true" />
+                  Approving...
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 aria-hidden="true" />
+                  Approve restaurant
+                </>
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog
+        open={rejectDialogOpen}
+        onOpenChange={handleRejectDialogChange}
+      >
+        <AlertDialogContent className="max-w-[calc(100%-2rem)] gap-0 overflow-hidden rounded-lg border border-border bg-card p-0 text-card-foreground shadow-xl sm:max-w-md">
+          <AlertDialogHeader className="gap-2 p-6 pb-4 sm:gap-x-4">
+            <AlertDialogMedia className="mb-1 size-12 bg-destructive/10 text-destructive sm:mb-0">
+              <XCircle className="size-5" aria-hidden="true" />
+            </AlertDialogMedia>
+            <AlertDialogTitle className="text-xl font-semibold text-foreground">
+              Reject restaurant?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="leading-6 text-muted-foreground">
+              Please provide a reason for rejecting this restaurant
+              application. This reason may be shown to the restaurant owner.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <div className="px-6 pb-6">
+            <label
+              htmlFor="rejection-reason"
+              className="mb-2 block text-sm font-medium text-foreground"
+            >
+              Rejection reason <span className="text-destructive">*</span>
+            </label>
+            <Textarea
+              id="rejection-reason"
+              value={rejectionReason}
+              onChange={(event) => {
+                setRejectionReason(event.target.value);
+                if (event.target.value.trim()) setRejectionReasonError("");
+              }}
+              placeholder="Write the rejection reason..."
+              disabled={rejectRestaurant.isPending}
+              aria-invalid={Boolean(rejectionReasonError)}
+              aria-describedby={
+                rejectionReasonError ? "rejection-reason-error" : undefined
+              }
+              className="min-h-28 resize-none"
+            />
+            {rejectionReasonError && (
+              <p
+                id="rejection-reason-error"
+                role="alert"
+                className="mt-2 text-sm text-destructive"
+              >
+                {rejectionReasonError}
+              </p>
+            )}
+          </div>
+
+          <AlertDialogFooter className="border-t border-border bg-muted/30 p-4 sm:px-6">
+            <AlertDialogCancel
+              size="lg"
+              disabled={rejectRestaurant.isPending}
+              className="rounded-md"
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              size="lg"
+              disabled={
+                rejectRestaurant.isPending || !rejectionReason.trim()
+              }
+              onClick={(event) => {
+                event.preventDefault();
+                handleRejectRestaurant();
+              }}
+              className="rounded-md"
+            >
+              {rejectRestaurant.isPending ? (
+                <>
+                  <LoaderCircle className="animate-spin" aria-hidden="true" />
+                  Rejecting...
+                </>
+              ) : (
+                <>
+                  <XCircle aria-hidden="true" />
+                  Reject restaurant
+                </>
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
