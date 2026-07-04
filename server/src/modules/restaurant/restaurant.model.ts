@@ -36,7 +36,8 @@ const openingHourSchema = new Schema(
 const restaurantSchema = new Schema(
   {
     ownerId: {
-      type: String,
+      type: Schema.Types.ObjectId,
+      ref: "AuthUser",
       required: true,
       index: true,
     },

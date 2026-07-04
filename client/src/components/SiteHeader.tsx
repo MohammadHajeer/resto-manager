@@ -8,7 +8,7 @@ import {
 } from "../auth/auth-types";
 import { authClient } from "../lib/auth-client";
 import { Button } from "./ui/button";
-import { LogoutButton } from "./LogoutButton";
+import { LogoutConfirmDialog } from "./common/LogoutConfirmDialog";
 
 const roleLinks: Record<UserRole, Array<{ label: string; to: string }>> = {
   customer: [
@@ -78,13 +78,14 @@ export function SiteHeader() {
               >
                 {user.name?.[0]?.toUpperCase() ?? "U"}
               </Link>
-              <LogoutButton />
+              <LogoutConfirmDialog />
             </>
           ) : (
             <div className="hidden items-center gap-1 sm:flex">
               <Button
                 variant="ghost"
                 size="icon"
+                nativeButton={false}
                 aria-label="Open login"
                 render={<Link to="/login" />}
               >

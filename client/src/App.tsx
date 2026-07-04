@@ -10,8 +10,11 @@ import { Toaster } from "sonner";
 // Layouts
 import PublicLayout from "./layouts/PublicLayout";
 import CustomerLayout from "./layouts/CustomerLayout";
-import OwnerLayout from "./layouts/OwnerLayout";
-import AdminLayout from "./layouts/AdminLayout";
+import { DashboardLayout } from "./components/layouts/DashboardLayout";
+import {
+  adminNavItems,
+  ownerNavItems,
+} from "./config/dashboard-navigation";
 
 // Route Guards
 import ProtectedRoute from "./routes/ProtectedRoute";
@@ -132,7 +135,12 @@ export default function App() {
           <Route
             element={
               <RequireApprovedOwner>
-                <OwnerLayout />
+                <DashboardLayout
+                  title="Owner workspace"
+                  subtitle="Manage your restaurant, menu, and customer orders."
+                  navItems={ownerNavItems}
+                  userRole="restaurant_owner"
+                />
               </RequireApprovedOwner>
             }
           >
@@ -162,7 +170,12 @@ export default function App() {
           element={
             <ProtectedRoute>
               <RoleRoute allowedRoles={["admin"]}>
-                <AdminLayout />
+                <DashboardLayout
+                  title="Admin workspace"
+                  subtitle="Monitor restaurants, approvals, users, and orders."
+                  navItems={adminNavItems}
+                  userRole="admin"
+                />
               </RoleRoute>
             </ProtectedRoute>
           }
