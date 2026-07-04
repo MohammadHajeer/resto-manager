@@ -17,7 +17,7 @@ router.get("/pending", requireRole("admin"), getPendingRestaurants);
 router.get("/:restaurantId", requireRole("admin"), getRestaurantForAdmin);
 
 router.patch(
-  "/:restaurantId/review",
+  "/:restaurantId/status",
   requireRole("admin"),
   reviewRestaurantRegistration,
 );

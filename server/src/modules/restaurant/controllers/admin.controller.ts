@@ -7,6 +7,7 @@ import {
 import { Restaurant, RestaurantDocument } from "../restaurant.model.js";
 import { sendResponse } from "@/utils/sendResponse.js";
 import { getPagination } from "@/utils/pagination.js";
+import { createPrivateSignedUrl } from "@/utils/storage.js";
 
 type AuthedRequest = Request & {
   auth?: {
@@ -175,22 +176,85 @@ export const getRestaurantForAdmin = async (
 
     if (!isValidObjectId(restaurantId as string)) {
       return res.status(400).json({
+        success: false,
         message: "Invalid restaurant ID",
       });
     }
 
-    const restaurant = await Restaurant.findById(restaurantId).lean();
+    const [restaurant] = await Restaurant.aggregate([
+      {
+        $match: {
+          _id: new Types.ObjectId(restaurantId as string),
+        },
+      },
+      {
+        $lookup: {
+          from: "user", // change to "users" if your Better Auth collection is named users
+          localField: "ownerId",
+          foreignField: "_id",
+          as: "owner",
+        },
+      },
+      {
+        $unwind: {
+          path: "$owner",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $project: {
+          ownerId: 1,
+
+          name: 1,
+          slug: 1,
+          description: 1,
+          logoUrl: 1,
+          bannerUrl: 1,
+          contact: 1,
+          address: 1,
+          cuisineTypes: 1,
+          status: 1,
+          isOpen: 1,
+          openingHours: 1,
+          verification: 1,
+          createdAt: 1,
+          updatedAt: 1,
+
+          owner: {
+            id: "$owner._id",
+            name: "$owner.name",
+            email: "$owner.email",
+            phone: "$owner.phone",
+            role: "$owner.role",
+          },
+        },
+      },
+    ]);
 
     if (!restaurant) {
       return res.status(404).json({
+        success: false,
         message: "Restaurant not found",
       });
     }
 
+    const [businessLicenseSignedUrl, ownerIdDocumentSignedUrl] =
+      await Promise.all([
+        createPrivateSignedUrl(restaurant.verification?.businessLicensePath),
+        createPrivateSignedUrl(restaurant.verification?.ownerIdDocumentPath),
+      ]);
+
     sendResponse(res, 200, {
       success: true,
       message: "Restaurant fetched successfully",
-      data: restaurant,
+      data: {
+        ...restaurant,
+        verification: {
+          ...restaurant.verification,
+          businessLicenseSignedUrl,
+          ownerIdDocumentSignedUrl,
+        },
+      },
     });
   } catch (error) {
     next(error);

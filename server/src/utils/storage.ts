@@ -49,9 +49,9 @@ export function getPublicFileUrl(bucket: string, filePath: string) {
   return data.publicUrl;
 }
 
-export async function createPrivateSignedUrl(bucket: string, filePath: string) {
+export async function createPrivateSignedUrl(filePath: string) {
   const { data, error } = await supabase.storage
-    .from(bucket)
+    .from(process.env.SUPABASE_PRIVATE_BUCKET as string)
     .createSignedUrl(filePath, 60 * 5);
 
   if (error) {

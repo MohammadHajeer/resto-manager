@@ -1,172 +1,166 @@
-import { usePendingRestaurants } from "@/hooks/admin/useAdminRestaurants";
-import { useNavigate } from "react-router-dom";
+import { AlertCircle, ArrowRight, Clock3 } from "lucide-react";
+import { Link, useSearchParams } from "react-router-dom";
 
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
+import { DataTable, type DataTableColumn } from "@/components/common/DataTable";
+import { Pagination } from "@/components/common/Pagination";
+import { Button } from "@/components/ui/button";
+import { usePendingRestaurants } from "@/hooks/admin/useAdminRestaurants";
+import type { PendingRestaurant } from "@/services/admin.service";
+
+const dateFormatter = new Intl.DateTimeFormat("en-US", {
+  year: "numeric",
+  month: "short",
+  day: "numeric",
+});
+
+function parsePositiveInteger(value: string | null, fallback: number) {
+  const parsed = Number(value);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+function formatDate(value: string) {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime())
+    ? "Unknown date"
+    : dateFormatter.format(date);
 }
 
 export default function AdminApprovalsPage() {
-  const navigate = useNavigate();
-  const { data, isLoading, isError, refetch } = usePendingRestaurants(1, 10);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const page = parsePositiveInteger(searchParams.get("page"), 1);
+  const limit = parsePositiveInteger(searchParams.get("limit"), 5);
+  const { data, isLoading, isError, isFetching, refetch } =
+    usePendingRestaurants(page, limit);
 
   const pendingRestaurants = data?.restaurants ?? [];
   const pagination = data?.pagination;
 
-  if (isLoading) {
-    return <p>Loading pending restaurants...</p>;
-  }
+  const columns: DataTableColumn<PendingRestaurant>[] = [
+    {
+      key: "index",
+      header: "#",
+      render: (_restaurant, index) => (page - 1) * limit + index + 1,
+      cellClassName: "w-16 text-muted-foreground",
+    },
+    {
+      key: "restaurant",
+      header: "Restaurant",
+      render: (restaurant) => (
+        <span className="font-medium text-foreground">{restaurant.name}</span>
+      ),
+    },
+    {
+      key: "owner",
+      header: "Owner",
+      render: (restaurant) => restaurant.owner?.name ?? "Unknown owner",
+    },
+    {
+      key: "email",
+      header: "Email",
+      render: (restaurant) => restaurant.owner?.email ?? "Not provided",
+      cellClassName: "text-muted-foreground",
+    },
+    {
+      key: "submitted",
+      header: "Submitted",
+      render: (restaurant) => formatDate(restaurant.createdAt),
+      cellClassName: "whitespace-nowrap text-muted-foreground",
+    },
+    {
+      key: "status",
+      header: "Status",
+      render: () => (
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-800">
+          <span className="size-1.5 rounded-full bg-amber-500" />
+          Pending
+        </span>
+      ),
+    },
+    {
+      key: "action",
+      header: <span className="sr-only">Action</span>,
+      headerClassName: "text-right",
+      cellClassName: "text-right",
+      render: (restaurant) => (
+        <Link to={`${restaurant._id}`}>
+          <Button type="button" size="xs" className="rounded-md">
+            Review
+            <ArrowRight aria-hidden="true" />
+          </Button>
+        </Link>
+      ),
+    },
+  ];
 
-  if (isError) {
-    return (
-      <div>
-        <p>Failed to load pending restaurants.</p>
-        <button type="button" onClick={() => refetch()}>
-          Try again
-        </button>
-      </div>
-    );
-  }
+  const handlePageChange = (nextPage: number) => {
+    setSearchParams((currentParams) => {
+      const nextParams = new URLSearchParams(currentParams);
+      nextParams.set("page", String(nextPage));
+      nextParams.set("limit", String(limit));
+      return nextParams;
+    });
+  };
 
   return (
     <div className="space-y-6">
-      {/* ── PAGE HEADER ── */}
-      <div>
-        <h1 className="text-xl font-bold text-[#0F172A]">Pending Approvals</h1>
-        <p className="mt-1 text-sm text-[#6B7280]">
-          Review and approve or reject new restaurant registration requests.
-        </p>
-      </div>
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold text-foreground">
+            Pending approvals
+          </h1>
+          <p className="mt-1 text-sm leading-6 text-muted-foreground">
+            Review new restaurant registrations before they join the platform.
+          </p>
+        </div>
 
-      {/* ── SUMMARY BADGE ── */}
-      <div className="inline-flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-700 text-sm font-medium px-3 py-1.5 rounded-full">
-        {/* Clock icon */}
-        <svg
-          className="w-4 h-4"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          strokeWidth={2}
-        >
-          <circle cx="12" cy="12" r="10" />
-          <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6l4 2" />
-        </svg>
-      </div>
-
-      {/* ── TABLE CARD ── */}
-      <div className="bg-white border border-[#E2E8F0] rounded-xl overflow-hidden">
-        {pendingRestaurants.length === 0 ? (
-          // ── EMPTY STATE ──
-          <div className="flex flex-col items-center justify-center py-20 text-center px-6">
-            {/* Checkmark icon */}
-            <div className="w-12 h-12 rounded-full bg-[#DCFCE7] flex items-center justify-center mb-4">
-              <svg
-                className="w-6 h-6 text-[#16A34A]"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M5 13l4 4L19 7"
-                />
-              </svg>
-            </div>
-            <h2 className="text-base font-semibold text-[#0F172A]">
-              All caught up!
-            </h2>
-            <p className="mt-1 text-sm text-[#6B7280] max-w-xs">
-              There are no pending restaurant registrations right now.
-            </p>
-          </div>
-        ) : (
-          // ── TABLE ──
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="bg-[#F8FAF9] border-b border-[#E2E8F0] text-left">
-                  <th className="px-5 py-3 font-semibold text-[#374151]">#</th>
-                  <th className="px-5 py-3 font-semibold text-[#374151]">
-                    Restaurant
-                  </th>
-                  <th className="px-5 py-3 font-semibold text-[#374151]">
-                    Owner
-                  </th>
-                  <th className="px-5 py-3 font-semibold text-[#374151]">
-                    Email
-                  </th>
-                  <th className="px-5 py-3 font-semibold text-[#374151]">
-                    Submitted
-                  </th>
-                  <th className="px-5 py-3 font-semibold text-[#374151]">
-                    Status
-                  </th>
-                  <th className="px-5 py-3 font-semibold text-[#374151]">
-                    Action
-                  </th>
-                </tr>
-              </thead>
-
-              <tbody className="divide-y divide-[#E2E8F0]">
-                {pendingRestaurants.map((restaurant, index) => (
-                  <tr
-                    key={restaurant._id}
-                    className="hover:bg-[#F8FAF9] transition-colors"
-                  >
-                    {/* Row number */}
-                    <td className="px-5 py-4 text-[#6B7280]">{index + 1}</td>
-
-                    {/* Restaurant name */}
-                    <td className="px-5 py-4 font-medium text-[#0F172A]">
-                      {restaurant.name}
-                    </td>
-
-                    {/* Owner name */}
-                    <td className="px-5 py-4 text-[#374151]">
-                      {restaurant.owner?.name}
-                    </td>
-
-                    {/* Owner email */}
-                    <td className="px-5 py-4 text-[#6B7280]">
-                      {restaurant.owner?.email}
-                    </td>
-
-                    {/* Date submitted */}
-                    <td className="px-5 py-4 text-[#6B7280]">
-                      {formatDate(restaurant.createdAt)}
-                    </td>
-
-                    {/* Status badge — always "Pending" on this page */}
-                    <td className="px-5 py-4">
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">
-                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                        Pending
-                      </span>
-                    </td>
-
-                    {/* Review button — navigates to the detail review page */}
-                    <td className="px-5 py-4">
-                      <button
-                        onClick={() =>
-                          navigate(`/admin/approvals/${restaurant._id}`)
-                        }
-                        className="px-4 py-1.5 rounded-md bg-[#16A34A] text-white text-xs font-semibold hover:bg-[#15803D] transition-colors"
-                      >
-                        Review →
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        {!isLoading && !isError && (
+          <div className="inline-flex w-fit items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-sm font-medium text-amber-800">
+            <Clock3 className="size-4" aria-hidden="true" />
+            {pagination?.total ?? pendingRestaurants.length} pending
           </div>
         )}
-      </div>
+      </header>
+
+      {isError ? (
+        <section className="rounded-md border border-destructive/20 bg-destructive/5 px-6 py-10 text-center">
+          <AlertCircle
+            className="mx-auto size-8 text-destructive"
+            aria-hidden="true"
+          />
+          <h2 className="mt-3 text-base font-semibold text-foreground">
+            Failed to load pending restaurants
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Check your connection and try loading the approvals again.
+          </p>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => refetch()}
+            className="mt-5 rounded-md"
+          >
+            Try again
+          </Button>
+        </section>
+      ) : (
+        <>
+          <DataTable
+            data={pendingRestaurants}
+            columns={columns}
+            getRowKey={(restaurant) => restaurant._id}
+            emptyMessage="There are no pending restaurant registrations right now."
+            isLoading={isLoading}
+          />
+
+          {pagination && (
+            <Pagination
+              pagination={pagination}
+              onPageChange={handlePageChange}
+              disabled={isFetching}
+            />
+          )}
+        </>
+      )}
     </div>
   );
 }
