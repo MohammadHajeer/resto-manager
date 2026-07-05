@@ -266,11 +266,13 @@ export const updateMyRestaurant = async (
     if (input.logoUrl !== undefined) restaurant.logoUrl = input.logoUrl;
     if (input.bannerUrl !== undefined) restaurant.bannerUrl = input.bannerUrl;
     if (input.contact !== undefined) {
-      restaurant.contact = input.contact;
+      restaurant.contact =
+        (input.contact as typeof restaurant.contact) ?? restaurant.contact;
     }
     if (input.address !== undefined) restaurant.address = input.address;
     if (input.openingHours !== undefined)
-      restaurant.openingHours = input.openingHours;
+      (restaurant.openingHours as typeof input.openingHours) =
+        input.openingHours;
     if (input.cuisineTypes !== undefined)
       restaurant.cuisineTypes = input.cuisineTypes;
 

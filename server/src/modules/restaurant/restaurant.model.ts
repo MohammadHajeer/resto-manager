@@ -112,6 +112,7 @@ const restaurantSchema = new Schema(
       floor: {
         type: String,
         trim: true,
+        required: false,
         default: "",
       },
       locationUrl: {
