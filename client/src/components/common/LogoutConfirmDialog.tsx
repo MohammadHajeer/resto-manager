@@ -65,7 +65,7 @@ export function LogoutConfirmDialog({
         render={
           <Button
             type="button"
-            variant="ghost"
+            variant="outline"
             size={triggerVariant === "sidebar" ? "lg" : "default"}
             aria-label="Sign out"
             className={cn(

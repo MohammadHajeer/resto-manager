@@ -126,13 +126,15 @@ export default function RestaurantListingPage() {
           </section>
         )}
 
-       <div className="mt-6">
-         <Pagination
-          pagination={data!.pagination}
-          onPageChange={handlePageChange}
-          disabled={isFetching}
-        />
-       </div>
+        <div className="mt-6">
+          {data?.pagination && (
+            <Pagination
+              pagination={data!.pagination}
+              onPageChange={handlePageChange}
+              disabled={isFetching}
+            />
+          )}
+        </div>
       </main>
     </div>
   );

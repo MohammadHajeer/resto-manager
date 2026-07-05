@@ -40,6 +40,8 @@ import {
   useRestaurantById,
 } from "@/hooks/admin/useAdminRestaurants";
 import type { AdminRestaurantDetails } from "@/services/admin.service";
+import axios from "axios";
+import { ResourceNotFound } from "@/components/common/ResourceNotFound";
 
 type DocumentKey = "businessLicense" | "ownerIdDocument";
 type RestaurantStatus = AdminRestaurantDetails["status"];
@@ -277,11 +279,16 @@ export default function AdminRestaurantReviewPage() {
     data: restaurant,
     isLoading,
     isError,
+    error,
     refetch,
   } = useRestaurantById(restaurantId ?? "");
   const approveRestaurant = useApproveRestaurant();
   const rejectRestaurant = useRejectRestaurant();
   const isMutating = approveRestaurant.isPending || rejectRestaurant.isPending;
+  const isRestaurantNotFound =
+    axios.isAxiosError(error) && error.response?.status === 404;
+
+  console.log(isRestaurantNotFound, "isRestaurantNotFound");
 
   const handleApproveRestaurant = () => {
     if (!restaurant?._id) return;
@@ -338,6 +345,18 @@ export default function AdminRestaurantReviewPage() {
   };
 
   if (isLoading) return <ReviewPageSkeleton />;
+
+  if (isRestaurantNotFound) {
+    return (
+      <ResourceNotFound
+        resourceName="restaurant"
+        title="Restaurant not found"
+        description="The restaurant you are trying to review may have been deleted, rejected, or the link is incorrect."
+        actionLabel="Back to restaurants"
+        actionTo="/admin/restaurants"
+      />
+    );
+  }
 
   if (isError) {
     return (
