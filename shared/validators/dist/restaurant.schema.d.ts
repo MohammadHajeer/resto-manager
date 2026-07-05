@@ -53,12 +53,12 @@ export declare const restaurantRegistrationSchema: z.ZodObject<{
         locationUrl: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodString, z.ZodLiteral<"">]>>>;
     }, z.core.$strip>;
     branding: z.ZodObject<{
-        logoUrl: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodString, z.ZodLiteral<"">]>>>;
-        bannerUrl: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodString, z.ZodLiteral<"">]>>>;
+        logo: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodString, z.ZodLiteral<"">]>>>;
+        banner: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodString, z.ZodLiteral<"">]>>>;
     }, z.core.$strip>;
     verification: z.ZodObject<{
-        businessLicenseUrl: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodString, z.ZodLiteral<"">]>>>;
-        ownerIdDocumentUrl: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodString, z.ZodLiteral<"">]>>>;
+        businessLicense: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodString, z.ZodLiteral<"">]>>>;
+        ownerIdDocument: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodString, z.ZodLiteral<"">]>>>;
     }, z.core.$strip>;
 }, z.core.$strip>;
 export declare const restaurantProfileUpdateSchema: z.ZodObject<{
@@ -72,11 +72,11 @@ export declare const restaurantProfileUpdateSchema: z.ZodObject<{
         email: z.ZodUnion<[z.ZodOptional<z.ZodEmail>, z.ZodLiteral<"">]>;
     }, z.core.$strip>>;
     address: z.ZodOptional<z.ZodObject<{
-        city: z.ZodString;
-        street: z.ZodString;
-        building: z.ZodString;
-        floor: z.ZodUnion<[z.ZodOptional<z.ZodString>, z.ZodLiteral<"">]>;
-        locationUrl: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodString, z.ZodLiteral<"">]>>>;
+        city: z.ZodOptional<z.ZodString>;
+        street: z.ZodOptional<z.ZodString>;
+        building: z.ZodOptional<z.ZodString>;
+        floor: z.ZodOptional<z.ZodUnion<[z.ZodOptional<z.ZodString>, z.ZodLiteral<"">]>>;
+        locationUrl: z.ZodOptional<z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodString, z.ZodLiteral<"">]>>>>;
     }, z.core.$strip>>;
     openingHours: z.ZodOptional<z.ZodArray<z.ZodObject<{
         day: z.ZodEnum<{

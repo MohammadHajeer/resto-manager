@@ -8,24 +8,27 @@ import {
   toggleMyRestaurantOpenStatus,
   updateMyRestaurant,
 } from "../controllers/owner.controller.js";
+import { validate } from "@/middlewares/validate.middleware.js";
+import { restaurantProfileUpdateSchema } from "@restomanager/validators";
 
 const router = Router();
 
-router.post(
-  ["/register", "/restaurant/register"],
-  uploadRestaurantRegistrationFiles,
-  registerRestaurant,
-);
+router.post("/register", uploadRestaurantRegistrationFiles, registerRestaurant);
 
 router.get("/", requireRole("restaurant_owner"), getMyRestaurant);
 
 router.get(
-  "/restaurant/status",
+  "/status",
   requireRole("restaurant_owner"),
   getOwnerRestaurantStatus,
 );
 
-router.patch("/", requireRole("restaurant_owner"), updateMyRestaurant);
+router.patch(
+  "/",
+  requireRole("restaurant_owner"),
+  validate(restaurantProfileUpdateSchema),
+  updateMyRestaurant,
+);
 
 router.patch(
   "/open-status",

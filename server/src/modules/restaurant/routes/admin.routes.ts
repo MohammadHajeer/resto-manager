@@ -5,20 +5,21 @@ import {
   reviewRestaurantRegistration,
   suspendRestaurant,
 } from "../controllers/admin.controller.js";
-import { requireRole } from "@/middlewares/auth.middleware.js";
+import { validate } from "@/middlewares/validate.middleware.js";
+import { restaurantReviewSchema } from "@restomanager/validators";
 
 const router = Router();
 
-router.get("/", requireRole("admin"), getAdminRestaurants);
+router.get("/", getAdminRestaurants);
 
-router.get("/:restaurantId", requireRole("admin"), getRestaurantForAdmin);
+router.get("/:restaurantId", getRestaurantForAdmin);
 
 router.patch(
   "/:restaurantId/status",
-  requireRole("admin"),
+  validate(restaurantReviewSchema),
   reviewRestaurantRegistration,
 );
 
-router.patch("/:restaurantId/suspend", requireRole("admin"), suspendRestaurant);
+router.patch("/:restaurantId/suspend", suspendRestaurant);
 
 export { router as AdminRestaurantRoutes };

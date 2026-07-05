@@ -56,12 +56,12 @@ export const restaurantRegistrationSchema = z
     }),
     address: restaurantAddressSchema,
     branding: z.object({
-        logoUrl: optionalUrlSchema,
-        bannerUrl: optionalUrlSchema,
+        logo: optionalUrlSchema,
+        banner: optionalUrlSchema,
     }),
     verification: z.object({
-        businessLicenseUrl: optionalUrlSchema,
-        ownerIdDocumentUrl: optionalUrlSchema,
+        businessLicense: optionalUrlSchema,
+        ownerIdDocument: optionalUrlSchema,
     }),
 })
     .refine((data) => data.owner.password === data.owner.confirmPassword, {
@@ -80,7 +80,7 @@ export const restaurantProfileUpdateSchema = z.object({
         email: emailSchema.optional().or(z.literal("")),
     })
         .optional(),
-    address: restaurantAddressSchema.optional(),
+    address: restaurantAddressSchema.partial().optional(),
     openingHours: z.array(openingHourSchema).max(7).optional(),
     cuisineTypes: z.array(cuisineTypeSchema).min(1).max(8).optional(),
     isOpen: z.boolean().optional(),

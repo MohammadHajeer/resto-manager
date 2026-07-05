@@ -83,6 +83,11 @@ const menuItemSchema = new Schema(
       default: true,
       index: true,
     },
+    deletedAt: {
+      type: Date,
+      default: null,
+      index: true,
+    },
   },
   {
     timestamps: true,

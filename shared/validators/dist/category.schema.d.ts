@@ -2,13 +2,13 @@ import { z } from "zod";
 export declare const createCategorySchema: z.ZodObject<{
     restaurantId: z.ZodOptional<z.ZodString>;
     name: z.ZodString;
-    slug: z.ZodOptional<z.ZodString>;
     description: z.ZodUnion<[z.ZodOptional<z.ZodString>, z.ZodLiteral<"">]>;
+    isActive: z.ZodOptional<z.ZodBoolean>;
 }, z.core.$strip>;
 export declare const updateCategorySchema: z.ZodObject<{
     name: z.ZodOptional<z.ZodString>;
-    slug: z.ZodOptional<z.ZodOptional<z.ZodString>>;
     description: z.ZodOptional<z.ZodUnion<[z.ZodOptional<z.ZodString>, z.ZodLiteral<"">]>>;
+    isActive: z.ZodOptional<z.ZodOptional<z.ZodBoolean>>;
 }, z.core.$strip>;
 export declare const categoryParamsSchema: z.ZodObject<{
     categoryId: z.ZodString;

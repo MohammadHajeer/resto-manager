@@ -1,22 +1,10 @@
 import { NextFunction, Request, Response } from "express";
-import { QueryFilter, Types } from "mongoose";
-import {
-  restaurantListQuerySchema,
-  restaurantReviewSchema,
-} from "@restomanager/validators";
-import { Restaurant, RestaurantDocument } from "../restaurant.model.js";
+import { Types } from "mongoose";
+import { RestaurantReviewInput } from "@restomanager/validators";
+import { Restaurant } from "../restaurant.model.js";
 import { sendResponse } from "@/utils/sendResponse.js";
 import { getPagination } from "@/utils/pagination.js";
 import { createPrivateSignedUrl } from "@/utils/storage.js";
-
-type AuthedRequest = Request & {
-  auth?: {
-    user: {
-      id: string;
-      role?: string;
-    };
-  };
-};
 
 function isValidObjectId(id: string) {
   return Types.ObjectId.isValid(id);
@@ -216,12 +204,12 @@ export const getRestaurantForAdmin = async (
 };
 
 export const reviewRestaurantRegistration = async (
-  req: AuthedRequest,
+  req: AuthedRequest<{ restaurantId: string }, {}, RestaurantReviewInput>,
   res: Response,
   next: NextFunction,
 ) => {
   try {
-    const adminId = req.auth?.user.id;
+    const adminId = req.auth!.user.id;
     const { restaurantId } = req.params;
 
     if (!isValidObjectId(restaurantId as string)) {
@@ -230,7 +218,7 @@ export const reviewRestaurantRegistration = async (
       });
     }
 
-    const input = restaurantReviewSchema.parse(req.body);
+    const input = req.body;
 
     const restaurant = await Restaurant.findById(restaurantId);
 
