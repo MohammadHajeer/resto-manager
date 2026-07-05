@@ -1,8 +1,8 @@
 import { Outlet } from "react-router-dom";
-import { SiteFooter } from "../components/SiteFooter";
-import { SiteHeader } from "../components/SiteHeader";
+import { SiteHeader } from "../SiteHeader";
+import { SiteFooter } from "../SiteFooter";
 
-export default function PublicLayout() {
+export function MainLayout() {
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
       <SiteHeader />

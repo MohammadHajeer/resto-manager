@@ -22,7 +22,7 @@ function isValidObjectId(id: string) {
   return Types.ObjectId.isValid(id);
 }
 
-export const getPendingRestaurants = async (
+export const getAdminRestaurants = async (
   req: Request,
   res: Response,
   next: NextFunction,
@@ -34,15 +34,32 @@ export const getPendingRestaurants = async (
       10,
     );
 
+    const allowedStatuses = ["pending", "approved", "rejected", "suspended"];
+
+    const status =
+      typeof req.query.status === "string" ? req.query.status : undefined;
+
+    const matchStage: Record<string, unknown> = {};
+
+    if (status && status !== "all") {
+      if (!allowedStatuses.includes(status)) {
+        return sendResponse(res, 400, {
+          success: false,
+          message: "Invalid status filter",
+          data: null,
+        });
+      }
+
+      matchStage.status = status;
+    }
+
     const [result] = await Restaurant.aggregate([
       {
-        $match: {
-          status: "pending",
-        },
+        $match: matchStage,
       },
       {
         $lookup: {
-          from: "user", // change to "users" if your Better Auth collection is named users
+          from: "user",
           localField: "ownerId",
           foreignField: "_id",
           as: "owner",
@@ -87,7 +104,7 @@ export const getPendingRestaurants = async (
 
     sendResponse(res, 200, {
       success: true,
-      message: "Pending restaurants fetched successfully",
+      message: "Restaurants fetched successfully",
       data: restaurants,
       pagination: {
         page,
@@ -96,69 +113,6 @@ export const getPendingRestaurants = async (
         totalPages,
         hasNextPage: page < totalPages,
         hasPrevPage: page > 1,
-      },
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const getAllRestaurantsForAdmin = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
-  try {
-    const query = restaurantListQuerySchema.parse(req.query);
-
-    const filter: QueryFilter<RestaurantDocument> = {};
-
-    if (query.status) {
-      filter.status = query.status;
-    }
-
-    if (typeof query.isOpen === "boolean") {
-      filter.isOpen = query.isOpen;
-    }
-
-    if (query.cuisine) {
-      filter.cuisineTypes = {
-        $regex: query.cuisine,
-        $options: "i",
-      };
-    }
-
-    if (query.q) {
-      filter.$or = [
-        { name: { $regex: query.q, $options: "i" } },
-        { description: { $regex: query.q, $options: "i" } },
-        { ownerId: { $regex: query.q, $options: "i" } },
-      ];
-    }
-
-    const skip = (query.page - 1) * query.limit;
-
-    const [restaurants, total] = await Promise.all([
-      Restaurant.find(filter)
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(query.limit)
-        .lean(),
-
-      Restaurant.countDocuments(filter),
-    ]);
-
-    sendResponse(res, 200, {
-      success: true,
-      message: "Restaurants fetched successfully",
-      data: {
-        restaurants,
-        pagination: {
-          page: query.page,
-          limit: query.limit,
-          total,
-          totalPages: Math.ceil(total / query.limit),
-        },
       },
     });
   } catch (error) {

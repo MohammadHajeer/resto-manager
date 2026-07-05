@@ -7,7 +7,8 @@ type PaginationMeta = {
   hasPrevPage: boolean;
 };
 
-type GetPendingQueryParams = {
+type GetQueryParams = {
   page?: number;
   limit?: number;
+  status?: string;
 };

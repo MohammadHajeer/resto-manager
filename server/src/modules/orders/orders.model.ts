@@ -193,9 +193,6 @@ const orderSchema = new Schema(
   },
 );
 
-orderSchema.index({ customerId: 1 });
-orderSchema.index({ restaurantId: 1 });
-orderSchema.index({ status: 1 });
 orderSchema.index({ createdAt: -1 });
 
 type OrderDocument = InferSchemaType<typeof orderSchema> & {

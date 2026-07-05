@@ -8,8 +8,7 @@ import {
 import { Toaster } from "sonner";
 
 // Layouts
-import PublicLayout from "./layouts/PublicLayout";
-import CustomerLayout from "./layouts/CustomerLayout";
+import { MainLayout } from "./components/layouts/MainLayout";
 import { DashboardLayout } from "./components/layouts/DashboardLayout";
 import { adminNavItems, ownerNavItems } from "./config/dashboard-navigation";
 
@@ -51,7 +50,6 @@ import OwnerPendingPage from "./pages/owner/OwnerPendingPage";
 // Pages: Admin
 import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
 import AdminRestaurantsPage from "./pages/admin/AdminRestaurantsPage";
-import AdminApprovalsPage from "./pages/admin/AdminApprovalsPage";
 import AdminRestaurantReviewPage from "./pages/admin/AdminRestaurantReviewPage";
 import AdminUsersPage from "./pages/admin/AdminUsersPage";
 
@@ -66,7 +64,7 @@ export default function App() {
         <Route
           element={
             <GuestRoute>
-              <PublicLayout />
+              <MainLayout />
             </GuestRoute>
           }
         >
@@ -75,7 +73,7 @@ export default function App() {
         </Route>
 
         {/* Public & Customer Browsing Routes */}
-        <Route element={<PublicLayout />}>
+        <Route element={<MainLayout />}>
           <Route path="/" element={<LandingPage />} />
           <Route
             path="/restaurant/register"
@@ -97,7 +95,7 @@ export default function App() {
           element={
             <ProtectedRoute>
               <RoleRoute allowedRoles={["customer"]}>
-                <CustomerLayout />
+                <MainLayout />
               </RoleRoute>
             </ProtectedRoute>
           }
@@ -180,16 +178,15 @@ export default function App() {
           />
           <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
           <Route path="/admin/restaurants" element={<AdminRestaurantsPage />} />
-          <Route path="/admin/approvals" element={<AdminApprovalsPage />} />
           <Route
-            path="/admin/approvals/:restaurantId"
+            path="/admin/restaurants/:restaurantId"
             element={<AdminRestaurantReviewPage />}
           />
           <Route path="/admin/users" element={<AdminUsersPage />} />
         </Route>
 
         {/* Fallback Catch-All Route */}
-        <Route element={<PublicLayout />}>
+        <Route element={<MainLayout />}>
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>

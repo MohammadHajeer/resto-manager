@@ -1,7 +1,6 @@
 import {
   ClipboardList,
   LayoutDashboard,
-  ShieldCheck,
   Store,
   Users,
   UtensilsCrossed,
@@ -17,7 +16,6 @@ export const adminNavItems: DashboardNavItem[] = [
     end: true,
   },
   { label: "Restaurants", href: "/admin/restaurants", icon: Store },
-  { label: "Approvals", href: "/admin/approvals", icon: ShieldCheck },
   { label: "Users", href: "/admin/users", icon: Users },
 ];
 

@@ -1,9 +1,16 @@
 export const queryKeys = {
+  public: {
+    restaurantMenu: (restaurantSlug: string) =>
+      ["public", "restaurants", restaurantSlug, "menu"] as const,
+  },
   admin: {
     restaurants: {
       all: ["admin", "restaurants"] as const,
-      pending: (page: number, limit: number) =>
-        ["admin", "restaurants", "pending", page, limit] as const,
+      list: (params: {
+        page: number;
+        limit: number;
+        status?: string;
+      }) => ["admin", "restaurants", "list", params] as const,
       detail: (restaurantId: string) =>
         ["admin", "restaurants", restaurantId] as const,
     },

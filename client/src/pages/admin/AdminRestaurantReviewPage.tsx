@@ -290,7 +290,7 @@ export default function AdminRestaurantReviewPage() {
       onSuccess: () => {
         setApproveDialogOpen(false);
         toast.success("Restaurant approved successfully.");
-        navigate("/admin/approvals");
+        navigate("/admin/restaurants");
       },
       onError: () => {
         toast.error("Failed to approve restaurant. Please try again.");
@@ -318,7 +318,7 @@ export default function AdminRestaurantReviewPage() {
           setRejectionReason("");
           setRejectionReasonError("");
           toast.success("Restaurant rejected successfully.");
-          navigate("/admin/approvals");
+          navigate("/admin/restaurants");
         },
         onError: () => {
           toast.error("Failed to reject restaurant. Please try again.");
@@ -383,10 +383,10 @@ export default function AdminRestaurantReviewPage() {
           nativeButton={false}
           variant="outline"
           className="mt-5 rounded-md"
-          render={<Link to="/admin/approvals" />}
+          render={<Link to="/admin/restaurants" />}
         >
           <ArrowLeft aria-hidden="true" />
-          Back to approvals
+          Back to restaurants
         </Button>
       </section>
     );
@@ -419,10 +419,10 @@ export default function AdminRestaurantReviewPage() {
         nativeButton={false}
         variant="ghost"
         className="rounded-md text-muted-foreground"
-        render={<Link to="/admin/approvals" />}
+        render={<Link to="/admin/restaurants" />}
       >
         <ArrowLeft aria-hidden="true" />
-        Back to approvals
+        Back to restaurants
       </Button>
 
       <header className="flex flex-col gap-5 border-b border-border pb-6 lg:flex-row lg:items-start lg:justify-between">
@@ -439,35 +439,37 @@ export default function AdminRestaurantReviewPage() {
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <Button
-            type="button"
-            variant="destructive"
-            disabled={restaurant.status !== "pending" || isMutating}
-            onClick={() => setRejectDialogOpen(true)}
-            className="rounded-md"
-          >
-            {rejectRestaurant.isPending ? (
-              <LoaderCircle className="animate-spin" aria-hidden="true" />
-            ) : (
-              <XCircle aria-hidden="true" />
-            )}
-            {rejectRestaurant.isPending ? "Rejecting..." : "Reject"}
-          </Button>
-          <Button
-            type="button"
-            disabled={restaurant.status !== "pending" || isMutating}
-            onClick={() => setApproveDialogOpen(true)}
-            className="rounded-md"
-          >
-            {approveRestaurant.isPending ? (
-              <LoaderCircle className="animate-spin" aria-hidden="true" />
-            ) : (
-              <CheckCircle2 aria-hidden="true" />
-            )}
-            {approveRestaurant.isPending ? "Approving..." : "Approve"}
-          </Button>
-        </div>
+        {restaurant.status === "pending" && (
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              type="button"
+              variant="destructive"
+              disabled={restaurant.status !== "pending" || isMutating}
+              onClick={() => setRejectDialogOpen(true)}
+              className="rounded-md"
+            >
+              {rejectRestaurant.isPending ? (
+                <LoaderCircle className="animate-spin" aria-hidden="true" />
+              ) : (
+                <XCircle aria-hidden="true" />
+              )}
+              {rejectRestaurant.isPending ? "Rejecting..." : "Reject"}
+            </Button>
+            <Button
+              type="button"
+              disabled={restaurant.status !== "pending" || isMutating}
+              onClick={() => setApproveDialogOpen(true)}
+              className="rounded-md"
+            >
+              {approveRestaurant.isPending ? (
+                <LoaderCircle className="animate-spin" aria-hidden="true" />
+              ) : (
+                <CheckCircle2 aria-hidden="true" />
+              )}
+              {approveRestaurant.isPending ? "Approving..." : "Approve"}
+            </Button>
+          </div>
+        )}
       </header>
 
       <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(24rem,0.9fr)]">
@@ -722,8 +724,8 @@ export default function AdminRestaurantReviewPage() {
               Reject restaurant?
             </AlertDialogTitle>
             <AlertDialogDescription className="leading-6 text-muted-foreground">
-              Please provide a reason for rejecting this restaurant
-              application. This reason may be shown to the restaurant owner.
+              Please provide a reason for rejecting this restaurant application.
+              This reason may be shown to the restaurant owner.
             </AlertDialogDescription>
           </AlertDialogHeader>
 
@@ -771,9 +773,7 @@ export default function AdminRestaurantReviewPage() {
             <AlertDialogAction
               variant="destructive"
               size="lg"
-              disabled={
-                rejectRestaurant.isPending || !rejectionReason.trim()
-              }
+              disabled={rejectRestaurant.isPending || !rejectionReason.trim()}
               onClick={(event) => {
                 event.preventDefault();
                 handleRejectRestaurant();

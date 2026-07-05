@@ -35,7 +35,6 @@ const categorySchema = new Schema(
   },
 );
 
-categorySchema.index({ restaurantId: 1 });
 categorySchema.index({ restaurantId: 1, slug: 1 }, { unique: true });
 
 type CategoryDocument = InferSchemaType<typeof categorySchema> & {

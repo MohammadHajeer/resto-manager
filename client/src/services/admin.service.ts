@@ -85,14 +85,16 @@ export type RejectRestaurantInput = {
 };
 
 export const adminService = {
-  getPendingRestaurants: async ({
+  getAdminRestaurants: async ({
     page = 1,
     limit = 10,
-  }: GetPendingQueryParams = {}): Promise<PaginatedPendingRestaurantsResponse> => {
-    const response = await api.get("/admin/restaurants/pending", {
+    status,
+  }: GetQueryParams = {}): Promise<PaginatedPendingRestaurantsResponse> => {
+    const response = await api.get("/admin/restaurants", {
       params: {
         page,
         limit,
+        status,
       },
     });
 

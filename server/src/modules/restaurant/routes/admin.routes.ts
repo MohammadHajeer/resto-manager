@@ -1,7 +1,6 @@
 import { Router } from "express";
 import {
-  getAllRestaurantsForAdmin,
-  getPendingRestaurants,
+  getAdminRestaurants,
   getRestaurantForAdmin,
   reviewRestaurantRegistration,
   suspendRestaurant,
@@ -10,9 +9,7 @@ import { requireRole } from "@/middlewares/auth.middleware.js";
 
 const router = Router();
 
-router.get("/", requireRole("admin"), getAllRestaurantsForAdmin);
-
-router.get("/pending", requireRole("admin"), getPendingRestaurants);
+router.get("/", requireRole("admin"), getAdminRestaurants);
 
 router.get("/:restaurantId", requireRole("admin"), getRestaurantForAdmin);
 

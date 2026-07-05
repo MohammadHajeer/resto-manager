@@ -89,8 +89,6 @@ const menuItemSchema = new Schema(
   },
 );
 
-menuItemSchema.index({ restaurantId: 1 });
-menuItemSchema.index({ categoryId: 1 });
 menuItemSchema.index({ restaurantId: 1, slug: 1 }, { unique: true });
 menuItemSchema.index({ name: "text", description: "text" });
 

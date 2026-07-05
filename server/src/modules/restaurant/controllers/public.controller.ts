@@ -2,6 +2,9 @@ import type { QueryFilter } from "mongoose";
 import { NextFunction, Request, Response } from "express";
 import { restaurantListQuerySchema } from "@restomanager/validators";
 import { Restaurant, RestaurantDocument } from "../restaurant.model.js";
+import { Category } from "@/modules/category/category.model.js";
+import { MenuItem } from "@/modules/menuItem/menuItem.model.js";
+import { sendResponse } from "@/utils/sendResponse.js";
 
 export const getApprovedRestaurants = async (
   req: Request,
@@ -86,6 +89,59 @@ export const getRestaurantBySlug = async (
     res.status(200).json({
       message: "Restaurant fetched successfully",
       restaurant,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getRestaurantMenuBySlug = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { slug } = req.params;
+    const restaurant = await Restaurant.findOne({
+      slug,
+      status: "approved",
+    })
+      .select("-verification")
+      .lean();
+
+    if (!restaurant) {
+      return sendResponse(res, 404, {
+        success: false,
+        message: "Restaurant not found",
+      });
+    }
+
+    const [categories, menuItems] = await Promise.all([
+      Category.find({ restaurantId: restaurant._id })
+        .sort({ createdAt: 1 })
+        .lean(),
+      MenuItem.find({ restaurantId: restaurant._id })
+        .sort({ createdAt: -1 })
+        .lean(),
+    ]);
+
+    const categoriesById = new Map(
+      categories.map((category) => [String(category._id), category]),
+    );
+
+    const itemsWithCategories = menuItems.map((item) => ({
+      ...item,
+      category: categoriesById.get(String(item.categoryId)) ?? null,
+    }));
+
+    sendResponse(res, 200, {
+      success: true,
+      message: "Restaurant menu fetched successfully",
+      data: {
+        restaurant,
+        categories,
+        menuItems: itemsWithCategories,
+      },
     });
   } catch (error) {
     next(error);

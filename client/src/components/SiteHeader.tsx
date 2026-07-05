@@ -24,7 +24,6 @@ const roleLinks: Record<UserRole, Array<{ label: string; to: string }>> = {
   admin: [
     { label: "Dashboard", to: "/admin/dashboard" },
     { label: "Restaurants", to: "/admin/restaurants" },
-    { label: "Approvals", to: "/admin/approvals" },
   ],
 };
 

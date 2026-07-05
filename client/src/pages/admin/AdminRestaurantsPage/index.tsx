@@ -4,8 +4,10 @@ import { Link, useSearchParams } from "react-router-dom";
 import { DataTable, type DataTableColumn } from "@/components/common/DataTable";
 import { Pagination } from "@/components/common/Pagination";
 import { Button } from "@/components/ui/button";
-import { usePendingRestaurants } from "@/hooks/admin/useAdminRestaurants";
+import { useAdminRestaurants } from "@/hooks/admin/useAdminRestaurants";
 import type { PendingRestaurant } from "@/services/admin.service";
+import { RestaurantStatusFilters } from "./RestaurantStatusFilters";
+import RestaurantStatusBadge from "./RestaurantStatusBadge";
 
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
   year: "numeric",
@@ -25,14 +27,18 @@ function formatDate(value: string) {
     : dateFormatter.format(date);
 }
 
-export default function AdminApprovalsPage() {
+export default function AdminRestaurantsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const page = parsePositiveInteger(searchParams.get("page"), 1);
   const limit = parsePositiveInteger(searchParams.get("limit"), 5);
-  const { data, isLoading, isError, isFetching, refetch } =
-    usePendingRestaurants(page, limit);
+  const status = searchParams.get("status") || undefined;
+  const { data, isLoading, isError, isFetching, refetch } = useAdminRestaurants(
+    page,
+    limit,
+    status,
+  );
 
-  const pendingRestaurants = data?.restaurants ?? [];
+  const restaurants = data?.restaurants ?? [];
   const pagination = data?.pagination;
 
   const columns: DataTableColumn<PendingRestaurant>[] = [
@@ -69,11 +75,8 @@ export default function AdminApprovalsPage() {
     {
       key: "status",
       header: "Status",
-      render: () => (
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-800">
-          <span className="size-1.5 rounded-full bg-amber-500" />
-          Pending
-        </span>
+      render: (restaurant) => (
+        <RestaurantStatusBadge status={restaurant.status} />
       ),
     },
     {
@@ -101,22 +104,29 @@ export default function AdminApprovalsPage() {
     });
   };
 
+  const statusLabel =
+    (status === "all" || status === undefined) ? "restaurants" : `${status} restaurants`;
+
   return (
     <div className="space-y-6">
       <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-foreground">
-            Pending approvals
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+            Restaurant applications
           </h1>
-          <p className="mt-1 text-sm leading-6 text-muted-foreground">
-            Review new restaurant registrations before they join the platform.
+
+          <p className="mt-1 max-w-2xl text-sm leading-6 text-muted-foreground">
+            Review, approve, reject, and monitor restaurant registration
+            requests before they become active on the platform.
           </p>
         </div>
 
         {!isLoading && !isError && (
-          <div className="inline-flex w-fit items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-sm font-medium text-amber-800">
+          <div className="inline-flex w-fit items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 text-sm font-medium text-muted-foreground shadow-sm">
             <Clock3 className="size-4" aria-hidden="true" />
-            {pagination?.total ?? pendingRestaurants.length} pending
+            <span>
+              {pagination?.total ?? restaurants.length} {statusLabel}
+            </span>
           </div>
         )}
       </header>
@@ -144,8 +154,9 @@ export default function AdminApprovalsPage() {
         </section>
       ) : (
         <>
+          <RestaurantStatusFilters />
           <DataTable
-            data={pendingRestaurants}
+            data={restaurants}
             columns={columns}
             getRowKey={(restaurant) => restaurant._id}
             emptyMessage="There are no pending restaurant registrations right now."
