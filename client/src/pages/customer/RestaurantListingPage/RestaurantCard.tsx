@@ -1,4 +1,5 @@
-import { Clock3, MapPin, Star } from "lucide-react";
+import { ImageOff, MapPin, Store } from "lucide-react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 
 import type { RestaurantListItem } from "./restaurants.data";
@@ -8,6 +9,20 @@ type RestaurantCardProps = {
 };
 
 export function RestaurantCard({ restaurant }: RestaurantCardProps) {
+  const [bannerError, setBannerError] = useState(false);
+  const [logoError, setLogoError] = useState(false);
+
+  const hasBanner = Boolean(restaurant.bannerUrl) && !bannerError;
+  const hasLogo = Boolean(restaurant.logoUrl) && !logoError;
+
+  const addressLabel = [
+    restaurant.address?.street,
+    restaurant.address?.building,
+    restaurant.address?.city,
+  ]
+    .filter(Boolean)
+    .join(", ");
+
   return (
     <Link
       to={`/restaurants/${restaurant.slug}`}
@@ -15,13 +30,22 @@ export function RestaurantCard({ restaurant }: RestaurantCardProps) {
       className="group flex h-full flex-col overflow-hidden rounded-xl border border-border bg-card text-card-foreground shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/30"
     >
       <div className="relative aspect-video overflow-hidden bg-muted">
-        <img
-          src={restaurant.bannerUrl}
-          alt={`${restaurant.name} food`}
-          loading="lazy"
-          referrerPolicy="no-referrer"
-          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
-        />
+        {hasBanner ? (
+          <img
+            src={restaurant.bannerUrl ?? ""}
+            alt={`${restaurant.name} banner`}
+            loading="lazy"
+            referrerPolicy="no-referrer"
+            onError={() => setBannerError(true)}
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+          />
+        ) : (
+          <div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-muted text-muted-foreground">
+            <ImageOff className="size-8" aria-hidden="true" />
+            <span className="text-xs font-medium">Banner not available</span>
+          </div>
+        )}
+
         <div className="absolute left-3 top-3 flex flex-wrap gap-2">
           <span
             className={`rounded-full border px-2.5 py-1 text-xs font-semibold shadow-sm ${
@@ -32,37 +56,36 @@ export function RestaurantCard({ restaurant }: RestaurantCardProps) {
           >
             {restaurant.isOpen ? "Open now" : "Closed"}
           </span>
-          {restaurant.featured && (
-            <span className="rounded-full border border-primary/20 bg-primary px-2.5 py-1 text-xs font-semibold text-primary-foreground shadow-sm">
-              Featured
-            </span>
-          )}
         </div>
       </div>
 
       <div className="flex flex-1 flex-col p-4">
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex min-w-0 items-center gap-3">
+        <div className="flex min-w-0 items-start gap-3">
+          {hasLogo ? (
             <img
-              src={restaurant.logoUrl}
-              alt=""
+              src={restaurant.logoUrl ?? ""}
+              alt={`${restaurant.name} logo`}
               referrerPolicy="no-referrer"
-              className="size-10 shrink-0 rounded-md border border-border bg-background object-cover"
+              onError={() => setLogoError(true)}
+              className="size-11 shrink-0 rounded-lg border border-border bg-background object-cover"
             />
-            <div className="min-w-0">
-              <h2 className="truncate text-base font-semibold text-foreground transition-colors group-hover:text-primary">
-                {restaurant.name}
-              </h2>
-              <p className="mt-0.5 truncate text-xs font-medium text-muted-foreground">
-                {restaurant.cuisineTypes.join(" · ")}
-              </p>
+          ) : (
+            <div className="flex size-11 shrink-0 items-center justify-center rounded-lg border border-border bg-muted text-muted-foreground">
+              <Store className="size-5" aria-hidden="true" />
             </div>
-          </div>
+          )}
 
-          <span className="flex shrink-0 items-center gap-1 rounded-md bg-primary/10 px-2 py-1 text-xs font-semibold text-primary">
-            <Star className="size-3.5 fill-current" aria-hidden="true" />
-            {restaurant.rating}
-          </span>
+          <div className="min-w-0">
+            <h2 className="truncate text-base font-semibold text-foreground transition-colors group-hover:text-primary">
+              {restaurant.name}
+            </h2>
+
+            <p className="mt-0.5 truncate text-xs font-medium text-muted-foreground">
+              {restaurant.cuisineTypes.length > 0
+                ? restaurant.cuisineTypes.join(" · ")
+                : "Cuisine not specified"}
+            </p>
+          </div>
         </div>
 
         <p className="mt-4 line-clamp-1 text-sm leading-6 text-muted-foreground">
@@ -74,31 +97,36 @@ export function RestaurantCard({ restaurant }: RestaurantCardProps) {
             className="size-4 shrink-0 text-muted-foreground"
             aria-hidden="true"
           />
-          <span className="truncate">{restaurant.location}</span>
+
+          <span className="truncate">
+            {addressLabel || "Address not available"}
+          </span>
         </div>
 
-        {restaurant.offer && (
-          <p className="mt-3 rounded-md bg-primary/5 px-3 py-2 text-xs font-medium text-primary">
-            {restaurant.offer}
-          </p>
-        )}
+        <div className="mt-4 flex flex-wrap gap-2 border-t border-border pt-4">
+          {restaurant.cuisineTypes.slice(0, 3).map((cuisine) => (
+            <span
+              key={cuisine}
+              className="rounded-full bg-primary px-2.5 py-1 text-xs font-medium text-primary-foreground"
+            >
+              {formatCuisine(cuisine)}
+            </span>
+          ))}
 
-        <div className="mt-2 flex items-center justify-between gap-3 border-t border-border pt-4 text-xs font-medium text-foreground/75">
-          <span className="flex items-center gap-1.5">
-            <Clock3
-              className="size-3.5 text-muted-foreground"
-              aria-hidden="true"
-            />
-            {restaurant.deliveryTime}
-          </span>
-          <span>{"$".repeat(restaurant.priceLevel)}</span>
-          <span className={restaurant.deliveryFee === 0 ? "text-primary" : ""}>
-            {restaurant.deliveryFee === 0
-              ? "Free delivery"
-              : `$${restaurant.deliveryFee.toFixed(2)} delivery`}
-          </span>
+          {restaurant.cuisineTypes.length > 3 && (
+            <span className="rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground">
+              +{restaurant.cuisineTypes.length - 3} more
+            </span>
+          )}
         </div>
       </div>
     </Link>
   );
+}
+
+function formatCuisine(cuisine: string) {
+  return cuisine
+    .split("_")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
 }

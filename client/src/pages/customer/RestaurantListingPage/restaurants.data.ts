@@ -3,8 +3,8 @@ export type RestaurantListItem = {
   name: string;
   slug: string;
   description: string;
-  bannerUrl: string;
-  logoUrl: string;
+  bannerUrl?: string;
+  logoUrl?: string;
   cuisineTypes: string[];
   isOpen: boolean;
   status: "approved";
@@ -26,7 +26,6 @@ export const restaurants: RestaurantListItem[] = [
     description: "Fresh Italian pizza made with authentic ingredients.",
     bannerUrl:
       "https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=1200&auto=format&fit=crop",
-    logoUrl: "https://cdn-icons-png.flaticon.com/512/3132/3132693.png",
     cuisineTypes: ["Italian", "Pizza"],
     isOpen: true,
     status: "approved",
@@ -44,8 +43,7 @@ export const restaurants: RestaurantListItem[] = [
     name: "Burger House",
     slug: "burger-house",
     description: "Juicy burgers with crispy fries and fresh ingredients.",
-    bannerUrl:
-      "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=1200&auto=format&fit=crop",
+
     logoUrl: "https://cdn-icons-png.flaticon.com/512/3075/3075977.png",
     cuisineTypes: ["American", "Fast Food"],
     isOpen: false,
