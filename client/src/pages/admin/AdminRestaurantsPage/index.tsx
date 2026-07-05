@@ -159,7 +159,7 @@ export default function AdminRestaurantsPage() {
             data={restaurants}
             columns={columns}
             getRowKey={(restaurant) => restaurant._id}
-            emptyMessage="There are no pending restaurant registrations right now."
+            emptyMessage="No restaurants found"
             isLoading={isLoading}
           />
 

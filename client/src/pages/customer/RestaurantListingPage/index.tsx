@@ -1,131 +1,138 @@
-import { useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
 import { RestaurantCard } from "./RestaurantCard";
 import { RestaurantEmptyState } from "./RestaurantEmptyState";
-import {
-  RestaurantFilters,
-  type RestaurantSort,
-} from "./RestaurantFilters";
 import { RestaurantListHeader } from "./RestaurantListHeader";
-import { restaurants } from "./restaurants.data";
+import { RestaurantFilters } from "./RestaurantFilters";
+import { usePublicRestaurants } from "@/hooks/public/useRestaurants";
+import { Pagination } from "@/components/common/Pagination";
 
-const allCuisines = [
-  "All",
-  ...Array.from(
-    new Set(restaurants.flatMap((restaurant) => restaurant.cuisineTypes)),
-  ),
-];
+const RESTAURANTS_PER_PAGE = 12;
 
-function getDeliveryStart(deliveryTime: string) {
-  return Number.parseInt(deliveryTime, 10) || Number.MAX_SAFE_INTEGER;
+function RestaurantCardSkeleton() {
+  return (
+    <div className="overflow-hidden rounded-2xl border border-border bg-card">
+      <div className="h-44 animate-pulse bg-muted" />
+
+      <div className="space-y-4 p-4">
+        <div className="h-5 w-2/3 animate-pulse rounded bg-muted" />
+        <div className="h-4 w-full animate-pulse rounded bg-muted" />
+        <div className="h-4 w-1/2 animate-pulse rounded bg-muted" />
+
+        <div className="flex gap-2">
+          <div className="h-7 w-20 animate-pulse rounded-full bg-muted" />
+          <div className="h-7 w-24 animate-pulse rounded-full bg-muted" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RestaurantGridSkeleton() {
+  return (
+    <section
+      className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3"
+      aria-label="Loading restaurant results"
+    >
+      {Array.from({ length: RESTAURANTS_PER_PAGE }).map((_, index) => (
+        <RestaurantCardSkeleton key={index} />
+      ))}
+    </section>
+  );
 }
 
 export default function RestaurantListingPage() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCuisine, setSelectedCuisine] = useState("All");
-  const [selectedPriceLevel, setSelectedPriceLevel] = useState<number | null>(
-    null,
-  );
-  const [onlyOpen, setOnlyOpen] = useState(false);
-  const [sortBy, setSortBy] = useState<RestaurantSort>("rating");
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  const visibleRestaurants = useMemo(() => {
-    const query = searchQuery.trim().toLowerCase();
+  const page = Number(searchParams.get("page") ?? 1);
+  const search = searchParams.get("search") ?? "";
+  const city = searchParams.getAll("city");
+  const cuisine = searchParams.getAll("cuisine");
+  const onlyOpen = searchParams.get("onlyOpen") === "true";
 
-    return restaurants
-      .filter((restaurant) => {
-        const searchableText = [
-          restaurant.name,
-          restaurant.description,
-          restaurant.location,
-          ...restaurant.cuisineTypes,
-        ]
-          .join(" ")
-          .toLowerCase();
-        const matchesSearch = !query || searchableText.includes(query);
-        const matchesCuisine =
-          selectedCuisine === "All" ||
-          restaurant.cuisineTypes.includes(selectedCuisine);
-        const matchesPrice =
-          selectedPriceLevel === null ||
-          restaurant.priceLevel === selectedPriceLevel;
-        const matchesAvailability = !onlyOpen || restaurant.isOpen;
+  const { data, isLoading, isFetching } = usePublicRestaurants({
+    page,
+    limit: RESTAURANTS_PER_PAGE,
+    search,
+    city,
+    cuisine,
+    onlyOpen,
+  });
 
-        return (
-          matchesSearch &&
-          matchesCuisine &&
-          matchesPrice &&
-          matchesAvailability
-        );
-      })
-      .toSorted((a, b) => {
-        if (sortBy === "deliveryTime") {
-          return (
-            getDeliveryStart(a.deliveryTime) -
-            getDeliveryStart(b.deliveryTime)
-          );
-        }
+  const restaurants = data?.restaurants ?? [];
 
-        if (sortBy === "reviews") {
-          return b.reviewsCount - a.reviewsCount;
-        }
+  // Better if your backend returns something like:
+  // data.pagination.totalItems or data.total
+  const restaurantCount = data?.pagination.total ?? restaurants.length;
 
-        return b.rating - a.rating;
-      });
-  }, [onlyOpen, searchQuery, selectedCuisine, selectedPriceLevel, sortBy]);
+  const hasActiveFilters =
+    search.trim() || city.length > 0 || cuisine.length > 0 || onlyOpen;
 
   const resetFilters = () => {
-    setSearchQuery("");
-    setSelectedCuisine("All");
-    setSelectedPriceLevel(null);
-    setOnlyOpen(false);
-    setSortBy("rating");
+    const params = new URLSearchParams();
+
+    params.set("page", "1");
+
+    setSearchParams(params);
+  };
+
+  const handlePageChange = (nextPage: number) => {
+    setSearchParams((currentParams) => {
+      const nextParams = new URLSearchParams(currentParams);
+      nextParams.set("page", String(nextPage));
+      nextParams.set("limit", String(RESTAURANTS_PER_PAGE));
+      return nextParams;
+    });
   };
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <RestaurantListHeader restaurantCount={restaurants.length} />
+      <RestaurantListHeader restaurantCount={restaurantCount} />
 
       <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
-        <RestaurantFilters
-          cuisines={allCuisines}
-          searchQuery={searchQuery}
-          selectedCuisine={selectedCuisine}
-          selectedPriceLevel={selectedPriceLevel}
-          onlyOpen={onlyOpen}
-          sortBy={sortBy}
-          onSearchChange={setSearchQuery}
-          onCuisineChange={setSelectedCuisine}
-          onPriceLevelChange={setSelectedPriceLevel}
-          onOnlyOpenChange={setOnlyOpen}
-          onSortChange={setSortBy}
-        />
+        <RestaurantFilters />
 
         <div className="mb-5 mt-6 flex items-center justify-between gap-4">
-          <p className="text-sm font-medium text-foreground">
-            {visibleRestaurants.length}{" "}
-            {visibleRestaurants.length === 1 ? "restaurant" : "restaurants"}
-          </p>
+          <div>
+            <p className="text-sm font-medium text-foreground">
+              {restaurantCount}{" "}
+              {restaurantCount === 1 ? "restaurant" : "restaurants"}
+            </p>
+          </div>
+
           <p className="text-xs text-muted-foreground">
             Select a restaurant to view its full menu
           </p>
         </div>
 
-        {visibleRestaurants.length === 0 ? (
-          <RestaurantEmptyState onReset={resetFilters} />
+        {isLoading ? (
+          <RestaurantGridSkeleton />
+        ) : restaurants.length === 0 ? (
+          <RestaurantEmptyState
+            onReset={() => {
+              if (hasActiveFilters) {
+                resetFilters();
+              }
+            }}
+          />
         ) : (
           <section
             className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3"
             aria-label="Restaurant results"
           >
-            {visibleRestaurants.map((restaurant) => (
-              <RestaurantCard
-                key={restaurant._id}
-                restaurant={restaurant}
-              />
+            {restaurants.map((restaurant) => (
+              <RestaurantCard key={restaurant._id} restaurant={restaurant} />
             ))}
           </section>
         )}
+
+       <div className="mt-6">
+         <Pagination
+          pagination={data!.pagination}
+          onPageChange={handlePageChange}
+          disabled={isFetching}
+        />
+       </div>
       </main>
     </div>
   );

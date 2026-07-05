@@ -1,11 +1,10 @@
+import type { PublicRestaurant } from "@/services/public.service";
 import { ImageOff, MapPin, Store } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
-import type { RestaurantListItem } from "./restaurants.data";
-
 type RestaurantCardProps = {
-  restaurant: RestaurantListItem;
+  restaurant: PublicRestaurant;
 };
 
 export function RestaurantCard({ restaurant }: RestaurantCardProps) {

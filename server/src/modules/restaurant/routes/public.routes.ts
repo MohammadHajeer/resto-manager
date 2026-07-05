@@ -1,15 +1,16 @@
 import { Router } from "express";
-
 import {
-  getApprovedRestaurants,
-  getRestaurantBySlug,
-  getRestaurantMenuBySlug,
+  getPublicRestaurantBySlug,
+  getPublicRestaurantFilterOptions,
+  getPublicRestaurants,
 } from "../controllers/public.controller.js";
 
 const router = Router();
 
-router.get("/", getApprovedRestaurants);
-router.get("/:slug/menu", getRestaurantMenuBySlug);
-router.get("/:slug", getRestaurantBySlug);
+router.get("/", getPublicRestaurants);
+
+router.get("/filter-options", getPublicRestaurantFilterOptions);
+
+router.get("/:slug", getPublicRestaurantBySlug);
 
 export { router as PublicRestaurantRoutes };
