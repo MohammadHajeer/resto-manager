@@ -83,3 +83,19 @@ export async function deleteFilesFromSupabase({
     throw new Error(error.message);
   }
 }
+
+export function getFilePathFromPublicUrl(
+  bucket: string,
+  publicUrl?: string | null,
+) {
+  if (!publicUrl) return null;
+
+  const marker = `/storage/v1/object/public/${bucket}/`;
+  const markerIndex = publicUrl.indexOf(marker);
+
+  if (markerIndex === -1) return null;
+
+  const filePath = publicUrl.slice(markerIndex + marker.length);
+
+  return decodeURIComponent(filePath.split("?")[0]);
+}

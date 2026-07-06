@@ -1,11 +1,19 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/queryKeys";
-import { ownerService } from "@/services/owner/owner.service";
+import { ownerRestaurantService } from "@/services/owner/owner.restaurant.service";
+import type { OwnerRestaurantMenuParams } from "@/services/owner/owner.types";
+
+export const useOwnerRestaurantMenu = (params?: OwnerRestaurantMenuParams) => {
+  return useQuery({
+    queryKey: queryKeys.owner.menuItemsList(params),
+    queryFn: () => ownerRestaurantService.getOwnerRestaurantMenu(params),
+  });
+};
 
 export function useOwnerRestaurantStatus(enabled = true) {
   return useQuery({
     queryKey: queryKeys.owner.restaurantStatus,
-    queryFn: ownerService.getRestaurantStatus,
+    queryFn: ownerRestaurantService.getRestaurantStatus,
     enabled,
   });
 }
@@ -13,7 +21,7 @@ export function useOwnerRestaurantStatus(enabled = true) {
 export const useOwnerRestaurant = () => {
   return useQuery({
     queryKey: queryKeys.owner.restaurant,
-    queryFn: ownerService.getOwnerRestaurant,
+    queryFn: ownerRestaurantService.getOwnerRestaurant,
   });
 };
 
@@ -21,7 +29,7 @@ export const useUpdateOwnerRestaurant = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ownerService.updateOwnerRestaurant,
+    mutationFn: ownerRestaurantService.updateOwnerRestaurant,
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.owner.restaurant,
@@ -34,7 +42,7 @@ export const useToggleRestaurantActivity = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ownerService.toggleRestaurantActivity,
+    mutationFn: ownerRestaurantService.toggleRestaurantActivity,
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.owner.restaurant,

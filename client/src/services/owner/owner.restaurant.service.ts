@@ -1,6 +1,8 @@
 import { api } from "@/lib/axios";
 import {
   type OwnerRestaurantDetails,
+  type OwnerRestaurantMenu,
+  type OwnerRestaurantMenuParams,
   type OwnerRestaurantStatusDetails,
   type UpdateRestaurantActivityPayload,
 } from "./owner.types";
@@ -8,7 +10,17 @@ import type { UpdateOwnerRestaurantFormValues } from "@/pages/owner/RestaurantPr
 
 const endpoint = "/owner/restaurant";
 
-export const ownerService = {
+export const ownerRestaurantService = {
+  getOwnerRestaurantMenu: async (
+    params?: OwnerRestaurantMenuParams,
+  ): Promise<OwnerRestaurantMenu> => {
+    const response = await api.get(`${endpoint}/menu`, {
+      params,
+    });
+
+    return response.data.data;
+  },
+
   getRestaurantStatus: async (): Promise<OwnerRestaurantStatusDetails> => {
     const response = await api.get(`${endpoint}/status`);
     return response.data?.data;

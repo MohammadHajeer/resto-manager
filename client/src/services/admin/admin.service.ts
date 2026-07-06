@@ -1,7 +1,7 @@
 import { api } from "@/lib/axios";
 import type {
   AdminRestaurantDetails,
-  PaginatedPendingRestaurantsResponse,
+  PaginatedRestaurantReviewsResponse,
   RejectRestaurantInput,
 } from "./admin.types";
 
@@ -12,7 +12,7 @@ export const adminService = {
     page = 1,
     limit = 10,
     status,
-  }: GetQueryParams = {}): Promise<PaginatedPendingRestaurantsResponse> => {
+  }: GetQueryParams = {}): Promise<PaginatedRestaurantReviewsResponse> => {
     const response = await api.get(`${endpoint}`, {
       params: {
         page,

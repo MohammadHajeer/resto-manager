@@ -1,6 +1,4 @@
-// src/modules/categories/category.controller.ts
-
-import { Request, Response, NextFunction } from "express";
+import { Response, NextFunction } from "express";
 import { isValidObjectId, Types } from "mongoose";
 
 import { Category } from "../category.model.js";

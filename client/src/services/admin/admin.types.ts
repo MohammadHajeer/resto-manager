@@ -1,4 +1,4 @@
-export type PendingRestaurant = {
+export type RestaurantReview = {
   _id: string;
   name: string;
   status: "pending" | "approved" | "rejected";
@@ -72,8 +72,8 @@ export type AdminRestaurantDetails = {
   updatedAt: string;
 };
 
-export type PaginatedPendingRestaurantsResponse = {
-  restaurants: PendingRestaurant[];
+export type PaginatedRestaurantReviewsResponse = {
+  restaurants: RestaurantReview[];
   pagination: PaginationMeta;
 };
 

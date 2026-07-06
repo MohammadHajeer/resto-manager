@@ -1,7 +1,13 @@
+import type { OwnerRestaurantMenuParams } from "@/services/owner/owner.types";
+
 export const queryKeys = {
   owner: {
     restaurantStatus: ["owner", "restaurant-status"] as const,
     restaurant: ["owner", "restaurant"] as const,
+    categories: ["owner", "categories"] as const,
+    menuItems: ["owner", "menu-items"] as const,
+    menuItemsList: (params?: OwnerRestaurantMenuParams) =>
+      ["owner", "restaurant-menu", params] as const,
   },
   public: {
     restaurants: {

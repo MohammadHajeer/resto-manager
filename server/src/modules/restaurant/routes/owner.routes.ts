@@ -6,6 +6,7 @@ import {
 } from "@/middlewares/upload.middleware.js";
 import {
   getMyRestaurant,
+  getOwnerRestaurantMenu,
   getOwnerRestaurantStatus,
   registerRestaurant,
   toggleMyRestaurantOpenStatus,
@@ -17,6 +18,8 @@ const router = Router();
 router.post("/register", uploadRestaurantRegistrationFiles, registerRestaurant);
 
 router.get("/", requireRole("restaurant_owner"), getMyRestaurant);
+
+router.get("/menu", requireRole("restaurant_owner"), getOwnerRestaurantMenu);
 
 router.get(
   "/status",

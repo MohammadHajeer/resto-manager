@@ -1,3 +1,8 @@
+import type {
+  CreateMenuItemInput,
+  UpdateMenuItemInput,
+} from "@restomanager/validators";
+
 export const ownerRestaurantStatuses = [
   "pending",
   "approved",
@@ -82,4 +87,85 @@ export type OwnerRestaurantDetails = {
 
 export type UpdateRestaurantActivityPayload = {
   isOpen: boolean;
+};
+
+export type OwnerCategory = {
+  _id: string;
+  name: string;
+  description?: string;
+  restaurantId: string;
+  isDeleted?: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CreateMenuItemFormInput = Omit<CreateMenuItemInput, "imageUrl"> & {
+  imageFile?: File | null;
+  imageUrl?: string | null;
+};
+
+export type UpdateMenuItemFormInput = Partial<
+  Omit<UpdateMenuItemInput, "imageUrl">
+> & {
+  imageFile?: File | null;
+  imageUrl?: string | null;
+};
+
+export type OwnerMenuStatusFilter = "all" | "available" | "out-of-stock";
+
+export type OwnerMenuAddon = {
+  name: string;
+  price: number;
+};
+
+export type OwnerMenuItem = {
+  _id: string;
+  restaurantId: string;
+  categoryId: string;
+
+  name: string;
+  slug: string;
+  description: string;
+  price: number;
+
+  imageUrl: string | null;
+
+  ingredients: string[];
+  availableAddons: OwnerMenuAddon[];
+
+  isAvailable: boolean;
+  deletedAt: string | null;
+
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type OwnerMenuSection = {
+  _id: string;
+  name: string;
+  slug: string;
+  description: string;
+  isActive: boolean;
+
+  itemCount: number;
+  items: OwnerMenuItem[];
+
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type OwnerRestaurantMenuStats = {
+  totalItems: number;
+  activeItems: number;
+  outOfStockItems: number;
+};
+
+export type OwnerRestaurantMenu = {
+  stats: OwnerRestaurantMenuStats;
+  sections: OwnerMenuSection[];
+};
+
+export type OwnerRestaurantMenuParams = {
+  search?: string;
+  status?: OwnerMenuStatusFilter;
 };

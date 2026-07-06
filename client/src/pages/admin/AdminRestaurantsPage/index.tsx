@@ -5,9 +5,9 @@ import { DataTable, type DataTableColumn } from "@/components/common/DataTable";
 import { Pagination } from "@/components/common/Pagination";
 import { Button } from "@/components/ui/button";
 import { useAdminRestaurants } from "@/hooks/admin/useAdminRestaurants";
-import type { PendingRestaurant } from "@/services/admin/admin.service";
 import { RestaurantStatusFilters } from "./RestaurantStatusFilters";
 import RestaurantStatusBadge from "./RestaurantStatusBadge";
+import type { RestaurantReview } from "@/services/admin/admin.types";
 
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
   year: "numeric",
@@ -41,7 +41,7 @@ export default function AdminRestaurantsPage() {
   const restaurants = data?.restaurants ?? [];
   const pagination = data?.pagination;
 
-  const columns: DataTableColumn<PendingRestaurant>[] = [
+  const columns: DataTableColumn<RestaurantReview>[] = [
     {
       key: "index",
       header: "#",
@@ -105,7 +105,9 @@ export default function AdminRestaurantsPage() {
   };
 
   const statusLabel =
-    (status === "all" || status === undefined) ? "restaurants" : `${status} restaurants`;
+    status === "all" || status === undefined
+      ? "restaurants"
+      : `${status} restaurants`;
 
   return (
     <div className="space-y-6">

@@ -7,7 +7,7 @@ import {
   type UpdateOwnerRestaurantFormValues,
 } from "./types";
 import { FormProvider, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod/src/zod.js";
+import { zodResolver } from "@hookform/resolvers/zod";
 import BrandIdentitySection from "./BrandIdentitySection";
 import GeneralInfoSection from "./GeneralInfoSection";
 import ContactSection from "./ContactSection";

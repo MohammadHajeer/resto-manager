@@ -1,6 +1,5 @@
 import { NextFunction, Request, Response } from "express";
 import {
-  RestaurantProfileUpdateInput,
   restaurantProfileUpdateSchema,
   restaurantRegistrationSchema,
 } from "@restomanager/validators";
@@ -8,12 +7,19 @@ import { Restaurant } from "../restaurant.model.js";
 import { auth, authDb } from "@/lib/auth.js";
 import {
   deleteFilesFromSupabase,
+  getFilePathFromPublicUrl,
   getPublicFileUrl,
   uploadFileToSupabase,
 } from "@/utils/storage.js";
 import { sendResponse } from "@/utils/sendResponse.js";
 import { ObjectId } from "mongodb";
 import { createSlug } from "@/utils/createSlug.js";
+import { QueryFilter } from "mongoose";
+import {
+  MenuItem,
+  MenuItemDocument,
+} from "@/modules/menuItem/menuItem.model.js";
+import { Category } from "@/modules/category/category.model.js";
 
 type RestaurantRegisterFiles = {
   logo?: Express.Multer.File[];
@@ -190,12 +196,6 @@ export const getMyRestaurant = async (
   try {
     const ownerId = req.auth?.user.id;
 
-    if (!ownerId) {
-      return res.status(401).json({
-        message: "Unauthorized",
-      });
-    }
-
     const restaurant = await Restaurant.findOne({ ownerId });
 
     if (!restaurant) {
@@ -237,7 +237,9 @@ export const updateMyRestaurant = async (
     }
 
     const parsedBody =
-      typeof req.body.data === "string" ? JSON.parse(req.body.data) : req.body.data;
+      typeof req.body.data === "string"
+        ? JSON.parse(req.body.data)
+        : req.body.data;
 
     const input = restaurantProfileUpdateSchema.parse(parsedBody);
 
@@ -404,12 +406,6 @@ export const toggleMyRestaurantOpenStatus = async (
   try {
     const ownerId = req.auth?.user.id;
 
-    if (!ownerId) {
-      return res.status(401).json({
-        message: "Unauthorized",
-      });
-    }
-
     const { isOpen } = req.body as { isOpen?: boolean };
 
     if (typeof isOpen !== "boolean") {
@@ -453,13 +449,6 @@ export const getOwnerRestaurantStatus = async (
   try {
     const ownerId = req.auth?.user?.id;
 
-    if (!ownerId) {
-      return res.status(401).json({
-        success: false,
-        message: "Unauthorized",
-      });
-    }
-
     const restaurant = await Restaurant.findOne({ ownerId }).select(
       "name slug status verification createdAt updatedAt",
     );
@@ -489,15 +478,158 @@ export const getOwnerRestaurantStatus = async (
   }
 };
 
-function getFilePathFromPublicUrl(bucket: string, publicUrl?: string | null) {
-  if (!publicUrl) return null;
+const escapeRegex = (value: string) => {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+};
 
-  const marker = `/storage/v1/object/public/${bucket}/`;
-  const markerIndex = publicUrl.indexOf(marker);
+type MenuStatusFilter = "all" | "available" | "out-of-stock";
 
-  if (markerIndex === -1) return null;
+export const getOwnerRestaurantMenu = async (
+  req: AuthedRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const ownerId = req.auth!.user!.id;
 
-  const filePath = publicUrl.slice(markerIndex + marker.length);
+    const search =
+      typeof req.query.search === "string" ? req.query.search.trim() : "";
 
-  return decodeURIComponent(filePath.split("?")[0]);
-}
+    const status =
+      typeof req.query.status === "string"
+        ? (req.query.status as MenuStatusFilter)
+        : "all";
+
+    const restaurant = await Restaurant.findOne({ ownerId })
+      .select("_id")
+      .lean();
+
+    if (!restaurant) {
+      return res.status(404).json({
+        success: false,
+        message: "Restaurant not found for this owner",
+      });
+    }
+
+    const menuItemFilter: QueryFilter<MenuItemDocument> = {
+      restaurantId: restaurant._id,
+      deletedAt: null,
+    };
+
+    if (status === "available") {
+      menuItemFilter.isAvailable = true;
+    }
+
+    if (status === "out-of-stock") {
+      menuItemFilter.isAvailable = false;
+    }
+
+    if (search) {
+      const regex = new RegExp(escapeRegex(search), "i");
+
+      menuItemFilter.$or = [
+        { name: regex },
+        { description: regex },
+        { ingredients: regex },
+      ];
+    }
+
+    const [categories, menuItems, statsResult] = await Promise.all([
+      Category.find({
+        restaurantId: restaurant._id,
+        isActive: true,
+      })
+        .select("_id name slug description isActive createdAt updatedAt")
+        .sort({ createdAt: 1 })
+        .lean(),
+
+      MenuItem.find(menuItemFilter)
+        .select(
+          "_id restaurantId categoryId name slug description price imageUrl ingredients availableAddons isAvailable deletedAt createdAt updatedAt",
+        )
+        .sort({ createdAt: 1 })
+        .lean(),
+
+      MenuItem.aggregate([
+        {
+          $match: {
+            restaurantId: restaurant._id,
+            deletedAt: null,
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            totalItems: { $sum: 1 },
+            activeItems: {
+              $sum: {
+                $cond: [{ $eq: ["$isAvailable", true] }, 1, 0],
+              },
+            },
+            outOfStockItems: {
+              $sum: {
+                $cond: [{ $eq: ["$isAvailable", false] }, 1, 0],
+              },
+            },
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            totalItems: 1,
+            activeItems: 1,
+            outOfStockItems: 1,
+          },
+        },
+      ]),
+    ]);
+
+    const itemsByCategoryId = new Map<string, typeof menuItems>();
+
+    for (const item of menuItems) {
+      const categoryId = String(item.categoryId);
+
+      const currentItems = itemsByCategoryId.get(categoryId) ?? [];
+
+      currentItems.push(item);
+      itemsByCategoryId.set(categoryId, currentItems);
+    }
+
+    let sections = categories.map((category) => {
+      const items = itemsByCategoryId.get(String(category._id)) ?? [];
+
+      return {
+        _id: category._id,
+        name: category.name,
+        slug: category.slug,
+        description: category.description,
+        isActive: category.isActive,
+        itemCount: items.length,
+        items,
+        createdAt: category.createdAt,
+        updatedAt: category.updatedAt,
+      };
+    });
+
+    if (search || status !== "all") {
+      sections = sections.filter((section) => section.items.length > 0);
+    }
+
+    const stats = statsResult[0] ?? {
+      totalItems: 0,
+      activeItems: 0,
+      outOfStockItems: 0,
+    };
+
+    return res.status(200).json({
+      success: true,
+      message: "Owner restaurant menu fetched successfully",
+      data: {
+        stats,
+        sections,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};

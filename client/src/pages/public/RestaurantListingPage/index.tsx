@@ -6,6 +6,7 @@ import { RestaurantListHeader } from "./RestaurantListHeader";
 import { RestaurantFilters } from "./RestaurantFilters";
 import { usePublicRestaurants } from "@/hooks/public/useRestaurants";
 import { Pagination } from "@/components/common/Pagination";
+import type { PublicRestaurant } from "@/services/restaurant.service";
 
 const RESTAURANTS_PER_PAGE = 12;
 
@@ -121,7 +122,10 @@ export default function RestaurantListingPage() {
             aria-label="Restaurant results"
           >
             {restaurants.map((restaurant) => (
-              <RestaurantCard key={restaurant._id} restaurant={restaurant} />
+              <RestaurantCard
+                key={restaurant._id}
+                restaurant={restaurant as PublicRestaurant}
+              />
             ))}
           </section>
         )}
