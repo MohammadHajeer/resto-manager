@@ -20,6 +20,8 @@ import RequireApprovedOwner from "./routes/RequireApprovedOwner";
 
 // Pages: Public
 import LandingPage from "./pages/public/LandingPage";
+import RestaurantListingPage from "./pages/public/RestaurantListingPage";
+import RestaurantMenuPage from "./pages/public/RestaurantMenuPage";
 
 // Pages: Auth
 import LoginPage from "./pages/auth/LoginPage";
@@ -27,8 +29,6 @@ import CustomerSignUpPage from "./pages/auth/CustomerSignUpPage";
 import RestaurantRegisterPage from "./pages/auth/RestaurantRegisterPage";
 
 // Pages: Customer
-import RestaurantListingPage from "./pages/customer/RestaurantListingPage";
-import RestaurantMenuPage from "./pages/customer/RestaurantMenuPage";
 import MenuItemDetailsPage from "./pages/customer/MenuItemDetailsPage";
 import CartPage from "./pages/customer/CartPage";
 import CheckoutPage from "./pages/customer/CheckoutPage";
