@@ -1,6 +1,7 @@
 export const queryKeys = {
   owner: {
     restaurantStatus: ["owner", "restaurant-status"] as const,
+    restaurant: ["owner", "restaurant"] as const,
   },
   public: {
     restaurants: {

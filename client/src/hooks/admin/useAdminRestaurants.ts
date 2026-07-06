@@ -1,6 +1,6 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/queryKeys";
-import { adminService } from "@/services/admin.service";
+import { adminService } from "@/services/admin/admin.service";
 
 export const useAdminRestaurants = (
   page: number,

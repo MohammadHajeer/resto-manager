@@ -39,7 +39,7 @@ import {
   useRejectRestaurant,
   useRestaurantById,
 } from "@/hooks/admin/useAdminRestaurants";
-import type { AdminRestaurantDetails } from "@/services/admin.service";
+import type { AdminRestaurantDetails } from "@/services/admin/admin.service";
 import axios from "axios";
 import { ResourceNotFound } from "@/components/common/ResourceNotFound";
 

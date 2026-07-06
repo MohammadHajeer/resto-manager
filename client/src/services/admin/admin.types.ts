@@ -1,5 +1,3 @@
-import { api } from "@/lib/axios";
-
 export type PendingRestaurant = {
   _id: string;
   name: string;
@@ -82,58 +80,4 @@ export type PaginatedPendingRestaurantsResponse = {
 export type RejectRestaurantInput = {
   restaurantId: string;
   rejectionReason: string;
-};
-
-export const adminService = {
-  getAdminRestaurants: async ({
-    page = 1,
-    limit = 10,
-    status,
-  }: GetQueryParams = {}): Promise<PaginatedPendingRestaurantsResponse> => {
-    const response = await api.get("/admin/restaurants", {
-      params: {
-        page,
-        limit,
-        status,
-      },
-    });
-
-    return {
-      restaurants: response.data.data,
-      pagination: response.data.pagination,
-    };
-  },
-  getRestaurantById: async (
-    restaurantId: string,
-  ): Promise<AdminRestaurantDetails> => {
-    const response = await api.get(`/admin/restaurants/${restaurantId}`);
-    return response.data.data;
-  },
-  approveRestaurant: async (
-    restaurantId: string,
-  ): Promise<AdminRestaurantDetails> => {
-    const response = await api.patch(
-      `/admin/restaurants/${restaurantId}/status`,
-      {
-        status: "approved",
-      },
-    );
-
-    return response.data.data;
-  },
-
-  rejectRestaurant: async ({
-    restaurantId,
-    rejectionReason,
-  }: RejectRestaurantInput): Promise<AdminRestaurantDetails> => {
-    const response = await api.patch(
-      `/admin/restaurants/${restaurantId}/status`,
-      {
-        status: "rejected",
-        rejectionReason,
-      },
-    );
-
-    return response.data.data;
-  },
 };

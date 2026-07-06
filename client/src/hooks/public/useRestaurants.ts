@@ -1,5 +1,5 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { publicService } from "@/services/public.service";
+import { publicService } from "@/services/public/public.service";
 import { queryKeys } from "@/lib/queryKeys";
 
 export const useRestaurantFilterOptions = () => {

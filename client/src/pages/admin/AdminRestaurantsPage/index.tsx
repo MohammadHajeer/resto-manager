@@ -5,7 +5,7 @@ import { DataTable, type DataTableColumn } from "@/components/common/DataTable";
 import { Pagination } from "@/components/common/Pagination";
 import { Button } from "@/components/ui/button";
 import { useAdminRestaurants } from "@/hooks/admin/useAdminRestaurants";
-import type { PendingRestaurant } from "@/services/admin.service";
+import type { PendingRestaurant } from "@/services/admin/admin.service";
 import { RestaurantStatusFilters } from "./RestaurantStatusFilters";
 import RestaurantStatusBadge from "./RestaurantStatusBadge";
 

@@ -4,7 +4,7 @@ import { authClient } from "../lib/auth-client";
 import { normalizeRole } from "../auth/auth-types";
 import { OwnerStatusErrorState } from "@/components/owner/OwnerStatusErrorState";
 import { RouteLoadingState } from "@/components/RouteLoadingState";
-import { useOwnerRestaurantStatus } from "@/hooks/owner/useOwnerRestaurantStatus";
+import { useOwnerRestaurantStatus } from "@/hooks/owner/useOwnerRestaurant";
 
 interface RequireApprovedOwnerProps {
   children: React.ReactNode;
