@@ -39,9 +39,9 @@ import {
   useRejectRestaurant,
   useRestaurantById,
 } from "@/hooks/admin/useAdminRestaurants";
-import type { AdminRestaurantDetails } from "@/services/admin/admin.service";
 import axios from "axios";
 import { ResourceNotFound } from "@/components/common/ResourceNotFound";
+import type { AdminRestaurantDetails } from "@/services/admin/admin.types";
 
 type DocumentKey = "businessLicense" | "ownerIdDocument";
 type RestaurantStatus = AdminRestaurantDetails["status"];
@@ -287,8 +287,6 @@ export default function AdminRestaurantReviewPage() {
   const isMutating = approveRestaurant.isPending || rejectRestaurant.isPending;
   const isRestaurantNotFound =
     axios.isAxiosError(error) && error.response?.status === 404;
-
-  console.log(isRestaurantNotFound, "isRestaurantNotFound");
 
   const handleApproveRestaurant = () => {
     if (!restaurant?._id) return;

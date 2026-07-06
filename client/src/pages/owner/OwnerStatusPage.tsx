@@ -10,7 +10,7 @@ import { Navigate } from "react-router-dom";
 import { OwnerStatusErrorState } from "@/components/owner/OwnerStatusErrorState";
 import { RouteLoadingState } from "@/components/RouteLoadingState";
 import { useOwnerRestaurantStatus } from "@/hooks/owner/useOwnerRestaurant";
-import type { OwnerRestaurantStatus } from "@/services/owner/owner.service";
+import type { OwnerRestaurantStatus } from "@/services/owner/owner.types";
 
 type StatusContent = {
   icon: LucideIcon;

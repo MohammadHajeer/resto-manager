@@ -1,6 +1,9 @@
 import { Router } from "express";
 import { requireRole } from "@/middlewares/auth.middleware.js";
-import { uploadRestaurantRegistrationFiles } from "@/middlewares/upload.middleware.js";
+import {
+  uploadRestaurantProfileFiles,
+  uploadRestaurantRegistrationFiles,
+} from "@/middlewares/upload.middleware.js";
 import {
   getMyRestaurant,
   getOwnerRestaurantStatus,
@@ -8,8 +11,6 @@ import {
   toggleMyRestaurantOpenStatus,
   updateMyRestaurant,
 } from "../controllers/owner.controller.js";
-import { validate } from "@/middlewares/validate.middleware.js";
-import { restaurantProfileUpdateSchema } from "@restomanager/validators";
 
 const router = Router();
 
@@ -26,7 +27,7 @@ router.get(
 router.patch(
   "/",
   requireRole("restaurant_owner"),
-  validate(restaurantProfileUpdateSchema),
+  uploadRestaurantProfileFiles,
   updateMyRestaurant,
 );
 

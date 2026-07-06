@@ -4,7 +4,7 @@ import {
   type OwnerRestaurantStatusDetails,
   type UpdateRestaurantActivityPayload,
 } from "./owner.types";
-import type { RestaurantProfileUpdateInput } from "@restomanager/validators";
+import type { UpdateOwnerRestaurantFormValues } from "@/pages/owner/RestaurantProfilePage/types";
 
 const endpoint = "/owner/restaurant";
 
@@ -20,9 +20,24 @@ export const ownerService = {
   },
 
   updateOwnerRestaurant: async (
-    payload: RestaurantProfileUpdateInput,
+    payload: UpdateOwnerRestaurantFormValues,
   ): Promise<OwnerRestaurantDetails> => {
-    const response = await api.patch(`${endpoint}`, payload);
+    const { logoFile, bannerFile, ...restaurantData } = payload;
+
+    const formData = new FormData();
+
+    formData.append("data", JSON.stringify(restaurantData));
+
+    if (logoFile instanceof File) {
+      formData.append("logoFile", logoFile);
+    }
+
+    if (bannerFile instanceof File) {
+      formData.append("bannerFile", bannerFile);
+    }
+
+    const response = await api.patch(endpoint, formData);
+
     return response.data?.data;
   },
 

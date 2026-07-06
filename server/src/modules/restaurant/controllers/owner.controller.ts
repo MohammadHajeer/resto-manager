@@ -1,11 +1,16 @@
 import { NextFunction, Request, Response } from "express";
 import {
   RestaurantProfileUpdateInput,
+  restaurantProfileUpdateSchema,
   restaurantRegistrationSchema,
 } from "@restomanager/validators";
 import { Restaurant } from "../restaurant.model.js";
 import { auth, authDb } from "@/lib/auth.js";
-import { getPublicFileUrl, uploadFileToSupabase } from "@/utils/storage.js";
+import {
+  deleteFilesFromSupabase,
+  getPublicFileUrl,
+  uploadFileToSupabase,
+} from "@/utils/storage.js";
 import { sendResponse } from "@/utils/sendResponse.js";
 import { ObjectId } from "mongodb";
 import { createSlug } from "@/utils/createSlug.js";
@@ -15,6 +20,11 @@ type RestaurantRegisterFiles = {
   banner?: Express.Multer.File[];
   businessLicense?: Express.Multer.File[];
   ownerIdDocument?: Express.Multer.File[];
+};
+
+type RestaurantProfileUpdateFiles = {
+  logoFile?: Express.Multer.File[];
+  bannerFile?: Express.Multer.File[];
 };
 
 export const registerRestaurant = async (
@@ -194,9 +204,10 @@ export const getMyRestaurant = async (
       });
     }
 
-    res.status(200).json({
+    sendResponse(res, 200, {
+      success: true,
       message: "Restaurant fetched successfully",
-      restaurant,
+      data: restaurant,
     });
   } catch (error) {
     next(error);
@@ -204,21 +215,17 @@ export const getMyRestaurant = async (
 };
 
 export const updateMyRestaurant = async (
-  req: AuthedRequest<{}, {}, RestaurantProfileUpdateInput>,
+  req: AuthedRequest<{}, {}, any>,
   res: Response,
   next: NextFunction,
 ) => {
+  const publicBucket = process.env.SUPABASE_PUBLIC_BUCKET ?? "restaurant-media";
+
+  const newlyUploadedPaths: string[] = [];
+  let shouldCleanupNewUploads = true;
+
   try {
     const ownerId = req.auth?.user.id;
-
-    if (!ownerId) {
-      return res.status(401).json({
-        success: false,
-        message: "Unauthorized",
-      });
-    }
-
-    const input = req.body;
 
     const restaurant = await Restaurant.findOne({ ownerId });
 
@@ -229,8 +236,26 @@ export const updateMyRestaurant = async (
       });
     }
 
+    const parsedBody =
+      typeof req.body.data === "string" ? JSON.parse(req.body.data) : req.body.data;
+
+    const input = restaurantProfileUpdateSchema.parse(parsedBody);
+
+    const files = req.files as RestaurantProfileUpdateFiles | undefined;
+
+    const logoFile = files?.logoFile?.[0];
+    const bannerFile = files?.bannerFile?.[0];
+
+    const oldLogoUrl = restaurant.logoUrl ?? null;
+    const oldBannerUrl = restaurant.bannerUrl ?? null;
+
+    let nextLogoUrl: string | undefined;
+    let nextBannerUrl: string | undefined;
+
+    let nextSlug = restaurant.slug;
+
     if (input.slug) {
-      const nextSlug = createSlug(input.slug);
+      nextSlug = createSlug(input.slug);
 
       const slugExists = await Restaurant.findOne({
         slug: nextSlug,
@@ -247,6 +272,30 @@ export const updateMyRestaurant = async (
       restaurant.slug = nextSlug;
     }
 
+    const folder = `restaurants/${nextSlug}`;
+
+    if (logoFile) {
+      const logoPath = await uploadFileToSupabase({
+        bucket: publicBucket,
+        folder: `${folder}/branding`,
+        file: logoFile,
+      });
+
+      newlyUploadedPaths.push(logoPath);
+      nextLogoUrl = getPublicFileUrl(publicBucket, logoPath);
+    }
+
+    if (bannerFile) {
+      const bannerPath = await uploadFileToSupabase({
+        bucket: publicBucket,
+        folder: `${folder}/branding`,
+        file: bannerFile,
+      });
+
+      newlyUploadedPaths.push(bannerPath);
+      nextBannerUrl = getPublicFileUrl(publicBucket, bannerPath);
+    }
+
     if (input.name !== undefined) {
       restaurant.name = input.name;
     }
@@ -255,15 +304,14 @@ export const updateMyRestaurant = async (
       restaurant.description = input.description;
     }
 
-    if (input.logoUrl !== undefined) {
-      restaurant.logoUrl = input.logoUrl;
+    if (nextLogoUrl !== undefined) {
+      restaurant.logoUrl = nextLogoUrl;
     }
 
-    if (input.bannerUrl !== undefined) {
-      restaurant.bannerUrl = input.bannerUrl;
+    if (nextBannerUrl !== undefined) {
+      restaurant.bannerUrl = nextBannerUrl;
     }
 
-    // Update contact fields partially
     if (input.contact?.phone !== undefined) {
       restaurant.set("contact.phone", input.contact.phone);
     }
@@ -272,7 +320,6 @@ export const updateMyRestaurant = async (
       restaurant.set("contact.email", input.contact.email);
     }
 
-    // Update address fields partially
     if (input.address?.city !== undefined) {
       restaurant.set("address.city", input.address.city);
     }
@@ -293,7 +340,6 @@ export const updateMyRestaurant = async (
       restaurant.set("address.locationUrl", input.address.locationUrl);
     }
 
-    // These are full replacements, and that is okay
     if (input.openingHours !== undefined) {
       restaurant.openingHours =
         input.openingHours as typeof restaurant.openingHours;
@@ -305,12 +351,47 @@ export const updateMyRestaurant = async (
 
     await restaurant.save();
 
-    res.status(200).json({
+    shouldCleanupNewUploads = false;
+
+    const oldLogoPath =
+      nextLogoUrl !== undefined
+        ? getFilePathFromPublicUrl(publicBucket, oldLogoUrl)
+        : null;
+
+    const oldBannerPath =
+      nextBannerUrl !== undefined
+        ? getFilePathFromPublicUrl(publicBucket, oldBannerUrl)
+        : null;
+
+    try {
+      await deleteFilesFromSupabase({
+        bucket: publicBucket,
+        filePaths: [oldLogoPath, oldBannerPath],
+      });
+    } catch (deleteError) {
+      console.warn("Failed to delete old restaurant images:", deleteError);
+    }
+
+    sendResponse(res, 200, {
       success: true,
       message: "Restaurant updated successfully",
       data: restaurant,
     });
   } catch (error) {
+    if (shouldCleanupNewUploads && newlyUploadedPaths.length > 0) {
+      try {
+        await deleteFilesFromSupabase({
+          bucket: publicBucket,
+          filePaths: newlyUploadedPaths,
+        });
+      } catch (cleanupError) {
+        console.warn(
+          "Failed to cleanup uploaded restaurant images:",
+          cleanupError,
+        );
+      }
+    }
+
     next(error);
   }
 };
@@ -354,9 +435,10 @@ export const toggleMyRestaurantOpenStatus = async (
     restaurant.isOpen = isOpen;
     await restaurant.save();
 
-    res.status(200).json({
-      message: isOpen ? "Restaurant is now open" : "Restaurant is now closed",
-      restaurant,
+    sendResponse(res, 200, {
+      success: true,
+      message: `Restaurant is now ${isOpen ? "open" : "closed"}`,
+      data: restaurant,
     });
   } catch (error) {
     next(error);
@@ -389,7 +471,7 @@ export const getOwnerRestaurantStatus = async (
       });
     }
 
-    return res.status(200).json({
+    return sendResponse(res, 200, {
       success: true,
       message: "Restaurant status fetched successfully.",
       data: {
@@ -406,3 +488,16 @@ export const getOwnerRestaurantStatus = async (
     next(error);
   }
 };
+
+function getFilePathFromPublicUrl(bucket: string, publicUrl?: string | null) {
+  if (!publicUrl) return null;
+
+  const marker = `/storage/v1/object/public/${bucket}/`;
+  const markerIndex = publicUrl.indexOf(marker);
+
+  if (markerIndex === -1) return null;
+
+  const filePath = publicUrl.slice(markerIndex + marker.length);
+
+  return decodeURIComponent(filePath.split("?")[0]);
+}

@@ -33,6 +33,51 @@ const openingHourSchema = new Schema(
   { _id: false },
 );
 
+const defaultOpeningHours = [
+  {
+    day: "Monday",
+    openTime: "09:00",
+    closeTime: "22:00",
+    isClosed: false,
+  },
+  {
+    day: "Tuesday",
+    openTime: "09:00",
+    closeTime: "22:00",
+    isClosed: false,
+  },
+  {
+    day: "Wednesday",
+    openTime: "09:00",
+    closeTime: "22:00",
+    isClosed: false,
+  },
+  {
+    day: "Thursday",
+    openTime: "09:00",
+    closeTime: "22:00",
+    isClosed: false,
+  },
+  {
+    day: "Friday",
+    openTime: "09:00",
+    closeTime: "23:30",
+    isClosed: false,
+  },
+  {
+    day: "Saturday",
+    openTime: "10:00",
+    closeTime: "23:30",
+    isClosed: false,
+  },
+  {
+    day: "Sunday",
+    openTime: "10:00",
+    closeTime: "18:00",
+    isClosed: true,
+  },
+] as const;
+
 const restaurantSchema = new Schema(
   {
     ownerId: {
@@ -124,7 +169,7 @@ const restaurantSchema = new Schema(
 
     openingHours: {
       type: [openingHourSchema],
-      default: [],
+      default: () => defaultOpeningHours.map((hour) => ({ ...hour })),
     },
 
     cuisineTypes: {

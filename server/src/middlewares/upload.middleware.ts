@@ -30,3 +30,8 @@ export const uploadRestaurantRegistrationFiles = upload.fields([
   { name: "businessLicense", maxCount: 1 },
   { name: "ownerIdDocument", maxCount: 1 },
 ]);
+
+export const uploadRestaurantProfileFiles = upload.fields([
+  { name: "logoFile", maxCount: 1 },
+  { name: "bannerFile", maxCount: 1 },
+]);

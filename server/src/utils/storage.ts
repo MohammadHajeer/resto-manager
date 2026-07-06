@@ -60,3 +60,26 @@ export async function createPrivateSignedUrl(filePath: string) {
 
   return data.signedUrl;
 }
+
+type DeleteFileOptions = {
+  bucket: string;
+  filePath?: string | null;
+};
+
+export async function deleteFilesFromSupabase({
+  bucket,
+  filePaths,
+}: {
+  bucket: string;
+  filePaths: Array<string | null | undefined>;
+}) {
+  const validPaths = filePaths.filter(Boolean) as string[];
+
+  if (validPaths.length === 0) return;
+
+  const { error } = await supabase.storage.from(bucket).remove(validPaths);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+}
