@@ -173,6 +173,11 @@ const restaurantSchema = new Schema(
         trim: true,
         default: null,
       },
+      suspensionReason: {
+        type: String,
+        trim: true,
+        default: null,
+      },
     },
   },
   {

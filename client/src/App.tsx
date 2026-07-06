@@ -45,7 +45,7 @@ import AddMenuItemPage from "./pages/owner/AddMenuItemPage";
 import EditMenuItemPage from "./pages/owner/EditMenuItemPage";
 import OwnerOrdersPage from "./pages/owner/OwnerOrdersPage";
 import OwnerOrderDetailsPage from "./pages/owner/OwnerOrderDetailsPage";
-import OwnerPendingPage from "./pages/owner/OwnerPendingPage";
+import OwnerStatusPage from "./pages/owner/OwnerStatusPage";
 
 // Pages: Admin
 import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
@@ -124,7 +124,7 @@ export default function App() {
             </ProtectedRoute>
           }
         >
-          <Route path="/owner/pending" element={<OwnerPendingPage />} />
+          <Route path="/owner/status" element={<OwnerStatusPage />} />
           <Route
             element={
               <RequireApprovedOwner>

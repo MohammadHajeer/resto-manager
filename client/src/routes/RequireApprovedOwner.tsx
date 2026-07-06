@@ -1,54 +1,26 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Navigate } from "react-router-dom";
 import { authClient } from "../lib/auth-client";
 import { normalizeRole } from "../auth/auth-types";
-import { api } from "@/lib/axios";
+import { OwnerStatusErrorState } from "@/components/owner/OwnerStatusErrorState";
 import { RouteLoadingState } from "@/components/RouteLoadingState";
+import { useOwnerRestaurantStatus } from "@/hooks/owner/useOwnerRestaurantStatus";
 
 interface RequireApprovedOwnerProps {
   children: React.ReactNode;
 }
 
-type RestaurantStatus = "pending" | "approved" | "rejected";
-
 export default function RequireApprovedOwner({
   children,
 }: RequireApprovedOwnerProps) {
   const { data, isPending } = authClient.useSession();
-
-  const [status, setStatus] = useState<RestaurantStatus | null>(null);
-  const [isCheckingStatus, setIsCheckingStatus] = useState(false);
-  const [statusError, setStatusError] = useState(false);
-
   const userRole = data?.user.role;
   const normalized = normalizeRole(userRole);
+  const shouldCheckStatus =
+    Boolean(data?.session) && normalized === "restaurant_owner";
+  const statusQuery = useOwnerRestaurantStatus(shouldCheckStatus);
 
-  useEffect(() => {
-    if (!data?.session || normalized !== "restaurant_owner") {
-      return;
-    }
-
-    const checkRestaurantStatus = async () => {
-      try {
-        setIsCheckingStatus(true);
-        setStatusError(false);
-
-        const response = await api.get("/owner/restaurant/status");
-
-        const data = response.data.data;
-
-        setStatus(data.status);
-      } catch {
-        setStatusError(true);
-      } finally {
-        setIsCheckingStatus(false);
-      }
-    };
-
-    checkRestaurantStatus();
-  }, [data?.session, normalized]);
-
-  if (isPending || isCheckingStatus || status === null) {
+  if (isPending) {
     return (
       <RouteLoadingState
         title="Checking restaurant approval"
@@ -61,13 +33,26 @@ export default function RequireApprovedOwner({
     return <Navigate to="/" replace />;
   }
 
-  if (statusError) {
-    return <Navigate to="/owner/pending" replace />;
+  if (statusQuery.isPending) {
+    return (
+      <RouteLoadingState
+        title="Checking restaurant approval"
+        description="We are verifying your restaurant approval status before opening the owner dashboard."
+      />
+    );
   }
 
-  if (status !== "approved") {
-    console.log(status)
-    return <Navigate to="/owner/pending" replace />;
+  if (statusQuery.isError) {
+    return (
+      <OwnerStatusErrorState
+        onRetry={() => void statusQuery.refetch()}
+        isRetrying={statusQuery.isFetching}
+      />
+    );
+  }
+
+  if (statusQuery.data.status !== "approved") {
+    return <Navigate to="/owner/status" replace />;
   }
 
   return <>{children}</>;

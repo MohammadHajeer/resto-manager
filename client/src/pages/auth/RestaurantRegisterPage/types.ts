@@ -159,12 +159,12 @@ export const defaultValues: RestaurantRegisterFormValues = {
     locationUrl: "",
   },
   branding: {
-    logoUrl: "",
-    bannerUrl: "",
+    logo: "",
+    banner: "",
   },
   verification: {
-    businessLicenseUrl: "",
-    ownerIdDocumentUrl: "",
+    businessLicense: "",
+    ownerIdDocument: "",
   },
   uploads: {
     logo: null,

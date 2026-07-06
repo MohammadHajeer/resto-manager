@@ -232,7 +232,7 @@ function RestaurantRegisterPage() {
         .unwrap();
       clearRegistration();
       setShowProgress(false);
-      navigate("/owner/pending", { replace: true });
+      navigate("/owner/status", { replace: true });
     } catch {
       // The rejection is presented by toast.promise.
       if (registrationSucceeded) {
