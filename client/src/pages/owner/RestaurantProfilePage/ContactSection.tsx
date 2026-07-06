@@ -25,7 +25,7 @@ export default function ContactSection() {
         </div>
       </div>
 
-      <div className="grid gap-5 md:grid-cols-2">
+      <div className="grid gap-5">
         <div className="rounded-2xl border bg-background/60 p-4">
           <div className="mb-4 flex items-center gap-2 text-sm font-medium text-foreground">
             <Phone className="h-4 w-4 text-muted-foreground" />

@@ -103,8 +103,10 @@ export default function OwnerRestaurantProfilePage() {
       <FormProvider {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <BrandIdentitySection />
-          <GeneralInfoSection />
-          <ContactSection />
+          <div className="grid grid-cols-2 gap-6 max-xl:grid-cols-1">
+            <GeneralInfoSection />
+            <ContactSection />
+          </div>
           <AddressSection />
           <OpeningHoursSection />
 
