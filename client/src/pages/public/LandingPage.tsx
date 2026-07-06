@@ -11,7 +11,7 @@ import { Link } from "react-router-dom";
 
 export default function LandingPage() {
   return (
-    <div className="w-full min-h-screen bg-background text-on-background selection:bg-primary selection:text-white flex flex-col font-sans">
+    <div className="w-full min-h-screen bg-background text-on-background flex flex-col font-sans">
       {/* Hero Section */}
       <section
         className="relative overflow-hidden pt-12 pb-24 px-4 md:px-12"
@@ -302,7 +302,7 @@ export default function LandingPage() {
 
             {/* Feature 4: Staffing */}
             <div className="md:col-span-2 bg-slate-900 text-white p-6 md:p-8 rounded-[20px] shadow-sm relative overflow-hidden flex flex-col justify-between text-left">
-              <div className="absolute right-0 top-0 w-1/2 h-full opacity-10 bg-gradient-to-l from-emerald-500 to-transparent pointer-events-none"></div>
+              <div className="absolute right-0 top-0 w-1/2 h-full opacity-10 bg-linear-to-l from-emerald-500 to-transparent pointer-events-none"></div>
               <div className="relative z-10 md:w-1/2 space-y-4">
                 <div
                   className="w-12 h-12 bg-emerald-600 rounded-xl flex items-center justify-center text-white"
@@ -469,7 +469,7 @@ export default function LandingPage() {
           className="max-w-4xl mx-auto rounded-[32px] p-8 md:p-12 text-center text-white relative overflow-hidden bg-emerald-700"
           style={{ backgroundColor: "#008a66" }}
         >
-          <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none"></div>
+          <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] bg-size-[16px_16px] pointer-events-none"></div>
           <div className="relative z-10 space-y-8">
             <h2 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight">
               Ready to serve better?

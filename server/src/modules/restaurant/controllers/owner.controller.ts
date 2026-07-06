@@ -1,29 +1,14 @@
 import { NextFunction, Request, Response } from "express";
 import {
-  restaurantProfileUpdateSchema,
+  RestaurantProfileUpdateInput,
   restaurantRegistrationSchema,
 } from "@restomanager/validators";
 import { Restaurant } from "../restaurant.model.js";
 import { auth, authDb } from "@/lib/auth.js";
 import { getPublicFileUrl, uploadFileToSupabase } from "@/utils/storage.js";
 import { sendResponse } from "@/utils/sendResponse.js";
-
-type AuthedRequest = Request & {
-  auth?: {
-    user: {
-      id: string;
-      role?: string;
-    };
-  };
-};
-
-function createSlug(value: string) {
-  return value
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
+import { ObjectId } from "mongodb";
+import { createSlug } from "@/utils/createSlug.js";
 
 type RestaurantRegisterFiles = {
   logo?: Express.Multer.File[];
@@ -134,7 +119,7 @@ export const registerRestaurant = async (
     const ownerId = signUpResult.user.id;
 
     await authDb.collection("user").updateOne(
-      { id: ownerId },
+      { _id: new ObjectId(ownerId) },
       {
         $set: {
           role: "restaurant_owner",
@@ -219,7 +204,7 @@ export const getMyRestaurant = async (
 };
 
 export const updateMyRestaurant = async (
-  req: AuthedRequest,
+  req: AuthedRequest<{}, {}, RestaurantProfileUpdateInput>,
   res: Response,
   next: NextFunction,
 ) => {
@@ -228,16 +213,18 @@ export const updateMyRestaurant = async (
 
     if (!ownerId) {
       return res.status(401).json({
+        success: false,
         message: "Unauthorized",
       });
     }
 
-    const input = restaurantProfileUpdateSchema.parse(req.body);
+    const input = req.body;
 
     const restaurant = await Restaurant.findOne({ ownerId });
 
     if (!restaurant) {
       return res.status(404).json({
+        success: false,
         message: "Restaurant not found",
       });
     }
@@ -252,6 +239,7 @@ export const updateMyRestaurant = async (
 
       if (slugExists) {
         return res.status(409).json({
+          success: false,
           message: "Restaurant slug already exists",
         });
       }
@@ -259,25 +247,68 @@ export const updateMyRestaurant = async (
       restaurant.slug = nextSlug;
     }
 
-    if (input.name !== undefined) restaurant.name = input.name;
-    if (input.description !== undefined)
-      restaurant.description = input.description;
-    if (input.logoUrl !== undefined) restaurant.logoUrl = input.logoUrl;
-    if (input.bannerUrl !== undefined) restaurant.bannerUrl = input.bannerUrl;
-    if (input.contact !== undefined) {
-      restaurant.contact = input.contact;
+    if (input.name !== undefined) {
+      restaurant.name = input.name;
     }
-    if (input.address !== undefined) restaurant.address = input.address;
-    if (input.openingHours !== undefined)
-      restaurant.openingHours = input.openingHours;
-    if (input.cuisineTypes !== undefined)
+
+    if (input.description !== undefined) {
+      restaurant.description = input.description;
+    }
+
+    if (input.logoUrl !== undefined) {
+      restaurant.logoUrl = input.logoUrl;
+    }
+
+    if (input.bannerUrl !== undefined) {
+      restaurant.bannerUrl = input.bannerUrl;
+    }
+
+    // Update contact fields partially
+    if (input.contact?.phone !== undefined) {
+      restaurant.set("contact.phone", input.contact.phone);
+    }
+
+    if (input.contact?.email !== undefined) {
+      restaurant.set("contact.email", input.contact.email);
+    }
+
+    // Update address fields partially
+    if (input.address?.city !== undefined) {
+      restaurant.set("address.city", input.address.city);
+    }
+
+    if (input.address?.street !== undefined) {
+      restaurant.set("address.street", input.address.street);
+    }
+
+    if (input.address?.building !== undefined) {
+      restaurant.set("address.building", input.address.building);
+    }
+
+    if (input.address?.floor !== undefined) {
+      restaurant.set("address.floor", input.address.floor);
+    }
+
+    if (input.address?.locationUrl !== undefined) {
+      restaurant.set("address.locationUrl", input.address.locationUrl);
+    }
+
+    // These are full replacements, and that is okay
+    if (input.openingHours !== undefined) {
+      restaurant.openingHours =
+        input.openingHours as typeof restaurant.openingHours;
+    }
+
+    if (input.cuisineTypes !== undefined) {
       restaurant.cuisineTypes = input.cuisineTypes;
+    }
 
     await restaurant.save();
 
     res.status(200).json({
+      success: true,
       message: "Restaurant updated successfully",
-      restaurant,
+      data: restaurant,
     });
   } catch (error) {
     next(error);
@@ -326,6 +357,50 @@ export const toggleMyRestaurantOpenStatus = async (
     res.status(200).json({
       message: isOpen ? "Restaurant is now open" : "Restaurant is now closed",
       restaurant,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getOwnerRestaurantStatus = async (
+  req: AuthedRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const ownerId = req.auth?.user?.id;
+
+    if (!ownerId) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+
+    const restaurant = await Restaurant.findOne({ ownerId }).select(
+      "name slug status verification createdAt updatedAt",
+    );
+
+    if (!restaurant) {
+      return res.status(404).json({
+        success: false,
+        message: "Restaurant registration was not found.",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Restaurant status fetched successfully.",
+      data: {
+        restaurantId: restaurant._id,
+        name: restaurant.name,
+        slug: restaurant.slug,
+        status: restaurant.status,
+        rejectionReason: restaurant.verification?.rejectionReason ?? null,
+        createdAt: restaurant.createdAt,
+        updatedAt: restaurant.updatedAt,
+      },
     });
   } catch (error) {
     next(error);

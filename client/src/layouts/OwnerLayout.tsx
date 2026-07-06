@@ -28,10 +28,16 @@
  * ACTIVE LINK HIGHLIGHTING:
  *   We use NavLink (not Link) so React Router automatically sets
  *   isActive=true when the current URL matches the link's `to` prop.
- *   We use this to apply the green highlight style to the active item.
+ *   We use this to apply the primary highlight style to the active item.
  *
  *   The `end` prop on Dashboard means it only activates on EXACT
  *   /owner/dashboard — without it, it would highlight on ALL /owner/* URLs.
+ *
+ * THEMING:
+ *   All colors reference the CSS variables defined in index.css
+ *   (--background, --foreground, --primary, --border, --muted, etc.)
+ *   rather than hardcoded hex values, so a palette change in index.css
+ *   propagates here automatically.
  *
  * EXTENDING THE SIDEBAR:
  *   To add a new page, just add a new entry to the NAV_ITEMS array below.
@@ -60,7 +66,7 @@ export default function OwnerLayout() {
   const user = session?.user;
 
   return (
-    <div className="min-h-screen flex bg-[#F8FAF9] text-[#0F172A]">
+    <div className="min-h-screen flex bg-background text-foreground">
 
       {/* ================================================================
           LEFT SIDEBAR
@@ -69,14 +75,14 @@ export default function OwnerLayout() {
           - flex flex-col justify-between: pushes "View Public Site"
             link to the bottom of the sidebar
           ================================================================ */}
-      <aside className="w-64 shrink-0 bg-white border-r border-[#E2E8F0] flex flex-col justify-between p-6">
+      <aside className="w-64 shrink-0 bg-card border-r border-border flex flex-col justify-between p-6">
 
         {/* Top section: logo + nav links */}
         <div>
           {/* Brand logo — clicking it goes to owner dashboard */}
           <Link
             to="/owner/dashboard"
-            className="block mb-8 text-xl font-bold tracking-tight text-[#0F172A]"
+            className="block mb-8 text-xl font-bold tracking-tight text-foreground"
           >
             🍽 Owner Portal
           </Link>
@@ -92,8 +98,8 @@ export default function OwnerLayout() {
                   [
                     "flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors",
                     isActive
-                      ? "bg-[#DCFCE7] text-[#16A34A] font-semibold" // active: light green bg + green text
-                      : "text-slate-600 hover:bg-[#F1F5F9] hover:text-slate-900",
+                      ? "bg-primary/10 text-primary font-semibold" // active: primary highlight
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground",
                   ].join(" ")
                 }
               >
@@ -104,10 +110,10 @@ export default function OwnerLayout() {
         </div>
 
         {/* Bottom section: back to public site */}
-        <div className="pt-4 border-t border-[#E2E8F0]">
+        <div className="pt-4 border-t border-border">
           <Link
             to="/"
-            className="text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors"
+            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
           >
             ← View Public Site
           </Link>
@@ -122,14 +128,14 @@ export default function OwnerLayout() {
       <div className="flex-1 flex flex-col overflow-hidden">
 
         {/* Top bar — sticky within the main area */}
-        <header className="h-16 shrink-0 bg-white border-b border-[#E2E8F0] px-8 flex items-center justify-between">
-          <span className="font-semibold text-sm text-slate-700">Owner Control Panel</span>
+        <header className="h-16 shrink-0 bg-card border-b border-border px-8 flex items-center justify-between">
+          <span className="font-semibold text-sm text-foreground">Owner Control Panel</span>
 
           {/* User name + avatar */}
           <div className="flex items-center gap-2">
-            <span className="text-sm text-slate-500">{user?.name ?? "Owner"}</span>
+            <span className="text-sm text-muted-foreground">{user?.name ?? "Owner"}</span>
             <div
-              className="w-8 h-8 rounded-full bg-[#16A34A] text-white flex items-center justify-center text-sm font-bold select-none"
+              className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold select-none"
               title={user?.name ?? "Owner"}
             >
               {user?.name?.[0]?.toUpperCase() ?? "O"}

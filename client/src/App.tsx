@@ -1,144 +1,130 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
+import { Toaster } from "sonner";
 
-// Layouts
-import PublicLayout from "./layouts/PublicLayout";
-import CustomerLayout from "./layouts/CustomerLayout";
-import OwnerLayout from "./layouts/OwnerLayout";
-import AdminLayout from "./layouts/AdminLayout";
+import { MainLayout }      from "./components/layouts/MainLayout";
+import { DashboardLayout } from "./components/layouts/DashboardLayout";
+import { adminNavItems, ownerNavItems } from "./config/dashboard-navigation";
 
-// Route Guards
-import ProtectedRoute from "./routes/ProtectedRoute";
-import RoleRoute from "./routes/RoleRoute";
-import GuestRoute from "./routes/GuestRoute";
+import ProtectedRoute      from "./routes/ProtectedRoute";
+import RoleRoute           from "./routes/RoleRoute";
+import GuestRoute          from "./routes/GuestRoute";
+import RequireApprovedOwner from "./routes/RequireApprovedOwner";
 
-// Pages: Public
-import LandingPage from "./pages/public/LandingPage";
-
-// Pages: Auth
-import LoginPage from "./pages/auth/LoginPage";
-import CustomerSignUpPage from "./pages/auth/CustomerSignUpPage";
-import RestaurantRegisterPage from "./pages/auth/RestaurantRegisterPage";
-
-// Pages: Customer
-import RestaurantListingPage from "./pages/customer/RestaurantListingPage";
-import RestaurantMenuPage from "./pages/customer/RestaurantMenuPage";
-import MenuItemDetailsPage from "./pages/customer/MenuItemDetailsPage";
-import CartPage from "./pages/customer/CartPage";
-import CheckoutPage from "./pages/customer/CheckoutPage";
-import OrderConfirmationPage from "./pages/customer/OrderConfirmationPage";
-import CustomerProfilePage from "./pages/customer/CustomerProfilePage";
-import CustomerOrderHistoryPage from "./pages/customer/CustomerOrderHistoryPage";
-import CustomerOrderDetailsPage from "./pages/customer/CustomerOrderDetailsPage";
-
-// Pages: Owner
-import OwnerDashboardPage from "./pages/owner/OwnerDashboardPage";
-import RestaurantProfilePage from "./pages/owner/RestaurantProfilePage";
-import MenuManagementPage from "./pages/owner/MenuManagementPage";
-import AddMenuItemPage from "./pages/owner/AddMenuItemPage";
-import EditMenuItemPage from "./pages/owner/EditMenuItemPage";
-import OwnerOrdersPage from "./pages/owner/OwnerOrdersPage";
-import OwnerOrderDetailsPage from "./pages/owner/OwnerOrderDetailsPage";
-import OwnerSettingsPage from "./pages/owner/OwnerSettingsPage";
-
-// Pages: Admin
-import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
-import AdminRestaurantsPage from "./pages/admin/AdminRestaurantsPage";
-import AdminApprovalsPage from "./pages/admin/AdminApprovalsPage";
-import AdminRestaurantReviewPage from "./pages/admin/AdminRestaurantReviewPage";
-import AdminUsersPage from "./pages/admin/AdminUsersPage";
-import AdminOrdersPage from "./pages/admin/AdminOrdersPage";
-
-// Pages: Shared
+// Public
+import LandingPage             from "./pages/public/LandingPage";
+// Auth
+import LoginPage               from "./pages/auth/LoginPage";
+import CustomerSignUpPage      from "./pages/auth/CustomerSignUpPage";
+import RestaurantRegisterPage  from "./pages/auth/RestaurantRegisterPage";
+// Customer
+import RestaurantListingPage   from "./pages/customer/RestaurantListingPage";
+import RestaurantMenuPage      from "./pages/customer/RestaurantMenuPage";
+import MenuItemDetailsPage     from "./pages/customer/MenuItemDetailsPage";
+import CartPage                from "./pages/customer/CartPage";
+import CheckoutPage            from "./pages/customer/CheckoutPage";
+import OrderConfirmationPage   from "./pages/customer/OrderConfirmationPage";
+import CustomerProfilePage     from "./pages/customer/CustomerProfilePage";
+import CustomerOrderHistoryPage  from "./pages/customer/CustomerOrderHistoryPage";
+import CustomerOrderDetailsPage  from "./pages/customer/CustomerOrderDetailsPage";
+// Owner
+import OwnerDashboardPage      from "./pages/owner/OwnerDashboardPage";
+import RestaurantProfilePage   from "./pages/owner/RestaurantProfilePage";
+import MenuManagementPage      from "./pages/owner/MenuManagementPage";
+import AddMenuItemPage         from "./pages/owner/AddMenuItemPage";
+import EditMenuItemPage        from "./pages/owner/EditMenuItemPage";
+import OwnerOrdersPage         from "./pages/owner/OwnerOrdersPage";
+import OwnerOrderDetailsPage   from "./pages/owner/OwnerOrderDetailsPage";
+import OwnerPendingPage        from "./pages/owner/OwnerPendingPage";
+// Admin
+import AdminDashboardPage         from "./pages/admin/AdminDashboardPage";
+import AdminRestaurantsPage       from "./pages/admin/AdminRestaurantsPage";
+import AdminRestaurantReviewPage  from "./pages/admin/AdminRestaurantReviewPage";
+import AdminUsersPage             from "./pages/admin/AdminUsersPage";
+// Shared
 import NotFoundPage from "./pages/shared/NotFoundPage";
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Guest Routes */}
-        <Route
-          element={
-            <GuestRoute>
-              <PublicLayout />
-            </GuestRoute>
-          }
-        >
-          <Route path="/login" element={<LoginPage />} />
+
+        {/* ── Guest (redirects away if already logged in) ── */}
+        <Route element={<GuestRoute><MainLayout /></GuestRoute>}>
+          <Route path="/login"   element={<LoginPage />} />
           <Route path="/sign-up" element={<CustomerSignUpPage />} />
         </Route>
 
-        {/* Public & Customer Browsing Routes */}
-        <Route element={<PublicLayout />}>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/restaurant/register" element={<RestaurantRegisterPage />} />
-          <Route path="/restaurants" element={<RestaurantListingPage />} />
-          <Route path="/restaurants/:restaurantSlug" element={<RestaurantMenuPage />} />
+        {/* ── Public browsing ── */}
+        <Route element={<MainLayout />}>
+          <Route path="/"                                          element={<LandingPage />} />
+          <Route path="/restaurant/register"                       element={<RestaurantRegisterPage />} />
+          <Route path="/restaurants"                               element={<RestaurantListingPage />} />
+          <Route path="/restaurants/:restaurantSlug"               element={<RestaurantMenuPage />} />
           <Route path="/restaurants/:restaurantSlug/items/:itemSlug" element={<MenuItemDetailsPage />} />
         </Route>
 
-        {/* Protected Customer Routes */}
-        <Route
-          element={
-            <ProtectedRoute>
-              <RoleRoute allowedRoles={["customer"]}>
-                <CustomerLayout />
-              </RoleRoute>
-            </ProtectedRoute>
-          }
-        >
-          <Route path="/cart" element={<CartPage />} />
-          <Route path="/checkout" element={<CheckoutPage />} />
+        {/* ── Customer (authenticated) ── */}
+        <Route element={<ProtectedRoute><RoleRoute allowedRoles={["customer"]}><MainLayout /></RoleRoute></ProtectedRoute>}>
+          <Route path="/cart"                    element={<CartPage />} />
+          <Route path="/checkout"                element={<CheckoutPage />} />
           <Route path="/orders/success/:orderId" element={<OrderConfirmationPage />} />
-          <Route path="/profile" element={<CustomerProfilePage />} />
-          <Route path="/orders" element={<CustomerOrderHistoryPage />} />
-          <Route path="/orders/:orderId" element={<CustomerOrderDetailsPage />} />
+          <Route path="/profile"                 element={<CustomerProfilePage />} />
+          <Route path="/orders"                  element={<CustomerOrderHistoryPage />} />
+          <Route path="/orders/:orderId"         element={<CustomerOrderDetailsPage />} />
         </Route>
 
-        {/* Protected Owner Routes */}
-        <Route
-          element={
-            <ProtectedRoute>
-              <RoleRoute allowedRoles={["restaurant_owner"]}>
-                <OwnerLayout />
-              </RoleRoute>
-            </ProtectedRoute>
-          }
-        >
-          <Route path="/owner" element={<Navigate to="/owner/dashboard" replace />} />
-          <Route path="/owner/dashboard" element={<OwnerDashboardPage />} />
-          <Route path="/owner/profile" element={<RestaurantProfilePage />} />
-          <Route path="/owner/menu" element={<MenuManagementPage />} />
-          <Route path="/owner/menu/new" element={<AddMenuItemPage />} />
-          <Route path="/owner/menu/:menuItemId/edit" element={<EditMenuItemPage />} />
-          <Route path="/owner/orders" element={<OwnerOrdersPage />} />
-          <Route path="/owner/orders/:orderId" element={<OwnerOrderDetailsPage />} />
-          <Route path="/owner/settings" element={<OwnerSettingsPage />} />
+        {/* ── Owner (authenticated + role guard) ── */}
+        <Route element={<ProtectedRoute><RoleRoute allowedRoles={["restaurant_owner"]}><Outlet /></RoleRoute></ProtectedRoute>}>
+          <Route path="/owner/pending" element={<OwnerPendingPage />} />
+          <Route element={
+            <RequireApprovedOwner>
+              <DashboardLayout
+                title="Owner workspace"
+                subtitle="Manage your restaurant, menu, and customer orders."
+                navItems={ownerNavItems}
+                userRole="restaurant_owner"
+              />
+            </RequireApprovedOwner>
+          }>
+            <Route path="/owner"                       element={<Navigate to="/owner/dashboard" replace />} />
+            <Route path="/owner/dashboard"             element={<OwnerDashboardPage />} />
+            <Route path="/owner/profile"               element={<RestaurantProfilePage />} />
+            <Route path="/owner/menu"                  element={<MenuManagementPage />} />
+            <Route path="/owner/menu/new"              element={<AddMenuItemPage />} />
+            <Route path="/owner/menu/:menuItemId/edit" element={<EditMenuItemPage />} />
+            <Route path="/owner/orders"                element={<OwnerOrdersPage />} />
+            <Route path="/owner/orders/:orderId"       element={<OwnerOrderDetailsPage />} />
+          </Route>
         </Route>
 
-        {/* Protected Admin Routes */}
-        <Route
-          element={
-            <ProtectedRoute>
-              <RoleRoute allowedRoles={["admin"]}>
-                <AdminLayout />
-              </RoleRoute>
-            </ProtectedRoute>
-          }
-        >
-          <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
-          <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
-          <Route path="/admin/restaurants" element={<AdminRestaurantsPage />} />
-          <Route path="/admin/approvals" element={<AdminApprovalsPage />} />
-          <Route path="/admin/approvals/:restaurantId" element={<AdminRestaurantReviewPage />} />
-          <Route path="/admin/users" element={<AdminUsersPage />} />
-          <Route path="/admin/orders" element={<AdminOrdersPage />} />
+        {/* ── Admin (authenticated + role guard) ── */}
+        <Route element={
+          <ProtectedRoute>
+            <RoleRoute allowedRoles={["admin"]}>
+              <DashboardLayout
+                title="Admin workspace"
+                subtitle="Monitor and manage restaurants, users, and orders."
+                navItems={adminNavItems}
+                userRole="admin"
+              />
+            </RoleRoute>
+          </ProtectedRoute>
+        }>
+          <Route path="/admin"                               element={<Navigate to="/admin/dashboard" replace />} />
+          <Route path="/admin/dashboard"                     element={<AdminDashboardPage />} />
+          {/* All restaurants list with status filters */}
+          <Route path="/admin/restaurants"                   element={<AdminRestaurantsPage />} />
+          <Route path="/admin/restaurants/:restaurantId"     element={<AdminRestaurantReviewPage />} />
+          <Route path="/admin/users"                         element={<AdminUsersPage />} />
         </Route>
 
-        {/* Fallback Catch-All Route */}
-        <Route element={<PublicLayout />}>
+        {/* ── Catch-all ── */}
+        <Route element={<MainLayout />}>
           <Route path="*" element={<NotFoundPage />} />
         </Route>
+
       </Routes>
+      <Toaster richColors position="bottom-right" />
     </BrowserRouter>
   );
 }

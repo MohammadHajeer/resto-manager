@@ -58,7 +58,7 @@ export function TextField<TFieldValues extends FieldValues>({
             className="h-11 rounded-lg border-input bg-background px-3 shadow-none"
           />
           {fieldState.error && (
-            <p id={`${inputId}-error`} className="text-sm text-destructive">
+            <p id={`${inputId}-error`} className="text-xs text-destructive">
               {fieldState.error.message}
             </p>
           )}

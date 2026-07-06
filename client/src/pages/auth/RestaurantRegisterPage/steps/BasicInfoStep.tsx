@@ -4,9 +4,13 @@ import type { RestaurantRegisterFormValues } from "../types";
 
 type BasicInfoStepProps = {
   control: Control<RestaurantRegisterFormValues>;
+  disabled?: boolean;
 };
 
-export function BasicInfoStep({ control }: BasicInfoStepProps) {
+export function BasicInfoStep({
+  control,
+  disabled = false,
+}: BasicInfoStepProps) {
   return (
     <section className="animate-fade-in">
       <div className="mb-8">
@@ -25,6 +29,7 @@ export function BasicInfoStep({ control }: BasicInfoStepProps) {
           label="Full Name"
           placeholder="John Doe"
           required
+          disabled={disabled}
         />
         <TextField
           control={control}
@@ -33,6 +38,7 @@ export function BasicInfoStep({ control }: BasicInfoStepProps) {
           label="Email Address"
           placeholder="john@example.com"
           required
+          disabled={disabled}
         />
         <TextField
           control={control}
@@ -41,6 +47,7 @@ export function BasicInfoStep({ control }: BasicInfoStepProps) {
           label="Phone Number"
           placeholder="+1 (555) 000-0000"
           required
+          disabled={disabled}
         />
         <TextField
           control={control}
@@ -49,6 +56,7 @@ export function BasicInfoStep({ control }: BasicInfoStepProps) {
           label="Password"
           placeholder="At least 8 characters"
           required
+          disabled={disabled}
         />
         <TextField
           control={control}
@@ -58,6 +66,7 @@ export function BasicInfoStep({ control }: BasicInfoStepProps) {
           placeholder="Re-enter password"
           className="md:col-span-2"
           required
+          disabled={disabled}
         />
       </div>
     </section>

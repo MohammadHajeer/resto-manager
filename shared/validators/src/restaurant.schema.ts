@@ -102,7 +102,7 @@ export const restaurantProfileUpdateSchema = z.object({
     })
     .optional(),
 
-  address: restaurantAddressSchema.optional(),
+  address: restaurantAddressSchema.partial().optional(),
 
   openingHours: z.array(openingHourSchema).max(7).optional(),
 

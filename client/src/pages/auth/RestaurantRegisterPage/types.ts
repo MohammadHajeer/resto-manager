@@ -34,19 +34,21 @@ const optionalDocumentFileSchema = z
     message: "License must be a PDF or image file",
   })
   .refine((file) => !file || file.size <= MAX_DOCUMENT_SIZE, {
-    message: "License must be 10MB or smaller",
+    message: "Document must be 10MB or smaller",
   });
+
+const requiredDocumentFileSchema = optionalDocumentFileSchema.refine(
+  (file): boolean => file instanceof File,
+  { message: "This document is required" },
+);
 
 const restaurantRegisterBaseSchema = restaurantRegistrationSchema.extend({
   uploads: z.object({
     logo: optionalImageFileSchema,
     banner: optionalImageFileSchema,
-    businessLicense: optionalDocumentFileSchema,
+    businessLicense: requiredDocumentFileSchema,
+    ownerIdDocument: requiredDocumentFileSchema,
   }),
-  brandPrimaryColor: z
-    .string()
-    .regex(/^#[0-9a-fA-F]{6}$/, "Enter a valid hex color"),
-
 });
 
 export const restaurantRegisterFormSchema = z.preprocess((value) => {
@@ -83,13 +85,11 @@ export type PersistedRestaurantRegisterValues = Omit<
     logo: null;
     banner: null;
     businessLicense: null;
+    ownerIdDocument: null;
   };
 };
 
-export type RestaurantRegisterSubmitData = RestaurantRegistrationInput & {
-  uploads: RestaurantRegisterFormValues["uploads"];
-  brandPrimaryColor: string;
-};
+export type RestaurantRegisterSubmitData = RestaurantRegistrationInput;
 
 export const totalSteps = 4;
 
@@ -120,7 +120,7 @@ export const stepFields: Record<
     "uploads.logo",
     "uploads.banner",
     "uploads.businessLicense",
-    "brandPrimaryColor",
+    "uploads.ownerIdDocument",
   ],
   4: [],
 };
@@ -170,8 +170,8 @@ export const defaultValues: RestaurantRegisterFormValues = {
     logo: null,
     banner: null,
     businessLicense: null,
+    ownerIdDocument: null,
   },
-  brandPrimaryColor: "#00694d",
 };
 
 export function sanitizeForPersistence(
@@ -188,6 +188,7 @@ export function sanitizeForPersistence(
       logo: null,
       banner: null,
       businessLicense: null,
+      ownerIdDocument: null,
     },
   };
 }
@@ -250,7 +251,5 @@ export function toSubmitData(
     address: data.address,
     branding: data.branding,
     verification: data.verification,
-    uploads: data.uploads,
-    brandPrimaryColor: data.brandPrimaryColor,
   };
 }

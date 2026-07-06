@@ -50,6 +50,10 @@ export function ReviewStep({ values }: ReviewStepProps) {
             label="Business License"
             value={values.uploads.businessLicense?.name}
           />
+          <ReviewItem
+            label="Owner ID Document"
+            value={values.uploads.ownerIdDocument?.name}
+          />
         </dl>
     </section>
   );

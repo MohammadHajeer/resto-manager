@@ -29,13 +29,18 @@ const categorySchema = new Schema(
       default: "",
       maxlength: 300,
     },
+
+    isActive: {
+      type: Boolean,
+      default: true,
+      index: true,
+    },
   },
   {
     timestamps: true,
   },
 );
 
-categorySchema.index({ restaurantId: 1 });
 categorySchema.index({ restaurantId: 1, slug: 1 }, { unique: true });
 
 type CategoryDocument = InferSchemaType<typeof categorySchema> & {

@@ -1,180 +1,215 @@
+import { AlertCircle, ArrowRight, Clock3, RefreshCw, ShieldCheck } from "lucide-react";
+import { Link, useSearchParams } from "react-router-dom";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
-import { useNavigate } from "react-router-dom";
+import { DataTable, type DataTableColumn } from "@/components/common/DataTable";
+import { Pagination } from "@/components/common/Pagination";
+import { Button } from "@/components/ui/button";
+import { queryKeys } from "@/lib/queryKeys";
+import { adminService, type PendingRestaurant } from "@/services/admin.service";
+import RestaurantStatusBadge from "./AdminRestaurantsPage/RestaurantStatusBadge";
 
-// ---------------------------------------------------------------------------
-// TYPES
-// ---------------------------------------------------------------------------
+// ── helpers ────────────────────────────────────────────────────────────────
 
-interface PendingRestaurant {
-  id: string;
-  name: string;
-  ownerName: string;
-  ownerEmail: string;
-  submittedAt: string; // ISO date string
+const dateFormatter = new Intl.DateTimeFormat("en-US", {
+  year: "numeric", month: "short", day: "numeric",
+});
+
+function formatDate(value: string) {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? "—" : dateFormatter.format(date);
 }
 
-// ---------------------------------------------------------------------------
-// MOCK DATA
-// Replace this with a real API call in a future ticket.
-// ---------------------------------------------------------------------------
-const MOCK_PENDING: PendingRestaurant[] = [
-  {
-    id: "rest-001",
-    name: "Al Sham Restaurant",
-    ownerName: "Khalid Mansour",
-    ownerEmail: "khalid@alsham.com",
-    submittedAt: "2026-06-28T10:15:00Z",
-  },
-  {
-    id: "rest-002",
-    name: "Pizza Palace",
-    ownerName: "Sara Haddad",
-    ownerEmail: "sara@pizzapalace.com",
-    submittedAt: "2026-06-29T14:40:00Z",
-  },
-  {
-    id: "rest-003",
-    name: "Burger Boutique",
-    ownerName: "Omar Khalil",
-    ownerEmail: "omar@burgerboutique.com",
-    submittedAt: "2026-06-30T09:05:00Z",
-  },
-];
-
-// ---------------------------------------------------------------------------
-// HELPERS
-// ---------------------------------------------------------------------------
-
-/** Formats an ISO date string into a readable date, e.g. "Jun 28, 2026" */
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
+function relativeLabel(iso: string): { text: string; cls: string } {
+  const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
+  if (days === 0) return { text: "Today",     cls: "text-primary font-medium" };
+  if (days === 1) return { text: "Yesterday", cls: "text-muted-foreground" };
+  return            { text: `${days}d ago`,   cls: "text-destructive font-medium" };
 }
 
-// ---------------------------------------------------------------------------
-// COMPONENT
-// ---------------------------------------------------------------------------
+function parsePositiveInt(value: string | null, fallback: number) {
+  const n = Number(value);
+  return Number.isInteger(n) && n > 0 ? n : fallback;
+}
+
+// ── stat card ──────────────────────────────────────────────────────────────
+
+function StatCard({ label, value, highlight = false }: {
+  label: string; value: string | number; highlight?: boolean;
+}) {
+  return (
+    <div className="rounded-md border border-border bg-card px-5 py-4 shadow-sm">
+      <p className="text-sm text-muted-foreground">{label}</p>
+      <p className={`mt-1 text-2xl font-bold ${highlight ? "text-primary" : "text-foreground"}`}>
+        {value}
+      </p>
+    </div>
+  );
+}
+
+// ── component ──────────────────────────────────────────────────────────────
 
 export default function AdminApprovalsPage() {
-  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const page  = parsePositiveInt(searchParams.get("page"),  1);
+  const limit = parsePositiveInt(searchParams.get("limit"), 10);
 
-  const pending = MOCK_PENDING; // TODO: replace with API data
+  const { data, isLoading, isError, isFetching, refetch } = useQuery({
+    queryKey: queryKeys.admin.restaurants.list({ page, limit, status: "pending" }),
+    queryFn: () => adminService.getAdminRestaurants({ page, limit, status: "pending" }),
+    placeholderData: keepPreviousData,
+  });
+
+  const restaurants = data?.restaurants ?? [];
+  const pagination  = data?.pagination;
+
+  const columns: DataTableColumn<PendingRestaurant>[] = [
+    {
+      key: "restaurant",
+      header: "Restaurant Name",
+      render: (r) => (
+        <div className="flex items-center gap-3">
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-primary/10 text-sm font-bold text-primary">
+            {r.name[0]?.toUpperCase() ?? "R"}
+          </span>
+          <div className="min-w-0">
+            <p className="font-semibold text-foreground truncate max-w-48">{r.name}</p>
+            <p className="text-xs text-muted-foreground">{r.owner?.email ?? "—"}</p>
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: "owner",
+      header: "Owner",
+      render: (r) => (
+        <div>
+          <p className="font-medium text-foreground">{r.owner?.name ?? "—"}</p>
+          <p className="text-xs text-muted-foreground">{r.owner?.email ?? "—"}</p>
+        </div>
+      ),
+    },
+    {
+      key: "submitted",
+      header: "Submitted",
+      render: (r) => {
+        const rel = relativeLabel(r.createdAt);
+        return (
+          <div>
+            <p className="text-foreground">{formatDate(r.createdAt)}</p>
+            <p className={`text-xs ${rel.cls}`}>{rel.text}</p>
+          </div>
+        );
+      },
+      cellClassName: "whitespace-nowrap",
+    },
+    {
+      key: "status",
+      header: "Status",
+      render: (r) => <RestaurantStatusBadge status={r.status} />,
+    },
+    {
+      key: "action",
+      header: <span className="sr-only">Action</span>,
+      headerClassName: "text-right",
+      cellClassName: "text-right",
+      render: (r) => (
+        <Link to={`/admin/restaurants/${r._id}`}>
+          <Button type="button" size="xs" className="rounded-md">
+            Review <ArrowRight aria-hidden="true" />
+          </Button>
+        </Link>
+      ),
+    },
+  ];
+
+  const handlePageChange = (nextPage: number) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.set("page",  String(nextPage));
+      next.set("limit", String(limit));
+      return next;
+    });
+  };
 
   return (
     <div className="space-y-6">
 
       {/* ── PAGE HEADER ── */}
-      <div>
-        <h1 className="text-xl font-bold text-[#0F172A]">Pending Approvals</h1>
-        <p className="mt-1 text-sm text-[#6B7280]">
-          Review and approve or reject new restaurant registration requests.
-        </p>
-      </div>
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+            Restaurant Approvals
+          </h1>
+          <p className="mt-1 max-w-2xl text-sm leading-6 text-muted-foreground">
+            Review and manage pending merchant submissions to the RestoManager network.
+          </p>
+        </div>
 
-      {/* ── SUMMARY BADGE ── */}
-      <div className="inline-flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-700 text-sm font-medium px-3 py-1.5 rounded-full">
-        {/* Clock icon */}
-        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <circle cx="12" cy="12" r="10" />
-          <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6l4 2" />
-        </svg>
-        {pending.length === 0
-          ? "No pending requests"
-          : `${pending.length} request${pending.length !== 1 ? "s" : ""} awaiting review`}
-      </div>
-
-      {/* ── TABLE CARD ── */}
-      <div className="bg-white border border-[#E2E8F0] rounded-xl overflow-hidden">
-
-        {pending.length === 0 ? (
-          // ── EMPTY STATE ──
-          <div className="flex flex-col items-center justify-center py-20 text-center px-6">
-            {/* Checkmark icon */}
-            <div className="w-12 h-12 rounded-full bg-[#DCFCE7] flex items-center justify-center mb-4">
-              <svg className="w-6 h-6 text-[#16A34A]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-            <h2 className="text-base font-semibold text-[#0F172A]">All caught up!</h2>
-            <p className="mt-1 text-sm text-[#6B7280] max-w-xs">
-              There are no pending restaurant registrations right now.
-            </p>
-          </div>
-
-        ) : (
-          // ── TABLE ──
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="bg-[#F8FAF9] border-b border-[#E2E8F0] text-left">
-                  <th className="px-5 py-3 font-semibold text-[#374151]">#</th>
-                  <th className="px-5 py-3 font-semibold text-[#374151]">Restaurant</th>
-                  <th className="px-5 py-3 font-semibold text-[#374151]">Owner</th>
-                  <th className="px-5 py-3 font-semibold text-[#374151]">Email</th>
-                  <th className="px-5 py-3 font-semibold text-[#374151]">Submitted</th>
-                  <th className="px-5 py-3 font-semibold text-[#374151]">Status</th>
-                  <th className="px-5 py-3 font-semibold text-[#374151]">Action</th>
-                </tr>
-              </thead>
-
-              <tbody className="divide-y divide-[#E2E8F0]">
-                {pending.map((restaurant, index) => (
-                  <tr
-                    key={restaurant.id}
-                    className="hover:bg-[#F8FAF9] transition-colors"
-                  >
-                    {/* Row number */}
-                    <td className="px-5 py-4 text-[#6B7280]">{index + 1}</td>
-
-                    {/* Restaurant name */}
-                    <td className="px-5 py-4 font-medium text-[#0F172A]">
-                      {restaurant.name}
-                    </td>
-
-                    {/* Owner name */}
-                    <td className="px-5 py-4 text-[#374151]">
-                      {restaurant.ownerName}
-                    </td>
-
-                    {/* Owner email */}
-                    <td className="px-5 py-4 text-[#6B7280]">
-                      {restaurant.ownerEmail}
-                    </td>
-
-                    {/* Date submitted */}
-                    <td className="px-5 py-4 text-[#6B7280]">
-                      {formatDate(restaurant.submittedAt)}
-                    </td>
-
-                    {/* Status badge — always "Pending" on this page */}
-                    <td className="px-5 py-4">
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">
-                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                        Pending
-                      </span>
-                    </td>
-
-                    {/* Review button — navigates to the detail review page */}
-                    <td className="px-5 py-4">
-                      <button
-                        onClick={() =>
-                          navigate(`/admin/approvals/${restaurant.id}`)
-                        }
-                        className="px-4 py-1.5 rounded-md bg-[#16A34A] text-white text-xs font-semibold hover:bg-[#15803D] transition-colors"
-                      >
-                        Review →
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        {!isLoading && !isError && (
+          <div className="inline-flex w-fit items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 text-sm font-medium text-muted-foreground shadow-sm">
+            <Clock3 className="size-4" aria-hidden="true" />
+            <span>{pagination?.total ?? restaurants.length} pending</span>
           </div>
         )}
+      </header>
+
+      {/* ── STATS ROW ── */}
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <StatCard label="Pending Reviews"    value={isLoading ? "—" : (pagination?.total ?? 0)} highlight />
+        <StatCard label="Avg. Response Time" value="4.2 hrs" />
+        <StatCard label="Page"               value={`${page} / ${pagination?.totalPages ?? 1}`} />
+        <StatCard label="Per Page"           value={limit} />
       </div>
+
+      {/* ── ERROR STATE ── */}
+      {isError && (
+        <section className="rounded-md border border-destructive/20 bg-destructive/5 px-6 py-10 text-center">
+          <AlertCircle className="mx-auto size-8 text-destructive" aria-hidden="true" />
+          <h2 className="mt-3 text-base font-semibold text-foreground">
+            Failed to load pending restaurants
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Check your connection and try again.
+          </p>
+          <Button type="button" variant="outline" onClick={() => refetch()} className="mt-5 rounded-md">
+            <RefreshCw aria-hidden="true" /> Try again
+          </Button>
+        </section>
+      )}
+
+      {/* ── TABLE ── */}
+      {!isError && (
+        <>
+          <DataTable
+            data={restaurants}
+            columns={columns}
+            getRowKey={(r) => r._id}
+            emptyMessage="No pending restaurant registrations right now."
+            isLoading={isLoading}
+            loadingRows={5}
+          />
+
+          {pagination && (
+            <Pagination
+              pagination={pagination}
+              onPageChange={handlePageChange}
+              disabled={isFetching}
+            />
+          )}
+        </>
+      )}
+
+      {/* ── EMPTY ICON when all caught up ── */}
+      {!isLoading && !isError && restaurants.length === 0 && (
+        <div className="flex flex-col items-center justify-center py-10 text-center">
+          <ShieldCheck className="size-10 text-primary" aria-hidden="true" />
+          <p className="mt-3 text-base font-semibold text-foreground">All caught up!</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            No pending registrations at the moment.
+          </p>
+        </div>
+      )}
     </div>
   );
 }

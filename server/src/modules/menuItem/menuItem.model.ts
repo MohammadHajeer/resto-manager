@@ -83,14 +83,17 @@ const menuItemSchema = new Schema(
       default: true,
       index: true,
     },
+    deletedAt: {
+      type: Date,
+      default: null,
+      index: true,
+    },
   },
   {
     timestamps: true,
   },
 );
 
-menuItemSchema.index({ restaurantId: 1 });
-menuItemSchema.index({ categoryId: 1 });
 menuItemSchema.index({ restaurantId: 1, slug: 1 }, { unique: true });
 menuItemSchema.index({ name: "text", description: "text" });
 

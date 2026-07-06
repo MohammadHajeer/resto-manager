@@ -1,5 +1,3 @@
-
-
 import { NavLink, Link, Outlet } from "react-router-dom";
 import { authClient } from "../lib/auth-client";
 
@@ -9,18 +7,18 @@ export default function CustomerLayout() {
   const user = session?.user;
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#F8FAF9] text-[#0F172A]">
+    <div className="min-h-screen flex flex-col bg-background text-foreground">
 
       {/* ================================================================
           TOP NAVBAR
           ================================================================ */}
-      <header className="sticky top-0 z-50 bg-white border-b border-[#E2E8F0] h-16">
+      <header className="sticky top-0 z-50 bg-card border-b border-border h-16">
         <div className="max-w-6xl mx-auto px-6 h-full flex items-center justify-between gap-6">
 
           {/* Brand — links back to public home */}
           <Link
             to="/"
-            className="font-bold text-lg tracking-tight text-[#0F172A] shrink-0"
+            className="font-bold text-lg tracking-tight text-foreground shrink-0"
           >
             🍽 RestoManager
           </Link>
@@ -31,8 +29,8 @@ export default function CustomerLayout() {
               to="/restaurants"
               className={({ isActive }) =>
                 isActive
-                  ? "text-[#16A34A] font-semibold"
-                  : "text-slate-500 hover:text-slate-900 transition-colors"
+                  ? "text-primary font-semibold"
+                  : "text-muted-foreground hover:text-foreground transition-colors"
               }
             >
               Browse
@@ -42,8 +40,8 @@ export default function CustomerLayout() {
               to="/orders"
               className={({ isActive }) =>
                 isActive
-                  ? "text-[#16A34A] font-semibold"
-                  : "text-slate-500 hover:text-slate-900 transition-colors"
+                  ? "text-primary font-semibold"
+                  : "text-muted-foreground hover:text-foreground transition-colors"
               }
             >
               My Orders
@@ -53,8 +51,8 @@ export default function CustomerLayout() {
               to="/profile"
               className={({ isActive }) =>
                 isActive
-                  ? "text-[#16A34A] font-semibold"
-                  : "text-slate-500 hover:text-slate-900 transition-colors"
+                  ? "text-primary font-semibold"
+                  : "text-muted-foreground hover:text-foreground transition-colors"
               }
             >
               Profile
@@ -72,7 +70,7 @@ export default function CustomerLayout() {
             */}
             <Link
               to="/cart"
-              className="relative p-2 rounded-md hover:bg-slate-100 text-slate-600 transition-colors"
+              className="relative p-2 rounded-md hover:bg-muted text-muted-foreground transition-colors"
               aria-label="View cart"
             >
               {/* Shopping cart SVG icon (inline — no external dependency needed) */}
@@ -92,14 +90,14 @@ export default function CustomerLayout() {
               </svg>
 
               {/* Badge — TODO: replace 0 with real cart item count */}
-              <span className="absolute -top-1 -right-1 bg-[#16A34A] text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+              <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
                 0
               </span>
             </Link>
 
-            {/* User avatar — first letter of name in a green circle */}
+            {/* User avatar — first letter of name in a primary-colored circle */}
             <div
-              className="w-8 h-8 rounded-full bg-[#16A34A] text-white flex items-center justify-center text-sm font-bold select-none"
+              className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold select-none"
               title={user?.name ?? "Customer"}
             >
               {user?.name?.[0]?.toUpperCase() ?? "C"}

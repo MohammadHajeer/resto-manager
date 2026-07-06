@@ -1,10 +1,10 @@
 import { z } from "zod";
-import { objectIdSchema, shortDescriptionSchema, slugSchema, } from "./common.schema.js";
+import { objectIdSchema, shortDescriptionSchema, } from "./common.schema.js";
 export const createCategorySchema = z.object({
     restaurantId: objectIdSchema.optional(),
     name: z.string().trim().min(2, "Category name is required").max(60),
-    slug: slugSchema.optional(),
     description: shortDescriptionSchema.optional().or(z.literal("")),
+    isActive: z.boolean().optional(),
 });
 export const updateCategorySchema = createCategorySchema
     .omit({ restaurantId: true })
