@@ -1,6 +1,7 @@
 import { api } from "@/lib/axios";
 import type {
   GetPublicRestaurantsParams,
+  PublicRestaurantSlug,
   PublicRestaurantsResponse,
   RestaurantFilterOptionsResponse,
 } from "./public.types";
@@ -38,5 +39,17 @@ export const publicService = {
       restaurants: response.data.data,
       pagination: response.data.pagination,
     };
+  },
+
+  getRestaurantBySlug: async (
+    slug: string,
+    category?: string | null,
+  ): Promise<PublicRestaurantSlug> => {
+    const response = await api.get(`${endpoint}/${slug}`, {
+      params: {
+        category: category ?? undefined,
+      },
+    });
+    return response.data.data;
   },
 };

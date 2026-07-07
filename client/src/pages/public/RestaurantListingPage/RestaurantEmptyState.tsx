@@ -4,10 +4,12 @@ import { Button } from "@/components/ui/button";
 
 type RestaurantEmptyStateProps = {
   onReset: () => void;
+  refetch: () => void;
 };
 
 export function RestaurantEmptyState({
   onReset,
+  refetch,
 }: RestaurantEmptyStateProps) {
   return (
     <section className="rounded-md border border-border bg-card px-6 py-14 text-center">
@@ -28,6 +30,14 @@ export function RestaurantEmptyState({
         onClick={onReset}
       >
         Reset filters
+      </Button>
+      <Button
+        type="button"
+        variant="outline"
+        className="mt-5 rounded-full"
+        onClick={refetch}
+      >
+        Refresh
       </Button>
     </section>
   );

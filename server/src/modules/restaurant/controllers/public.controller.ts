@@ -114,12 +114,13 @@ export const getPublicRestaurants = async (
 };
 
 export const getPublicRestaurantBySlug = async (
-  req: Request<{ slug: string }>,
+  req: Request<{ slug: string }, unknown, unknown, { category?: string }>,
   res: Response,
   next: NextFunction,
 ) => {
   try {
     const { slug } = req.params;
+    const selectedCategorySlug = req.query.category?.trim();
 
     const restaurant = await Restaurant.findOne({
       slug,
@@ -145,40 +146,55 @@ export const getPublicRestaurantBySlug = async (
 
     const categoryIds = categories.map((category) => category._id);
 
-    const menuItems = await MenuItem.find({
+    const selectedCategory = selectedCategorySlug
+      ? categories.find((category) => category.slug === selectedCategorySlug)
+      : null;
+
+    if (selectedCategorySlug && !selectedCategory) {
+      return res.status(404).json({
+        success: false,
+        message: "Category not found for this restaurant",
+      });
+    }
+
+    const menuItemFilter = {
       restaurantId: restaurant._id,
-      categoryId: { $in: categoryIds },
+      categoryId: selectedCategory
+        ? selectedCategory._id
+        : { $in: categoryIds },
       isAvailable: true,
       deletedAt: null,
-    })
+    };
+
+    const categoryNameById = new Map(
+      categories.map((category) => [String(category._id), category.name]),
+    );
+
+    const menuItems = await MenuItem.find(menuItemFilter)
       .select(
         "_id categoryId name slug description price imageUrl ingredients availableAddons isAvailable",
       )
       .sort({ createdAt: -1 })
       .lean();
 
-    const menuItemsByCategoryId = new Map<string, typeof menuItems>();
+    const menuItemsWithCategoryName = menuItems.map((menuItem) => {
+      const { categoryId, ...restMenuItem } = menuItem;
 
-    for (const menuItem of menuItems) {
-      const categoryId = menuItem.categoryId.toString();
-
-      const existingItems = menuItemsByCategoryId.get(categoryId) ?? [];
-      existingItems.push(menuItem);
-
-      menuItemsByCategoryId.set(categoryId, existingItems);
-    }
-
-    const categoriesWithMenuItems = categories.map((category) => ({
-      ...category,
-      menuItems: menuItemsByCategoryId.get(category._id.toString()) ?? [],
-    }));
+      return {
+        ...restMenuItem,
+        categoryName:
+          categoryNameById.get(String(categoryId)) ?? "Uncategorized",
+      };
+    });
 
     sendResponse(res, 200, {
       success: true,
       message: "Restaurant fetched successfully",
       data: {
         restaurant,
-        categories: categoriesWithMenuItems,
+        categories,
+        menuItems: menuItemsWithCategoryName,
+        totalItems: menuItems.length,
       },
     });
   } catch (error) {
@@ -186,7 +202,7 @@ export const getPublicRestaurantBySlug = async (
   }
 };
 
-export const getPublicRestaurantFilterOptions = async (
+export const getPublicRestaurantsFilterOptions = async (
   _req: Request,
   res: Response,
   next: NextFunction,

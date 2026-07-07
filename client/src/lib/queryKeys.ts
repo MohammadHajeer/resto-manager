@@ -36,6 +36,17 @@ export const queryKeys = {
         ] as const,
 
       filterOptions: ["public", "restaurants", "filter-options"] as const,
+
+      slug: (slug: string, category?: string | null) =>
+        [
+          "public",
+          "restaurants",
+          "slug",
+          slug,
+          {
+            category: category ?? "all",
+          },
+        ] as const,
     },
   },
   admin: {

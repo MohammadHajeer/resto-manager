@@ -1,10 +1,10 @@
 import { ImageIcon } from "lucide-react";
 
-import type { MockMenuItem } from "./mockMenuData";
+import type { PublicMenuItem } from "@/services/public/public.types";
 
 type MenuItemCardProps = {
-  item: MockMenuItem;
-  onSelect: (item: MockMenuItem) => void;
+  item: PublicMenuItem;
+  onSelect: (item: PublicMenuItem) => void;
 };
 
 export function MenuItemCard({ item, onSelect }: MenuItemCardProps) {
@@ -15,7 +15,7 @@ export function MenuItemCard({ item, onSelect }: MenuItemCardProps) {
       className="group flex h-full w-full flex-col overflow-hidden rounded-xl border border-border bg-card text-left text-card-foreground shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/30"
       aria-label={`View details for ${item.name}`}
     >
-      <div className="relative aspect-[16/10] w-full overflow-hidden bg-muted">
+      <div className="relative aspect-16/10 w-full overflow-hidden bg-muted">
         {item.imageUrl ? (
           <img
             src={item.imageUrl}
@@ -31,7 +31,7 @@ export function MenuItemCard({ item, onSelect }: MenuItemCardProps) {
           </div>
         )}
         <span className="absolute left-3 top-3 rounded-full border border-border bg-card/95 px-2.5 py-1 text-xs font-semibold text-foreground shadow-sm">
-          {item.category}
+          {item.categoryName}
         </span>
       </div>
 
@@ -40,9 +40,13 @@ export function MenuItemCard({ item, onSelect }: MenuItemCardProps) {
           <h2 className="font-heading text-base font-semibold text-foreground transition-colors group-hover:text-primary">
             {item.name}
           </h2>
-          <span className="shrink-0 font-semibold text-primary">${item.price.toFixed(2)}</span>
+          <span className="shrink-0 font-semibold text-primary">
+            ${item.price.toFixed(2)}
+          </span>
         </div>
-        <p className="mt-2 line-clamp-2 text-sm leading-6 text-muted-foreground">{item.description}</p>
+        <p className="mt-2 line-clamp-2 text-sm leading-6 text-muted-foreground">
+          {item.description}
+        </p>
         <span
           className={`mt-4 w-fit rounded-full px-2.5 py-1 text-xs font-semibold ${
             item.isAvailable

@@ -51,7 +51,7 @@ export default function RestaurantListingPage() {
   const cuisine = searchParams.getAll("cuisine");
   const onlyOpen = searchParams.get("onlyOpen") === "true";
 
-  const { data, isLoading, isFetching } = usePublicRestaurants({
+  const { data, isLoading, isFetching, refetch } = usePublicRestaurants({
     page,
     limit: RESTAURANTS_PER_PAGE,
     search,
@@ -115,6 +115,7 @@ export default function RestaurantListingPage() {
                 resetFilters();
               }
             }}
+            refetch={refetch}
           />
         ) : (
           <section
