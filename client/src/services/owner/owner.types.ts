@@ -140,6 +140,14 @@ export type OwnerMenuItem = {
   updatedAt: string;
 };
 
+export type OwnerCategorySection = {
+  _id: string;
+  name: string;
+  description?: string;
+  slug: string;
+  isActive: boolean;
+};
+
 export type OwnerMenuSection = {
   _id: string;
   name: string;

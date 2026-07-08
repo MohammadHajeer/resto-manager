@@ -1,5 +1,3 @@
-// src/services/owner/ownerMenuItems.service.ts
-
 import { api } from "@/lib/axios";
 import type {
   CreateMenuItemFormInput,

@@ -25,6 +25,10 @@ export const useCreateOwnerCategory = () => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.owner.categories,
       });
+
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.owner.menuList.all,
+      });
     },
   });
 };
@@ -44,6 +48,10 @@ export const useUpdateOwnerCategory = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.owner.categories,
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.owner.menuList.all,
       });
     },
   });
