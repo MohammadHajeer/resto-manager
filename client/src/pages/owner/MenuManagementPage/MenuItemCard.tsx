@@ -1,4 +1,4 @@
-import { ImageIcon, Pencil, Trash2 } from "lucide-react";
+import { ImageIcon, Pencil } from "lucide-react";
 
 import type { OwnerMenuItem } from "@/services/owner/owner.types";
 import { Button } from "@/components/ui/button";
@@ -47,22 +47,12 @@ export function MenuItemCard({ item, onEdit }: MenuItemCardProps) {
             <div className="flex items-center gap-2">
               <Button
                 type="button"
-                variant="ghost"
+                variant="outline"
                 size="icon"
                 onClick={onEdit}
                 className="size-8 rounded-full"
               >
                 <Pencil className="size-4" />
-              </Button>
-
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                // onClick={onDelete}
-                className="size-8 rounded-full text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-              >
-                <Trash2 className="size-4" />
               </Button>
             </div>
 

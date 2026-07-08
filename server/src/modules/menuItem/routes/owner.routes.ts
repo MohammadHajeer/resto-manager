@@ -8,18 +8,14 @@ import {
   restoreMenuItem,
   updateMenuItem,
 } from "../controllers/owner.controller.js";
-import { validate } from "@/middlewares/validate.middleware.js";
-import {
-  createMenuItemSchema,
-  updateMenuItemSchema,
-} from "@restomanager/validators";
+import { uploadMenuItemImage } from "@/middlewares/upload.middleware.js";
 
 const router = Router();
 
 router.get("/", getMyMenuItems);
-router.post("/", validate(createMenuItemSchema), createMenuItem);
+router.post("/", uploadMenuItemImage, createMenuItem);
 router.get("/:menuItemId", getMyMenuItemById);
-router.patch("/:menuItemId", validate(updateMenuItemSchema), updateMenuItem);
+router.patch("/:menuItemId", uploadMenuItemImage, updateMenuItem);
 router.delete("/:menuItemId", deleteMenuItem);
 router.patch("/:menuItemId/restore", restoreMenuItem);
 

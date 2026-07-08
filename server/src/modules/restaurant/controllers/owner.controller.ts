@@ -81,7 +81,7 @@ export const registerRestaurant = async (
     }
 
     const publicBucket =
-      process.env.SUPABASE_PUBLIC_BUCKET ?? "restaurant-images";
+      process.env.SUPABASE_PUBLIC_BUCKET ?? "restaurant-media";
 
     const privateBucket =
       process.env.SUPABASE_PRIVATE_BUCKET ?? "restaurant-documents";

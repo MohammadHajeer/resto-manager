@@ -12,7 +12,7 @@ type TextFieldProps<TFieldValues extends FieldValues> = {
   name: FieldPath<TFieldValues>;
   label: string;
   placeholder?: string;
-  type?: "text" | "email" | "tel" | "password" | "url" | "color";
+  type?: "text" | "email" | "tel" | "password" | "url" | "color" | "number";
   required?: boolean;
   disabled?: boolean;
   className?: string;
