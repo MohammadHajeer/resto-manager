@@ -9,6 +9,13 @@ import Router, { Request, Response, NextFunction } from "express";
 
 const router = Router();
 
+router.get("/health", (_req, res) => {
+  res.status(200).json({
+    status: "ok",
+    message: "Server is running",
+  });
+});
+
 router.use("/owner/restaurant", RestaurantOwnerRoutes);
 router.use(
   "/owner/categories",
