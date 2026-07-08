@@ -53,6 +53,8 @@ import AdminUsersPage from "./pages/admin/AdminUsersPage";
 
 // Pages: Shared
 import NotFoundPage from "./pages/shared/NotFoundPage";
+import AddMenuItemPage from "./pages/owner/AddMenuItemPage";
+import EditMenuItemPage from "./pages/owner/EditMenuItemPage";
 
 export default function App() {
   return (
@@ -142,6 +144,11 @@ export default function App() {
             <Route path="/owner/dashboard" element={<OwnerDashboardPage />} />
             <Route path="/owner/profile" element={<RestaurantProfilePage />} />
             <Route path="/owner/menu" element={<MenuManagementPage />} />
+            <Route path="/owner/menu/new" element={<AddMenuItemPage />} />
+            <Route
+              path="/owner/menu/:menuItemId/edit"
+              element={<EditMenuItemPage />}
+            />
             <Route path="/owner/orders" element={<OwnerOrdersPage />} />
             <Route
               path="/owner/orders/:orderId"
@@ -179,9 +186,7 @@ export default function App() {
         </Route>
 
         {/* Fallback Catch-All Route */}
-        <Route element={<MainLayout />}>
-          <Route path="*" element={<NotFoundPage />} />
-        </Route>
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
       <Toaster richColors position="bottom-right" />
     </BrowserRouter>

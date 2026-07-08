@@ -23,7 +23,6 @@ export const createMenuItemSchema = z.object({
   categoryId: objectIdSchema,
 
   name: z.string().trim().min(2, "Item name is required").max(100),
-  slug: slugSchema.optional(),
   description: shortDescriptionSchema,
   price: priceSchema,
   imageUrl: optionalUrlSchema,

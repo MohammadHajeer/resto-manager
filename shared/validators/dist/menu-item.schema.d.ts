@@ -8,7 +8,6 @@ export declare const createMenuItemSchema: z.ZodObject<{
     restaurantId: z.ZodOptional<z.ZodString>;
     categoryId: z.ZodString;
     name: z.ZodString;
-    slug: z.ZodOptional<z.ZodString>;
     description: z.ZodString;
     price: z.ZodCoercedNumber<unknown>;
     imageUrl: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodString, z.ZodLiteral<"">]>>>;
@@ -23,7 +22,6 @@ export declare const updateMenuItemSchema: z.ZodObject<{
     restaurantId: z.ZodOptional<z.ZodOptional<z.ZodString>>;
     categoryId: z.ZodOptional<z.ZodString>;
     name: z.ZodOptional<z.ZodString>;
-    slug: z.ZodOptional<z.ZodOptional<z.ZodString>>;
     description: z.ZodOptional<z.ZodString>;
     price: z.ZodOptional<z.ZodCoercedNumber<unknown>>;
     imageUrl: z.ZodOptional<z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodString, z.ZodLiteral<"">]>>>>;
