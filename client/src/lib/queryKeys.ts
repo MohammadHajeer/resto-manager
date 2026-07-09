@@ -1,6 +1,16 @@
+import type { CustomerOrderHistoryParams } from "@/services/customer/customer.types";
 import type { OwnerRestaurantMenuParams } from "@/services/owner/owner.types";
 
 export const queryKeys = {
+  admin: {
+    restaurants: {
+      all: ["admin", "restaurants"] as const,
+      list: (params: { page: number; limit: number; status?: string }) =>
+        ["admin", "restaurants", "list", params] as const,
+      detail: (restaurantId: string) =>
+        ["admin", "restaurants", restaurantId] as const,
+    },
+  },
   owner: {
     restaurantStatus: ["owner", "restaurant-status"] as const,
 
@@ -31,6 +41,19 @@ export const queryKeys = {
 
       detail: (orderId: string) =>
         [...queryKeys.owner.orders.all, "detail", orderId] as const,
+    },
+  },
+  customer: {
+    orders: {
+      all: ["customer", "orders"] as const,
+
+      current: () => [...queryKeys.customer.orders.all, "current"] as const,
+
+      history: (params?: CustomerOrderHistoryParams) =>
+        [...queryKeys.customer.orders.all, "history", params ?? {}] as const,
+
+      detail: (orderId: string) =>
+        [...queryKeys.customer.orders.all, "detail", orderId] as const,
     },
   },
   public: {
@@ -71,15 +94,6 @@ export const queryKeys = {
             category: category ?? "all",
           },
         ] as const,
-    },
-  },
-  admin: {
-    restaurants: {
-      all: ["admin", "restaurants"] as const,
-      list: (params: { page: number; limit: number; status?: string }) =>
-        ["admin", "restaurants", "list", params] as const,
-      detail: (restaurantId: string) =>
-        ["admin", "restaurants", restaurantId] as const,
     },
   },
 };
