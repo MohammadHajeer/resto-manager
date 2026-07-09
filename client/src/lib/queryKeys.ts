@@ -55,6 +55,14 @@ export const queryKeys = {
       detail: (orderId: string) =>
         [...queryKeys.customer.orders.all, "detail", orderId] as const,
     },
+    addresses: {
+      all: ["customer", "addresses"] as const,
+
+      list: () => [...queryKeys.customer.addresses.all, "list"] as const,
+
+      detail: (addressId: string) =>
+        [...queryKeys.customer.addresses.all, "detail", addressId] as const,
+    },
   },
   public: {
     restaurants: {

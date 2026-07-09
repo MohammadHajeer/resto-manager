@@ -1,4 +1,5 @@
 import { requireRole } from "@/middlewares/auth.middleware.js";
+import { CustomerAddressRoutes } from "@/modules/address/routes.js";
 import { CategoryOwnerRoutes } from "@/modules/category/routes/owner.routes.js";
 import { MenuItemOwnerRoutes } from "@/modules/menuItem/routes/owner.routes.js";
 import { CustomerOrderRoutes } from "@/modules/orders/routes/customer.routes.js";
@@ -34,6 +35,11 @@ router.use(
 router.use("/owner/orders", requireRole("restaurant_owner"), OwnerOrderRoutes);
 
 router.use("/customer/orders", requireRole("customer"), CustomerOrderRoutes);
+router.use(
+  "/customer/addresses",
+  requireRole("customer"),
+  CustomerAddressRoutes,
+);
 
 router.use("/restaurants", PublicRestaurantRoutes);
 

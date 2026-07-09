@@ -89,3 +89,35 @@ export type CustomerOrderHistoryResponse = {
     hasPreviousPage: boolean;
   };
 };
+
+//
+// Addresses
+//
+export type CustomerAddress = {
+  _id: string;
+  userId: string;
+
+  label: string;
+  city: string;
+  street: string;
+  building: string;
+  floor: string;
+  phoneNumber: string;
+
+  isDefault: boolean;
+
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CreateCustomerAddressInput = {
+  label: string;
+  city: string;
+  street: string;
+  building: string;
+  floor?: string;
+  phoneNumber: string;
+  isDefault?: boolean;
+};
+
+export type UpdateCustomerAddressInput = Partial<CreateCustomerAddressInput>;
