@@ -42,7 +42,6 @@ import OwnerDashboardPage from "./pages/owner/OwnerDashboardPage";
 import RestaurantProfilePage from "./pages/owner/RestaurantProfilePage";
 import MenuManagementPage from "./pages/owner/MenuManagementPage";
 import OwnerOrdersPage from "./pages/owner/OwnerOrdersPage";
-import OwnerOrderDetailsPage from "./pages/owner/OwnerOrderDetailsPage";
 import OwnerStatusPage from "./pages/owner/OwnerStatusPage";
 
 // Pages: Admin
@@ -150,10 +149,6 @@ export default function App() {
               element={<EditMenuItemPage />}
             />
             <Route path="/owner/orders" element={<OwnerOrdersPage />} />
-            <Route
-              path="/owner/orders/:orderId"
-              element={<OwnerOrderDetailsPage />}
-            />
           </Route>
         </Route>
 

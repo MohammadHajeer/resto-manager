@@ -6,22 +6,7 @@ import { cn } from "@/lib/utils";
 import type { UpdateOwnerRestaurantFormValues } from "./types";
 import { TextField } from "@/components/form/TextField";
 import { TextareaField } from "@/components/form/TextareaField";
-
-
-const cuisineOptions = [
-  "Lebanese",
-  "Italian",
-  "American",
-  "Japanese",
-  "Chinese",
-  "Mexican",
-  "Indian",
-  "Turkish",
-  "Seafood",
-  "Fast Food",
-  "Desserts",
-  "Healthy",
-];
+import { cuisineOptions } from "@/lib/constants";
 
 export default function GeneralInfoSection() {
   const {
