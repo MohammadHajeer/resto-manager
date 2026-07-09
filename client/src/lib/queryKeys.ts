@@ -23,6 +23,15 @@ export const queryKeys = {
       list: (params?: OwnerRestaurantMenuParams) =>
         [...queryKeys.owner.menuList.all, params ?? {}] as const,
     },
+
+    orders: {
+      all: ["owner", "orders"] as const,
+
+      kitchen: () => [...queryKeys.owner.orders.all, "kitchen"] as const,
+
+      detail: (orderId: string) =>
+        [...queryKeys.owner.orders.all, "detail", orderId] as const,
+    },
   },
   public: {
     restaurants: {

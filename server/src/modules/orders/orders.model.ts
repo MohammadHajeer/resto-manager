@@ -103,7 +103,8 @@ const deliveryAddressSchema = new Schema(
 const orderSchema = new Schema(
   {
     customerId: {
-      type: String,
+      type: Schema.Types.ObjectId,
+      ref: "AuthUser",
       required: true,
       index: true,
     },
@@ -181,6 +182,7 @@ orderSchema.index({ customerId: 1, createdAt: -1 });
 orderSchema.index({ status: 1, createdAt: -1 });
 
 type OrderDocument = InferSchemaType<typeof orderSchema> & {
+  _id: Types.ObjectId;
   restaurantId: Types.ObjectId;
 };
 
