@@ -90,6 +90,7 @@ function RestaurantRegisterPage() {
       >,
     ) as unknown as Resolver<RestaurantRegisterFormValues>,
     defaultValues: initialValues,
+    mode: "onChange"
   });
 
   const watchedValues = useWatch({ control });

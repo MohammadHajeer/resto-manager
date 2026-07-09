@@ -4,6 +4,7 @@ import {
   restaurantRegistrationSchema,
   type RestaurantRegistrationInput,
 } from "@restomanager/validators";
+import { cuisineOptions } from "@/lib/constants";
 
 export const DEFAULT_BANNER =
   "https://images.unsplash.com/photo-1506765515384-028b60a970df?q=80&w=1169&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D";
@@ -12,6 +13,7 @@ export const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 export const MAX_DOCUMENT_SIZE = 10 * 1024 * 1024;
 export const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 export const DOCUMENT_TYPES = [...IMAGE_TYPES, "application/pdf"];
+const cuisineOptionSet = new Set<string>(cuisineOptions);
 
 const optionalImageFileSchema = z
   .custom<File | null | undefined>(
@@ -107,7 +109,7 @@ export const stepFields: Record<
   2: [
     "restaurant.name",
     "restaurant.description",
-    "restaurant.cuisineTypes.0",
+    "restaurant.cuisineTypes",
     "contact.phone",
     "contact.email",
     "address.city",
@@ -145,7 +147,7 @@ export const defaultValues: RestaurantRegisterFormValues = {
   restaurant: {
     name: "",
     description: "",
-    cuisineTypes: [""],
+    cuisineTypes: [],
   },
   contact: {
     phone: "",
@@ -200,6 +202,10 @@ export function mergePersistedValues(
     return defaultValues;
   }
 
+  const persistedCuisineTypes = persisted.restaurant.cuisineTypes.filter(
+    (cuisine) => cuisineOptionSet.has(cuisine),
+  );
+
   return {
     ...defaultValues,
     ...persisted,
@@ -214,8 +220,8 @@ export function mergePersistedValues(
       ...persisted.restaurant,
       slug: persisted.restaurant.slug?.trim() || undefined,
       cuisineTypes:
-        persisted.restaurant.cuisineTypes.length > 0
-          ? persisted.restaurant.cuisineTypes
+        persistedCuisineTypes.length > 0
+          ? persistedCuisineTypes
           : defaultValues.restaurant.cuisineTypes,
     },
     contact: {

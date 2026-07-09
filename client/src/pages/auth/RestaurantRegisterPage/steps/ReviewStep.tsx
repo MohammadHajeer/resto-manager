@@ -6,7 +6,7 @@ type ReviewStepProps = {
 
 function ReviewItem({ label, value }: { label: string; value?: string | null }) {
   return (
-    <div className="border-b border-border py-4 last:border-b-0 md:[&:nth-last-child(-n+2)]:border-b-0">
+    <div className="border-b border-border py-4 last:border-b-0 md:nth-last-[-n+2]:border-b-0">
       <dt className="text-xs font-medium uppercase text-muted-foreground">{label}</dt>
       <dd className="mt-1 wrap-break-word text-sm text-foreground">
         {value?.trim() || "Not provided"}
@@ -33,8 +33,8 @@ export function ReviewStep({ values }: ReviewStepProps) {
           <ReviewItem label="Owner Email" value={values.owner.email} />
           <ReviewItem label="Restaurant" value={values.restaurant.name} />
           <ReviewItem
-            label="Cuisine"
-            value={values.restaurant.cuisineTypes[0]}
+            label="Cuisines"
+            value={values.restaurant.cuisineTypes.join(", ")}
           />
           <ReviewItem label="Restaurant Phone" value={values.contact.phone} />
           <ReviewItem label="Restaurant Email" value={values.contact.email} />

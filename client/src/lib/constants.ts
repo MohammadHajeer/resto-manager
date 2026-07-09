@@ -4,7 +4,6 @@ export const cuisineOptions = [
   "Palestinian",
   "Turkish",
   "Italian",
-  "American",
   "Mexican",
   "Indian",
   "Chinese",
