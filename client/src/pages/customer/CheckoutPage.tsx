@@ -1,16 +1,22 @@
 import { useEffect, useState } from "react";
 import {
   ArrowLeft,
+  Banknote,
   Check,
   Info,
+  Lock,
   MapPinPlus,
   ShoppingBag,
   Star,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { useCustomerAddresses } from "@/hooks/customer/useCustomerAddresses";
+import { useCreateOrder } from "@/hooks/customer/useCustomerOrders";
 import { calculateCartSubtotal, useCartStore } from "@/stores/useCartStore";
 import type { CustomerAddress } from "@/services/customer/customer.types";
 
@@ -20,6 +26,8 @@ const currencyFormatter = new Intl.NumberFormat("en-US", {
   style: "currency",
   currency: "USD",
 });
+
+const CUSTOMER_NOTE_MAX_LENGTH = 500;
 
 function AddressesSkeleton() {
   return (
@@ -117,27 +125,36 @@ function EmptyCartRedirect() {
 }
 
 /**
- * CheckoutPage — delivery address section (RES-90/91, RES-119..RES-124)
- * -----------------------------------------------------------------------
- * Lets the customer pick (or add) a saved delivery address before placing
- * an order. Order submission itself (RES-93, RES-94, RES-95) is a separate,
- * not-yet-scoped task — the backend endpoint and client hook for it already
- * exist and are ready to wire up, so "Place Order" is intentionally left in
- * the same disabled "coming soon" state already used elsewhere in the
- * customer profile, rather than silently doing nothing on click.
+ * CheckoutPage (RES-90/91 address section, RES-93/94/95 order submission)
+ * ------------------------------------------------------------------------
+ * The customer picks (or adds) a saved delivery address, optionally leaves
+ * a note for the restaurant, and places the order.
+ *
+ * Client-side validation before submitting (RES-95):
+ * - cart must not be empty (empty carts never render the form at all)
+ * - a delivery address must be selected
+ * - the cart must belong to one restaurant (the store enforces this rule)
+ * The server independently re-validates the payload shape (zod middleware)
+ * and every business rule (item availability, ownership, addon/ingredient
+ * names) and recomputes all prices from the database.
  */
 export default function CheckoutPage() {
   const navigate = useNavigate();
 
   const items = useCartStore((state) => state.items);
+  const cartRestaurantId = useCartStore((state) => state.restaurantId);
   const restaurantName = useCartStore((state) => state.restaurantName);
+  const clearCart = useCartStore((state) => state.clearCart);
 
   const { data: addresses, isPending: isLoadingAddresses } =
     useCustomerAddresses();
 
+  const createOrderMutation = useCreateOrder();
+
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(
     null,
   );
+  const [customerNote, setCustomerNote] = useState("");
   const [isFormOpen, setIsFormOpen] = useState(false);
 
   // Pre-select the default address (or the only address) once addresses
@@ -153,7 +170,61 @@ export default function CheckoutPage() {
   const deliveryFee = 0;
   const totalPrice = subtotal + deliveryFee;
 
-  const hasSelectedAddress = Boolean(selectedAddressId);
+  const selectedAddress =
+    addresses?.find((address) => address._id === selectedAddressId) ?? null;
+
+  const isPlacingOrder = createOrderMutation.isPending;
+
+  const handlePlaceOrder = () => {
+    // RES-95: validate the cart and selections before hitting the API.
+    if (items.length === 0) {
+      toast.error("Your cart is empty.");
+      navigate("/cart");
+      return;
+    }
+
+    if (!cartRestaurantId) {
+      toast.error("Your cart is missing its restaurant. Please re-add items.");
+      navigate("/cart");
+      return;
+    }
+
+    if (!selectedAddress) {
+      toast.error("Please select a delivery address first.");
+      return;
+    }
+
+    const trimmedNote = customerNote.trim();
+
+    createOrderMutation.mutate(
+      {
+        restaurantId: cartRestaurantId,
+        deliveryAddress: {
+          label: selectedAddress.label,
+          city: selectedAddress.city,
+          street: selectedAddress.street,
+          building: selectedAddress.building,
+          floor: selectedAddress.floor ?? "",
+          phoneNumber: selectedAddress.phoneNumber,
+        },
+        items: items.map((item) => ({
+          menuItemId: item.menuItemId,
+          quantity: item.quantity,
+          selectedAddonNames: item.selectedAddons.map((addon) => addon.name),
+          removedIngredientNames: item.removedIngredients,
+        })),
+        ...(trimmedNote ? { customerNote: trimmedNote } : {}),
+      },
+      {
+        onSuccess: (order) => {
+          // Only clear the cart once the server has accepted the order,
+          // so a failed submission never loses the customer's cart.
+          clearCart();
+          navigate(`/orders/success/${order._id}`, { replace: true });
+        },
+      },
+    );
+  };
 
   if (items.length === 0) {
     return (
@@ -205,6 +276,7 @@ export default function CheckoutPage() {
                   size="sm"
                   onClick={() => setIsFormOpen(true)}
                   className="w-fit"
+                  disabled={isPlacingOrder}
                 >
                   <MapPinPlus className="size-4" aria-hidden="true" />
                   Add new
@@ -261,18 +333,124 @@ export default function CheckoutPage() {
               {items.map((item) => (
                 <li
                   key={item.cartItemKey}
-                  className="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0"
+                  className="flex items-start justify-between gap-4 py-3 first:pt-0 last:pb-0"
                 >
-                  <p className="text-sm text-foreground">
-                    <span className="font-semibold">{item.quantity}×</span>{" "}
-                    {item.name}
-                  </p>
-                  <p className="text-sm font-semibold text-foreground">
+                  <div className="min-w-0">
+                    <p className="text-sm text-foreground">
+                      <span className="font-semibold">{item.quantity}×</span>{" "}
+                      {item.name}
+                    </p>
+
+                    {item.selectedAddons.length > 0 && (
+                      <p className="mt-0.5 text-xs text-muted-foreground">
+                        +{" "}
+                        {item.selectedAddons
+                          .map((addon) => addon.name)
+                          .join(", ")}
+                      </p>
+                    )}
+
+                    {item.removedIngredients.length > 0 && (
+                      <p className="mt-0.5 text-xs font-medium text-destructive">
+                        No {item.removedIngredients.join(", ")}
+                      </p>
+                    )}
+                  </div>
+
+                  <p className="shrink-0 text-sm font-semibold text-foreground">
                     {currencyFormatter.format(item.itemTotal)}
                   </p>
                 </li>
               ))}
             </ul>
+          </section>
+
+          {/* Frontend-only payment placeholder: Cash on Delivery is the only
+              available method, so it renders as a selected, locked radio-card.
+              Nothing about it is sent to the backend or persisted — the
+              existing order API has no payment fields, and none are added. */}
+          <section
+            className="rounded-2xl border border-border bg-card p-5 sm:p-6"
+            aria-label="Payment method"
+          >
+            <h2 className="text-lg font-semibold text-foreground">
+              Payment Method
+            </h2>
+
+            <div
+              role="radiogroup"
+              aria-label="Payment method options"
+              className="mt-4"
+            >
+              <div
+                role="radio"
+                aria-checked="true"
+                aria-disabled="true"
+                className="flex w-full items-start gap-3 rounded-2xl border border-primary bg-primary/5 p-4 text-left"
+              >
+                <span
+                  aria-hidden="true"
+                  className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border border-primary bg-primary text-primary-foreground"
+                >
+                  <Check className="size-3" />
+                </span>
+
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="flex size-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                      <Banknote className="size-4.5" aria-hidden="true" />
+                    </span>
+
+                    <p className="font-semibold text-foreground">
+                      Cash on Delivery
+                    </p>
+
+                    <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                      <Lock className="size-3" aria-hidden="true" />
+                      Only available option
+                    </span>
+                  </div>
+
+                  <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                    Pay with cash when your order arrives. The courier will
+                    collect the total amount upon delivery.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section
+            className="rounded-2xl border border-border bg-card p-5 sm:p-6"
+            aria-label="Note for the restaurant"
+          >
+            <Label
+              htmlFor="checkout-customer-note"
+              className="text-lg font-semibold text-foreground"
+            >
+              Note for the restaurant{" "}
+              <span className="text-sm font-normal text-muted-foreground">
+                (optional)
+              </span>
+            </Label>
+
+            <Textarea
+              id="checkout-customer-note"
+              value={customerNote}
+              onChange={(event) => setCustomerNote(event.target.value)}
+              maxLength={CUSTOMER_NOTE_MAX_LENGTH}
+              rows={3}
+              disabled={isPlacingOrder}
+              placeholder="E.g. ring the doorbell twice, extra napkins please..."
+              className="mt-3 min-h-20 resize-y rounded-lg border-input bg-background px-3 py-2.5 shadow-none transition-[border-color,box-shadow] focus-visible:border-primary focus-visible:ring-primary/20"
+            />
+
+            <p
+              className="mt-2 text-right text-xs tabular-nums text-muted-foreground"
+              aria-live="polite"
+            >
+              {customerNote.length}/{CUSTOMER_NOTE_MAX_LENGTH}
+            </p>
           </section>
         </div>
 
@@ -317,17 +495,19 @@ export default function CheckoutPage() {
           <Button
             type="button"
             size="lg"
-            disabled
-            title="Order placement is coming in a future update"
+            onClick={handlePlaceOrder}
+            disabled={!selectedAddress || isPlacingOrder}
             className="mt-6 h-12 w-full rounded-xl text-base font-semibold"
           >
-            Place Order
+            {isPlacingOrder
+              ? "Placing order..."
+              : `Place Order · ${currencyFormatter.format(totalPrice)}`}
           </Button>
 
           <p className="mt-3 flex items-start gap-1.5 text-xs leading-5 text-muted-foreground">
             <Info className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
-            {hasSelectedAddress
-              ? "Order placement is coming in a future update. Your cart and address are saved."
+            {selectedAddress
+              ? "You'll pay in cash when your order is delivered. Final prices are confirmed by the restaurant."
               : "Select a delivery address above to continue."}
           </p>
         </aside>

@@ -219,26 +219,35 @@ export default function CustomerProfilePage() {
                   Saved Addresses
                 </Link>
 
-                {[
-                  { label: "Payment Methods", icon: CreditCard },
-                  { label: "Preferences", icon: Settings2 },
-                ].map(({ label, icon: Icon }) => (
-                  <div
-                    key={label}
-                    className="mt-2 flex cursor-not-allowed items-center justify-between gap-3 rounded-2xl px-4 py-3 text-sm text-muted-foreground/75 transition-colors"
-                    title="Coming soon"
-                  >
-                    <span className="flex min-w-0 items-center gap-3">
-                      <span className="flex size-9 items-center justify-center rounded-xl bg-muted text-muted-foreground">
-                        <Icon className="size-4" aria-hidden="true" />
+                <Link
+                  to="/payment-methods"
+                  className="mt-2 flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium text-foreground transition-all hover:bg-accent hover:text-accent-foreground"
+                >
+                  <span className="flex size-9 items-center justify-center rounded-xl bg-muted text-muted-foreground">
+                    <CreditCard className="size-4" aria-hidden="true" />
+                  </span>
+                  Payment Methods
+                </Link>
+
+                {[{ label: "Preferences", icon: Settings2 }].map(
+                  ({ label, icon: Icon }) => (
+                    <div
+                      key={label}
+                      className="mt-2 flex cursor-not-allowed items-center justify-between gap-3 rounded-2xl px-4 py-3 text-sm text-muted-foreground/75 transition-colors"
+                      title="Coming soon"
+                    >
+                      <span className="flex min-w-0 items-center gap-3">
+                        <span className="flex size-9 items-center justify-center rounded-xl bg-muted text-muted-foreground">
+                          <Icon className="size-4" aria-hidden="true" />
+                        </span>
+                        <span className="truncate">{label}</span>
                       </span>
-                      <span className="truncate">{label}</span>
-                    </span>
-                    <span className="rounded-full bg-muted px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-                      Soon
-                    </span>
-                  </div>
-                ))}
+                      <span className="rounded-full bg-muted px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                        Soon
+                      </span>
+                    </div>
+                  ),
+                )}
               </div>
 
               <div className="border-t border-border/60 px-4 py-3">
