@@ -1,501 +1,764 @@
 import {
   ArrowRight,
-  Sparkles,
-  CheckCircle,
+  BadgeCheck,
+  CheckCircle2,
+  ChefHat,
   ChevronRight,
-  Plus,
-  TrendingUp,
-  FileText,
+  ClipboardCheck,
+  Clock3,
+  LayoutDashboard,
+  MapPin,
+  Search,
+  ShieldCheck,
+  ShoppingBag,
+  Sparkles,
+  Store,
+  UtensilsCrossed,
+  UsersRound,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { Link } from "react-router-dom";
+
+type Role = {
+  eyebrow: string;
+  title: string;
+  description: string;
+  points: string[];
+  icon: LucideIcon;
+};
+
+const roles: Role[] = [
+  {
+    eyebrow: "For customers",
+    title: "Discover restaurants with confidence",
+    description:
+      "Browse approved restaurants, filter by cuisine and city, and explore organized digital menus before choosing where to eat.",
+    points: [
+      "Search and smart filters",
+      "Clear restaurant details",
+      "Menus grouped by category",
+    ],
+    icon: Search,
+  },
+  {
+    eyebrow: "For restaurant owners",
+    title: "Build and manage your digital presence",
+    description:
+      "Register your restaurant, complete its profile, organize categories, and keep menu items accurate from one owner workspace.",
+    points: [
+      "Guided registration",
+      "Profile and brand management",
+      "Category and menu controls",
+    ],
+    icon: Store,
+  },
+  {
+    eyebrow: "For administrators",
+    title: "Protect the quality of the platform",
+    description:
+      "Review submitted restaurants and their verification details before approving, rejecting, or suspending access.",
+    points: [
+      "Central review workflow",
+      "Clear status decisions",
+      "Role-protected access",
+    ],
+    icon: ShieldCheck,
+  },
+];
+
+const journey = [
+  {
+    step: "01",
+    title: "Restaurant applies",
+    description:
+      "The owner submits restaurant, contact, branding, and verification details.",
+    icon: ClipboardCheck,
+  },
+  {
+    step: "02",
+    title: "Admin reviews",
+    description:
+      "The submission is reviewed before the restaurant becomes publicly visible.",
+    icon: ShieldCheck,
+  },
+  {
+    step: "03",
+    title: "Owner manages",
+    description:
+      "Approved owners update profiles, opening hours, categories, and menu items.",
+    icon: LayoutDashboard,
+  },
+  {
+    step: "04",
+    title: "Customers discover",
+    description:
+      "Customers browse trusted restaurants and explore their menus in one place.",
+    icon: UsersRound,
+  },
+];
+
+function DotPattern({ className = "" }: { className?: string }) {
+  return (
+    <div
+      aria-hidden="true"
+      className={`grid grid-cols-6 gap-2 opacity-55 ${className}`}
+    >
+      {Array.from({ length: 24 }).map((_, index) => (
+        <span key={index} className="size-1 rounded-full bg-primary/55" />
+      ))}
+    </div>
+  );
+}
+
+function BrowserHeader({ label }: { label: string }) {
+  return (
+    <div className="flex h-9 items-center gap-2 border-b border-border/80 bg-muted/50 px-4">
+      <div className="flex gap-1.5" aria-hidden="true">
+        <span className="size-2 rounded-full bg-red-300" />
+        <span className="size-2 rounded-full bg-amber-300" />
+        <span className="size-2 rounded-full bg-primary/45" />
+      </div>
+      <div className="mx-auto flex h-5 min-w-32 items-center justify-center rounded-full border border-border bg-white px-4 text-[8px] font-semibold text-muted-foreground">
+        {label}
+      </div>
+      <div className="w-7" />
+    </div>
+  );
+}
+
+function PublicDiscoveryMockup() {
+  const restaurants = [
+    { name: "Cedar Table", cuisine: "Lebanese", time: "25–35 min" },
+    { name: "Pasta Lane", cuisine: "Italian", time: "30–40 min" },
+    { name: "Tokyo Bowl", cuisine: "Japanese", time: "20–30 min" },
+  ];
+
+  return (
+    <div className="overflow-hidden rounded-2xl border border-border/80 bg-white shadow-[0_24px_70px_-28px_rgba(15,23,42,0.32)]">
+      <BrowserHeader label="restomanager.app/restaurants" />
+
+      <div className="space-y-4 p-4 sm:p-5">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <div className="text-[10px] font-bold text-primary">
+              RestoManager
+            </div>
+            <div className="mt-1 text-sm font-extrabold tracking-tight text-foreground sm:text-base">
+              Discover great food near you
+            </div>
+          </div>
+          <div className="flex size-8 items-center justify-center rounded-full bg-secondary text-secondary-foreground">
+            <ShoppingBag size={14} />
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 rounded-xl border border-border bg-white p-2 shadow-sm">
+          <Search size={13} className="text-muted-foreground" />
+          <span className="flex-1 text-[9px] text-muted-foreground">
+            Search restaurants or cuisines...
+          </span>
+          <span className="rounded-lg bg-primary px-3 py-1.5 text-[8px] font-bold text-primary-foreground">
+            Search
+          </span>
+        </div>
+
+        <div className="flex gap-2 overflow-hidden">
+          {["All", "Lebanese", "Italian", "Burgers"].map((item, index) => (
+            <span
+              key={item}
+              className={`whitespace-nowrap rounded-full px-3 py-1.5 text-[8px] font-semibold ${
+                index === 0
+                  ? "bg-primary text-primary-foreground"
+                  : "border border-border bg-white text-muted-foreground"
+              }`}
+            >
+              {item}
+            </span>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-3 gap-2.5">
+          {restaurants.map((restaurant, index) => (
+            <div
+              key={restaurant.name}
+              className="overflow-hidden rounded-xl border border-border bg-card shadow-sm"
+            >
+              <div
+                className={`h-14 sm:h-20 ${
+                  index === 0
+                    ? "bg-[linear-gradient(135deg,#d9f5ed,#8fd8c5)]"
+                    : index === 1
+                      ? "bg-[linear-gradient(135deg,#f8e8cf,#dfb979)]"
+                      : "bg-[linear-gradient(135deg,#e8eef7,#9fb4d1)]"
+                }`}
+              >
+                <div className="flex h-full items-end justify-end p-2">
+                  <div className="flex size-7 items-center justify-center rounded-lg bg-white/85 text-primary shadow-sm backdrop-blur-sm">
+                    <UtensilsCrossed size={13} />
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-1 p-2">
+                <div className="truncate text-[8px] font-bold text-foreground sm:text-[9px]">
+                  {restaurant.name}
+                </div>
+                <div className="truncate text-[7px] text-muted-foreground">
+                  {restaurant.cuisine}
+                </div>
+                <div className="flex items-center gap-1 text-[6px] font-medium text-muted-foreground sm:text-[7px]">
+                  <Clock3 size={8} />
+                  {restaurant.time}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function OwnerDashboardMockup() {
+  return (
+    <div className="overflow-hidden rounded-2xl border border-border bg-white shadow-[0_20px_55px_-24px_rgba(15,23,42,0.35)]">
+      <BrowserHeader label="Owner workspace" />
+      <div className="flex min-h-48">
+        <aside className="hidden w-24 shrink-0 bg-[#005f4c] p-3 text-white sm:block">
+          <div className="mb-5 text-[8px] font-extrabold">RestoManager</div>
+          <div className="space-y-2 text-[7px] text-white/75">
+            {[
+              [LayoutDashboard, "Overview"],
+              [Store, "Profile"],
+              [UtensilsCrossed, "Menu"],
+            ].map(([Icon, label]) => {
+              const SidebarIcon = Icon as LucideIcon;
+              return (
+                <div
+                  key={label as string}
+                  className="flex items-center gap-1.5 rounded-md px-2 py-1.5 first:bg-white/15 first:text-white"
+                >
+                  <SidebarIcon size={9} />
+                  <span>{label as string}</span>
+                </div>
+              );
+            })}
+          </div>
+        </aside>
+
+        <div className="min-w-0 flex-1 space-y-3 p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-[8px] text-muted-foreground">
+                Welcome back
+              </div>
+              <div className="text-[11px] font-extrabold text-foreground">
+                Restaurant profile
+              </div>
+            </div>
+            <span className="rounded-full bg-secondary px-2 py-1 text-[7px] font-bold text-secondary-foreground">
+              Approved
+            </span>
+          </div>
+
+          <div className="grid grid-cols-3 gap-2">
+            {[
+              ["Categories", "06"],
+              ["Menu items", "24"],
+              ["Profile", "92%"],
+            ].map(([label, value]) => (
+              <div
+                key={label}
+                className="rounded-lg border border-border bg-card p-2.5"
+              >
+                <div className="text-[6px] text-muted-foreground">{label}</div>
+                <div className="mt-1 text-[11px] font-extrabold text-foreground">
+                  {value}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="rounded-xl border border-border bg-muted/45 p-3">
+            <div className="mb-2 flex items-center justify-between">
+              <div className="text-[8px] font-bold text-foreground">
+                Profile completeness
+              </div>
+              <div className="text-[7px] font-bold text-primary">92%</div>
+            </div>
+            <div className="h-1.5 overflow-hidden rounded-full bg-border">
+              <div className="h-full w-[92%] rounded-full bg-primary" />
+            </div>
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              <div className="h-8 rounded-lg border border-border bg-white" />
+              <div className="h-8 rounded-lg border border-border bg-white" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AdminReviewMockup() {
+  return (
+    <div className="rounded-2xl border border-primary/15 bg-white/95 p-4 shadow-[0_18px_50px_-25px_rgba(0,138,102,0.48)] backdrop-blur-xl">
+      <div className="flex items-start gap-3">
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-secondary text-secondary-foreground">
+          <BadgeCheck size={17} />
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center justify-between gap-3">
+            <div className="truncate text-[10px] font-extrabold text-foreground">
+              New restaurant application
+            </div>
+            <span className="rounded-full bg-amber-50 px-2 py-1 text-[6px] font-bold text-amber-700">
+              Pending
+            </span>
+          </div>
+          <div className="mt-1 flex items-center gap-1 text-[7px] text-muted-foreground">
+            <MapPin size={8} /> Beirut, Lebanon
+          </div>
+          <div className="mt-3 flex gap-2">
+            <span className="rounded-md bg-primary px-2.5 py-1.5 text-[7px] font-bold text-primary-foreground">
+              Review
+            </span>
+            <span className="rounded-md border border-border px-2.5 py-1.5 text-[7px] font-bold text-muted-foreground">
+              View details
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SectionHeading({
+  eyebrow,
+  title,
+  description,
+  align = "center",
+}: {
+  eyebrow: string;
+  title: string;
+  description: string;
+  align?: "center" | "left";
+}) {
+  return (
+    <div
+      className={
+        align === "center"
+          ? "mx-auto max-w-3xl text-center"
+          : "max-w-2xl text-left"
+      }
+    >
+      <div className="mb-3 text-xs font-extrabold uppercase tracking-[0.2em] text-primary">
+        {eyebrow}
+      </div>
+      <h2 className="text-3xl font-extrabold tracking-[-0.035em] text-foreground sm:text-4xl lg:text-5xl">
+        {title}
+      </h2>
+      <p className="mt-5 text-base leading-8 text-muted-foreground sm:text-lg">
+        {description}
+      </p>
+    </div>
+  );
+}
 
 export default function LandingPage() {
   return (
-    <div className="w-full min-h-screen bg-background text-on-background flex flex-col font-sans">
-      {/* Hero Section */}
+    <main className="min-h-screen overflow-hidden bg-background font-sans text-foreground">
       <section
-        className="relative overflow-hidden pt-12 pb-24 px-4 md:px-12"
         id="home"
+        className="relative isolate overflow-hidden px-4 pb-24 pt-14 sm:px-6 lg:px-8 lg:pb-32 lg:pt-20"
       >
-        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16">
-          <div className="flex-1 space-y-8 z-10 text-left">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-emerald-200 bg-emerald-50 text-emerald-800">
+        <div
+          aria-hidden="true"
+          className="absolute -left-28 -top-36 -z-10 size-112 rounded-full bg-secondary/80 blur-3xl"
+        />
+        <div
+          aria-hidden="true"
+          className="absolute -right-40 top-8 -z-10 size-136 rounded-full bg-primary/10 blur-3xl"
+        />
+        <div
+          aria-hidden="true"
+          className="absolute left-0 top-0 -z-10 h-44 w-[42%] rounded-br-[48%] border-b border-r border-primary/25 bg-white/[0.55]"
+        />
+        <DotPattern className="absolute left-8 top-9 hidden sm:grid" />
+        <DotPattern className="absolute bottom-12 right-8 hidden lg:grid" />
+
+        <div className="mx-auto grid max-w-7xl items-center gap-16 lg:grid-cols-[0.88fr_1.12fr] lg:gap-12">
+          <div className="relative z-10 text-left">
+            <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-white/80 px-4 py-2 text-xs font-bold text-primary shadow-sm backdrop-blur-sm">
               <Sparkles size={14} />
-              <span className="text-[10px] font-bold tracking-wider uppercase">
-                NEW: AI-POWERED ANALYTICS
-              </span>
+              One platform. Three connected experiences.
             </div>
 
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight leading-none">
-              Modernize Your{" "}
-              <span className="text-primary" style={{ color: "#008a66" }}>
-                Restaurant
-              </span>{" "}
-              Operations
+            <h1 className="mt-7 max-w-3xl text-5xl font-extrabold leading-[0.98] tracking-[-0.055em] text-foreground sm:text-6xl lg:text-7xl">
+              Discover, manage, and grow with{" "}
+              <span className="text-primary">RestoManager.</span>
             </h1>
 
-            <p className="text-gray-600 text-base md:text-lg max-w-xl leading-relaxed">
-              RestoManager is the all-in-one hospitality engine built to
-              streamline your kitchen, delight your guests, and grow your bottom
-              line with precision.
+            <p className="mt-7 max-w-xl text-base leading-8 text-muted-foreground sm:text-lg">
+              A restaurant platform that connects customers, restaurant owners,
+              and administrators through trusted listings, organized menus, and
+              a clear approval workflow.
             </p>
 
-            <div className="flex flex-wrap gap-4">
+            <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
               <Link
-                to="/restaurant/register"
-                className="text-white text-sm font-bold px-8 py-4 rounded-full hover:bg-emerald-800 transition-all shadow-md flex items-center gap-2 group"
-                style={{ backgroundColor: "#008a66" }}
+                to="/restaurants"
+                className="group inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-bold text-primary-foreground shadow-[0_14px_35px_-16px_rgba(0,138,102,0.8)] transition hover:-translate-y-0.5 hover:bg-[#00795a] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               >
-                Start Free Trial
+                Explore restaurants
                 <ArrowRight
-                  size={16}
-                  className="group-hover:translate-x-1 transition-transform"
+                  size={17}
+                  className="transition-transform group-hover:translate-x-1"
                 />
               </Link>
               <Link
-                to="/book-demo"
-                className="bg-white border text-sm font-bold px-8 py-4 rounded-full transition-all"
-                style={{ color: "#008a66", borderColor: "#008a66" }}
+                to="/restaurant/register"
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-primary/25 bg-white px-6 py-3 text-sm font-bold text-primary shadow-sm transition hover:-translate-y-0.5 hover:border-primary/45 hover:bg-secondary/55 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               >
-                Book a Demo
+                Register your restaurant
               </Link>
             </div>
 
-            <div className="flex items-center gap-6 pt-4">
-              <div className="flex -space-x-3">
-                <div
-                  className="w-10 h-10 rounded-full border-2 border-white bg-cover bg-center"
-                  style={{
-                    backgroundImage:
-                      "url('https://lh3.googleusercontent.com/aida-public/AB6AXuBuvFDTQObNJrndzLVzmi8jeL7Xe9tK8NPuva08wN6PjjW5bNCmiJ2veyBTG4rYzc9zWpTiGrth9peTForJBArAgTdCRkQcJ3Ol9hF-wQu7tGkfS9ONNmEh8wU7NbXFv3DnAEDJYUar1IcdavMiHtAy6tb6EJ1EnAnSaK97GsnyqmmTDYgygQgRaJmmRqshWZTIzLHZzJ9dpHwT30jYX1vRJD-5nv1ophVdfxrd-RNAMsRdXhWVvCIrQMKr0PZkbI4gEqmaCX6pHrI')",
-                  }}
-                ></div>
-                <div
-                  className="w-10 h-10 rounded-full border-2 border-white bg-cover bg-center"
-                  style={{
-                    backgroundImage:
-                      "url('https://lh3.googleusercontent.com/aida-public/AB6AXuBJDuBuB6_fTCC4se067jVnK0X0OKO4G0XrZoTBBUQAGmLY8PQUrE15HUPZulrXUe2LezVq6xEEWIyMzwUa35Y576lhSKmfvAjq8uCyGfncrcxNNws5EO6zdiZx7LhiuT8Rz4uHze8Qh6Kp04c8-y51Con8LHeohMVb3BgiG97WsULwLAXCZ3ndOwl1XdtDDGPLTHsdYjTIJZZEc02ThYgCtzaVS29QZ3Bx11N9yiG57qAeMSQCgAcnfM4pfkuGWOv4lKmEv82zndc')",
-                  }}
-                ></div>
-                <div
-                  className="w-10 h-10 rounded-full border-2 border-white bg-cover bg-center"
-                  style={{
-                    backgroundImage:
-                      "url('https://lh3.googleusercontent.com/aida-public/AB6AXuB96v9g6u9twpHoOu9amkr4oMTzKQKC2LujZtdhCWzCtpv2l9PI4TGTF-onpCJ9IUZfcq1i1Mu3W9VA_FaTj4cYlAv2S7Fs6rmeSPgYi6OdV1ORi5INFpiA8ifrNccv-h9PDrvkHRXz6rIUyQdVcSPiXpF1oYBSE59jcQA1FtHD5ZniSmTd2d_mSIxuGYrRAD7AKxoEAcJNa7j5fsNH_Z7-4SnjTLIg-dib_M0Uc0YUkqV0L5yR3DvyGsm2AnmcjxbTtnrI2i82y_o')",
-                  }}
-                ></div>
-              </div>
-              <p className="text-xs text-gray-500 font-medium">
-                Trusted by{" "}
-                <span className="text-slate-800 font-bold">2,500+</span>{" "}
-                kitchens worldwide
-              </p>
+            <div className="mt-9 grid max-w-xl gap-3 text-sm text-muted-foreground sm:grid-cols-3">
+              {[
+                "Approved listings",
+                "Protected role access",
+                "Cloud file storage",
+              ].map((item) => (
+                <div key={item} className="flex items-center gap-2">
+                  <CheckCircle2 size={16} className="shrink-0 text-primary" />
+                  <span>{item}</span>
+                </div>
+              ))}
             </div>
           </div>
 
-          <div className="flex-1 w-full relative">
-            <div className="absolute -top-10 -right-10 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl"></div>
-            <div className="absolute -bottom-10 -left-10 w-72 h-72 bg-emerald-500/5 rounded-full blur-3xl"></div>
+          <div className="relative mx-auto w-full max-w-3xl lg:mx-0 lg:pl-8">
+            <div
+              aria-hidden="true"
+              className="absolute inset-x-10 top-16 -z-10 h-[76%] rounded-[3rem] bg-[linear-gradient(145deg,rgba(0,138,102,0.18),rgba(221,244,236,0.32),rgba(255,255,255,0.7))] blur-2xl"
+            />
 
-            {/* Product Mockup Preview */}
-            <div className="relative bg-white/70 backdrop-blur-md rounded-[2rem] p-4 shadow-2xl overflow-hidden border border-gray-200/50 transform lg:rotate-2 hover:rotate-0 transition-all duration-500">
-              <div className="bg-slate-50 rounded-xl overflow-hidden border border-gray-200 shadow-inner">
-                <div className="h-8 bg-gray-200/50 flex items-center px-4 gap-1.5">
-                  <div className="w-2.5 h-2.5 rounded-full bg-red-400"></div>
-                  <div className="w-2.5 h-2.5 rounded-full bg-amber-400"></div>
-                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-400"></div>
-                </div>
-                <div className="p-4 bg-white">
-                  <div
-                    className="aspect-video w-full rounded-lg bg-cover bg-center"
-                    style={{
-                      backgroundImage:
-                        "url('https://lh3.googleusercontent.com/aida-public/AB6AXuD9lC0QUVMGAZ6WxGjQVjSJl27q5ZqQr4w5lEtW0ISwcJIx9acyAIYpfX1n0-mLTHxyF72WnDZ-LzYZVo-LVAeEa2YbvcXsIltkyyxR1V4YtZz52mSmU27V_PPrZlJS-y6g_Zc3PKRit03UhVxZp_x2ytiqI7NpfESbzjUy5Ag-k7fbs_CF-9fe-peLGQQnQuhx0njZhw-gp2qt4_fvZnj_jEZz7secE7SaDTQQkErhIf33wyclDlxUuxl5i3WrwZrBzeSjhpG9HVI')",
-                    }}
-                  ></div>
-                </div>
-              </div>
-
-              {/* Floating Widget 1 */}
-              <div
-                className="absolute -left-4 top-1/4 bg-white/90 backdrop-blur-sm p-4 rounded-2xl shadow-xl border border-emerald-100 flex items-center gap-3 animate-bounce"
-                style={{ animationDuration: "6s" }}
-              >
-                <div
-                  className="w-10 h-10 bg-emerald-50 rounded-full flex items-center justify-center text-primary"
-                  style={{ color: "#008a66" }}
-                >
-                  <CheckCircle size={18} />
-                </div>
-                <div className="text-left">
-                  <p className="text-[9px] text-gray-400 uppercase tracking-wider font-bold">
-                    Recent Order
-                  </p>
-                  <p className="text-xs font-bold text-slate-800">
-                    Table 12: $142.50
-                  </p>
-                </div>
-              </div>
-
-              {/* Floating Widget 2 */}
-              <div
-                className="absolute -right-2 bottom-12 bg-white/90 backdrop-blur-sm p-4 rounded-2xl shadow-xl border border-gray-200 flex flex-col gap-1.5 animate-pulse"
-                style={{ animationDuration: "4s" }}
-              >
-                <p className="text-[10px] font-bold text-gray-500 text-left">
-                  Peak Efficiency
-                </p>
-                <div className="flex items-end gap-1 h-10">
-                  <div className="w-2 bg-emerald-100 rounded-t h-1/3"></div>
-                  <div className="w-2 bg-emerald-200 rounded-t h-1/2"></div>
-                  <div className="w-2 bg-emerald-400 rounded-t h-4/5"></div>
-                  <div
-                    className="w-2 bg-emerald-600 rounded-t h-full"
-                    style={{ backgroundColor: "#008a66" }}
-                  ></div>
-                  <div className="w-2 bg-emerald-200 rounded-t h-2/3"></div>
-                </div>
-              </div>
+            <div className="relative ml-auto w-[94%] sm:w-[88%]">
+              <PublicDiscoveryMockup />
             </div>
+
+            <div className="relative -mt-7 w-[76%] sm:-mt-10 sm:w-[70%] lg:-ml-5">
+              <OwnerDashboardMockup />
+            </div>
+
+            <div className="absolute -right-1 bottom-3 w-[68%] sm:-right-4 sm:bottom-10 sm:w-[52%] lg:-right-5">
+              <AdminReviewMockup />
+            </div>
+
+            <div
+              aria-hidden="true"
+              className="absolute -right-5 top-[34%] hidden h-24 w-24 rounded-full border border-primary/25 sm:block"
+            />
+            <div
+              aria-hidden="true"
+              className="absolute -right-1 top-[37%] hidden size-3 rounded-full bg-primary sm:block"
+            />
           </div>
         </div>
       </section>
 
-      {/* Features Bento Grid */}
-      <section className="py-24 px-4 md:px-12 bg-slate-50" id="features">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16 space-y-4">
-            <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">
-              Precision Tools for Busy Services
-            </h2>
-            <p className="text-gray-500 text-base max-w-2xl mx-auto leading-relaxed">
-              Built for the noise and heat of the kitchen, designed for the
-              quiet sophistication of the front office.
-            </p>
-          </div>
+      <section
+        id="features"
+        className="relative px-4 py-24 sm:px-6 lg:px-8 lg:py-32"
+      >
+        <div className="mx-auto max-w-7xl">
+          <SectionHeading
+            eyebrow="Built around every role"
+            title="One connected platform, designed for the whole journey"
+            description="RestoManager gives each user exactly what they need while keeping the platform consistent, secure, and easy to understand."
+          />
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Feature 1: Order Management */}
-            <div className="md:col-span-2 bg-white p-6 md:p-8 rounded-[20px] shadow-sm border border-gray-200 hover:border-emerald-500 transition-all group overflow-hidden relative">
-              <div className="flex flex-col md:flex-row gap-8">
-                <div className="flex-1 space-y-4 text-left">
+          <div className="mt-16 grid gap-6 lg:grid-cols-3">
+            {roles.map(
+              ({ eyebrow, title, description, points, icon: Icon }, index) => (
+                <article
+                  key={title}
+                  className={`group relative overflow-hidden rounded-3xl border p-7 transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_60px_-30px_rgba(15,23,42,0.34)] sm:p-8 ${
+                    index === 1
+                      ? "border-primary/20 bg-[#005f4c] text-white"
+                      : "border-border bg-white text-foreground"
+                  }`}
+                >
                   <div
-                    className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center text-primary group-hover:bg-emerald-600 group-hover:text-white transition-all"
-                    style={{ color: "#008a66" }}
+                    aria-hidden="true"
+                    className={`absolute -right-14 -top-14 size-40 rounded-full ${
+                      index === 1 ? "bg-white/[0.07]" : "bg-secondary/65"
+                    }`}
+                  />
+                  <div
+                    className={`relative flex size-12 items-center justify-center rounded-2xl ${
+                      index === 1
+                        ? "bg-white/12 text-white"
+                        : "bg-secondary text-secondary-foreground"
+                    }`}
                   >
-                    <FileText size={24} />
+                    <Icon size={23} />
                   </div>
-                  <h3 className="text-xl font-bold text-slate-900">
-                    Dynamic Order Management
+                  <div
+                    className={`relative mt-8 text-xs font-extrabold uppercase tracking-[0.18em] ${
+                      index === 1 ? "text-emerald-100" : "text-primary"
+                    }`}
+                  >
+                    {eyebrow}
+                  </div>
+                  <h3 className="relative mt-3 text-2xl font-extrabold leading-tight tracking-[-0.03em]">
+                    {title}
                   </h3>
-                  <p className="text-xs text-gray-500 leading-relaxed">
-                    Manage tables, takeout, and delivery from a single pane of
-                    glass. Sync your POS with kitchen displays in real-time to
-                    eliminate errors.
+                  <p
+                    className={`relative mt-4 text-sm leading-7 ${
+                      index === 1
+                        ? "text-emerald-50/80"
+                        : "text-muted-foreground"
+                    }`}
+                  >
+                    {description}
                   </p>
-                  <ul className="space-y-2">
-                    <li className="flex items-center gap-2 text-xs font-semibold text-slate-600">
-                      <CheckCircle
-                        size={16}
-                        className="text-primary"
-                        style={{ color: "#008a66" }}
-                      />{" "}
-                      Instant Sync across all devices
-                    </li>
-                    <li className="flex items-center gap-2 text-xs font-semibold text-slate-600">
-                      <CheckCircle
-                        size={16}
-                        className="text-primary"
-                        style={{ color: "#008a66" }}
-                      />{" "}
-                      Automated table-turn predictions
-                    </li>
+                  <ul className="relative mt-7 space-y-3">
+                    {points.map((point) => (
+                      <li
+                        key={point}
+                        className="flex items-center gap-3 text-sm font-semibold"
+                      >
+                        <CheckCircle2
+                          size={17}
+                          className={
+                            index === 1 ? "text-emerald-200" : "text-primary"
+                          }
+                        />
+                        {point}
+                      </li>
+                    ))}
                   </ul>
-                </div>
-                <div className="flex-1 h-64 bg-gray-100 rounded-xl relative overflow-hidden">
-                  <div
-                    className="absolute inset-0 bg-cover bg-center"
-                    style={{
-                      backgroundImage:
-                        "url('https://lh3.googleusercontent.com/aida-public/AB6AXuDcSK1WJjZYgj-jUyMdwZHm1iYv5mfCgGP0TosRzQvT4Zx24ImS7wEG4owuhAXRaUefhEkF6w-ENT6KH4RT8ezMLl7rYKce3f8wTPJs45A3r3NyU5VBf5gbQn9HvbmTal5_T9UpmJeoLASgrOeFWrox_g_KShI7PGZLlcqNYrmK8x3l7dFHTMerK1aK2dcEGYLDV38RRo1BG8ceKPlNriZOS2BEa_9fbyA50cN7_yaqpHTceHo6xWMgaO5C7w-JdRxRtF7-1l1t7JU')",
-                    }}
-                  ></div>
-                </div>
-              </div>
-            </div>
-
-            {/* Feature 2: Analytics */}
-            <div className="bg-white p-6 md:p-8 rounded-[20px] shadow-sm border border-gray-200 hover:border-emerald-500 transition-all group flex flex-col text-left">
-              <div
-                className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center text-primary mb-6 group-hover:bg-emerald-600 group-hover:text-white transition-all"
-                style={{ color: "#008a66" }}
-              >
-                <TrendingUp size={24} />
-              </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-3">
-                Deep Analytics
-              </h3>
-              <p className="text-xs text-gray-500 leading-relaxed mb-6">
-                Uncover your most profitable dishes and peak hours with
-                automated reporting that actually makes sense.
-              </p>
-              <div className="mt-auto bg-gray-50 rounded-lg p-4 border border-gray-100">
-                <div className="flex justify-between items-end gap-1.5 h-24">
-                  <div
-                    className="w-full bg-emerald-200 rounded-sm"
-                    style={{ height: "60%" }}
-                  ></div>
-                  <div
-                    className="w-full bg-emerald-300 rounded-sm"
-                    style={{ height: "45%" }}
-                  ></div>
-                  <div
-                    className="w-full bg-emerald-100 rounded-sm"
-                    style={{ height: "85%" }}
-                  ></div>
-                  <div
-                    className="w-full bg-emerald-600 rounded-sm"
-                    style={{ height: "100%", backgroundColor: "#008a66" }}
-                  ></div>
-                  <div
-                    className="w-full bg-emerald-200 rounded-sm"
-                    style={{ height: "70%" }}
-                  ></div>
-                </div>
-              </div>
-            </div>
-
-            {/* Feature 3: Menu Builder */}
-            <div className="bg-white p-6 md:p-8 rounded-[20px] shadow-sm border border-gray-200 hover:border-emerald-500 transition-all group text-left flex flex-col justify-between">
-              <div>
-                <div
-                  className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center text-primary mb-6 group-hover:bg-emerald-600 group-hover:text-white transition-all"
-                  style={{ color: "#008a66" }}
-                >
-                  <Plus size={24} />
-                </div>
-                <h3 className="text-xl font-bold text-slate-900 mb-3">
-                  Visual Menu Builder
-                </h3>
-                <p className="text-xs text-gray-500 leading-relaxed mb-6">
-                  Create stunning digital and print menus. Update prices and
-                  availability across all platforms with one click.
-                </p>
-              </div>
-              <div className="grid grid-cols-2 gap-2 mt-auto">
-                <div
-                  className="h-20 bg-gray-100 rounded-lg bg-cover bg-center"
-                  style={{
-                    backgroundImage:
-                      "url('https://lh3.googleusercontent.com/aida-public/AB6AXuA6peeul9fIZgU-piQ1aIXHAgmGjdxCWpYC0hTZ4S3MID_4peQaSt72gx7XoznEB4DIr3UKrF3GOnv6GuzG_KSAC2mY9EzGS8bqOLAxuc1xWxlKVv4KmQP_8QBC8w68av5m9MEJ8FVvoqk3fKhGQz41-VoH8hMSlr8cNFYrrKMuZaV60W-kOGixYVIm-SXZm-LbuIfE5hz9E9E3UkEojFBfIf7DSgg2xIQIhJn41rmPGOwNkaltCSPBe_7lLW9VtzuOer06GEZsiXc')",
-                  }}
-                ></div>
-                <div
-                  className="h-20 bg-gray-100 rounded-lg bg-cover bg-center"
-                  style={{
-                    backgroundImage:
-                      "url('https://lh3.googleusercontent.com/aida-public/AB6AXuAMSGZ1lROWKEVkArS0nR2z8u0LJeO2CA1sg_s0EeKgKKFHJei5CiV063SYXVoD0LIru8P3zfuXV0pvXtq00ihEeJ0c8gQa_gIWqLzawo9upUrS24mUmPubAYwlbsgtzx3J3DEJgNePwl7-Iu9z4912Nq098sdHHVFFLxWyKGkMiBEQIl9wN-l_XZ2fqLyAgLmLGWaVQgBR7l3wPVX08oH2evTQSOueodukOPTl_hTin4lBA5BxLdU_mAqYuJQoqwkgtnaC7vtlcjw')",
-                  }}
-                ></div>
-              </div>
-            </div>
-
-            {/* Feature 4: Staffing */}
-            <div className="md:col-span-2 bg-slate-900 text-white p-6 md:p-8 rounded-[20px] shadow-sm relative overflow-hidden flex flex-col justify-between text-left">
-              <div className="absolute right-0 top-0 w-1/2 h-full opacity-10 bg-linear-to-l from-emerald-500 to-transparent pointer-events-none"></div>
-              <div className="relative z-10 md:w-1/2 space-y-4">
-                <div
-                  className="w-12 h-12 bg-emerald-600 rounded-xl flex items-center justify-center text-white"
-                  style={{ backgroundColor: "#008a66" }}
-                >
-                  <Sparkles size={24} />
-                </div>
-                <h3 className="text-xl font-bold text-white">
-                  Smart Staff Scheduling
-                </h3>
-                <p className="text-xs text-slate-300 leading-relaxed">
-                  AI-driven labor forecasting helps you staff perfectly for
-                  every shift, reducing waste and burnout.
-                </p>
-                <Link
-                  to="/restaurant/register"
-                  className="inline-flex items-center gap-1 text-emerald-200 font-bold text-xs hover:translate-x-1.5 transition-transform"
-                >
-                  Explore Labor Management <ChevronRight size={16} />
-                </Link>
-              </div>
-            </div>
+                </article>
+              ),
+            )}
           </div>
         </div>
       </section>
 
-      {/* How It Works Section */}
-      <section className="py-24 px-4 md:px-12" id="about">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-20">
-            {/* Owner Flow */}
-            <div className="space-y-12 text-left">
-              <div className="space-y-3">
-                <span
-                  className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest block"
-                  style={{ color: "#008a66" }}
-                >
-                  FOR OPERATORS
-                </span>
-                <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">
-                  Streamline the Backend
-                </h2>
-              </div>
-              <div className="space-y-8">
-                <div className="flex gap-6">
-                  <div
-                    className="shrink-0 w-10 h-10 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-sm"
-                    style={{ backgroundColor: "#008a66" }}
-                  >
-                    1
-                  </div>
-                  <div>
-                    <h4 className="text-base font-bold text-slate-800 mb-1">
-                      Configure Your Space
-                    </h4>
-                    <p className="text-xs text-gray-500 leading-relaxed">
-                      Upload your floor plan and menu in minutes using our
-                      intuitive wizard.
-                    </p>
-                  </div>
-                </div>
-                <div className="flex gap-6">
-                  <div
-                    className="shrink-0 w-10 h-10 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-sm"
-                    style={{ backgroundColor: "#008a66" }}
-                  >
-                    2
-                  </div>
-                  <div>
-                    <h4 className="text-base font-bold text-slate-800 mb-1">
-                      Onboard Your Team
-                    </h4>
-                    <p className="text-xs text-gray-500 leading-relaxed">
-                      Assign roles and permissions. Staff can download the
-                      mobile app for instant notifications.
-                    </p>
-                  </div>
-                </div>
-                <div className="flex gap-6">
-                  <div
-                    className="shrink-0 w-10 h-10 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-sm"
-                    style={{ backgroundColor: "#008a66" }}
-                  >
-                    3
-                  </div>
-                  <div>
-                    <h4 className="text-base font-bold text-slate-800 mb-1">
-                      Monitor Live Health
-                    </h4>
-                    <p className="text-xs text-gray-500 leading-relaxed">
-                      Track sales, labor costs, and guest sentiment in real-time
-                      from your executive dashboard.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Customer Flow */}
-            <div className="space-y-12 text-left">
-              <div className="space-y-3">
-                <span
-                  className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest block"
-                  style={{ color: "#008a66" }}
-                >
-                  FOR CUSTOMERS
-                </span>
-                <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">
-                  Elevate the Guest Experience
-                </h2>
-              </div>
-              <div className="space-y-8">
-                <div className="flex gap-6">
-                  <div className="shrink-0 w-10 h-10 rounded-full bg-emerald-800 text-white flex items-center justify-center font-bold text-sm">
-                    1
-                  </div>
-                  <div>
-                    <h4 className="text-base font-bold text-slate-800 mb-1">
-                      Seamless Reservations
-                    </h4>
-                    <p className="text-xs text-gray-500 leading-relaxed">
-                      Guests book directly through your site or social media
-                      with no third-party fees.
-                    </p>
-                  </div>
-                </div>
-                <div className="flex gap-6">
-                  <div className="shrink-0 w-10 h-10 rounded-full bg-emerald-800 text-white flex items-center justify-center font-bold text-sm">
-                    2
-                  </div>
-                  <div>
-                    <h4 className="text-base font-bold text-slate-800 mb-1">
-                      Contactless Dining
-                    </h4>
-                    <p className="text-xs text-gray-500 leading-relaxed">
-                      Order and pay from the table using dynamic QR codes that
-                      sync to the kitchen.
-                    </p>
-                  </div>
-                </div>
-                <div className="flex gap-6">
-                  <div className="shrink-0 w-10 h-10 rounded-full bg-emerald-800 text-white flex items-center justify-center font-bold text-sm">
-                    3
-                  </div>
-                  <div>
-                    <h4 className="text-base font-bold text-slate-800 mb-1">
-                      Loyalty & Personalization
-                    </h4>
-                    <p className="text-xs text-gray-500 leading-relaxed">
-                      Earn rewards and receive tailored offers based on previous
-                      visits and preferences.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-24 px-4 md:px-12">
+      <section
+        id="how-it-works"
+        className="relative border-y border-border/75 bg-white px-4 py-24 sm:px-6 lg:px-8 lg:py-32"
+      >
         <div
-          className="max-w-4xl mx-auto rounded-[32px] p-8 md:p-12 text-center text-white relative overflow-hidden bg-emerald-700"
-          style={{ backgroundColor: "#008a66" }}
-        >
-          <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] bg-size-[16px_16px] pointer-events-none"></div>
-          <div className="relative z-10 space-y-8">
-            <h2 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight">
-              Ready to serve better?
-            </h2>
-            <p className="text-sm text-emerald-100 max-w-xl mx-auto leading-relaxed">
-              Join the future of hospitality. Get started today and see the
-              difference in your first week.
-            </p>
-            <div className="flex flex-col sm:flex-row justify-center gap-4">
+          aria-hidden="true"
+          className="absolute right-0 top-0 h-48 w-48 rounded-bl-[70%] bg-secondary/50"
+        />
+        <div className="mx-auto max-w-7xl">
+          <div className="grid items-end gap-10 lg:grid-cols-[0.9fr_1.1fr]">
+            <SectionHeading
+              align="left"
+              eyebrow="How it works"
+              title="From restaurant application to customer discovery"
+              description="A clear flow keeps restaurant information trustworthy and gives every role a focused experience."
+            />
+
+            <div className="lg:justify-self-end">
               <Link
                 to="/restaurant/register"
-                className="bg-white font-bold px-8 py-4 rounded-full hover:bg-emerald-50 transition-all shadow-md text-sm text-emerald-800"
+                className="group inline-flex items-center gap-2 text-sm font-extrabold text-primary"
               >
-                Get Started Now
+                Start restaurant registration
+                <ChevronRight
+                  size={18}
+                  className="transition-transform group-hover:translate-x-1"
+                />
               </Link>
-              <Link
-                to="/book-demo"
-                className="bg-emerald-800 border border-emerald-600/30 text-white font-bold px-8 py-4 rounded-full hover:bg-opacity-80 transition-all text-sm"
+            </div>
+          </div>
+
+          <div className="relative mt-16 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+            <div
+              aria-hidden="true"
+              className="absolute left-[12%] right-[12%] top-9 hidden h-px bg-[linear-gradient(90deg,transparent,rgba(0,138,102,0.35),transparent)] xl:block"
+            />
+            {journey.map(({ step, title, description, icon: Icon }) => (
+              <article
+                key={step}
+                className="relative rounded-3xl border border-border bg-background p-6"
               >
-                Schedule a Private Demo
-              </Link>
+                <div className="flex items-center justify-between">
+                  <div className="relative z-10 flex size-14 items-center justify-center rounded-2xl border border-primary/15 bg-white text-primary shadow-sm">
+                    <Icon size={24} />
+                  </div>
+                  <span className="text-3xl font-extrabold tracking-tighter text-primary/18">
+                    {step}
+                  </span>
+                </div>
+                <h3 className="mt-7 text-xl font-extrabold tracking-tight text-foreground">
+                  {title}
+                </h3>
+                <p className="mt-3 text-sm leading-7 text-muted-foreground">
+                  {description}
+                </p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="px-4 py-24 sm:px-6 lg:px-8 lg:py-32">
+        <div className="mx-auto grid max-w-7xl items-center gap-14 lg:grid-cols-2">
+          <div className="relative min-h-107.5">
+            <div className="absolute inset-x-0 top-7 mx-auto h-72 w-[88%] rounded-[3rem] bg-secondary/60" />
+            <div className="absolute left-[4%] top-0 w-[78%] -rotate-2">
+              <OwnerDashboardMockup />
+            </div>
+            <div className="absolute bottom-0 right-[2%] w-[68%] rotate-[1.5deg]">
+              <div className="rounded-2xl border border-border bg-white p-5 shadow-[0_22px_55px_-28px_rgba(15,23,42,0.38)]">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="text-[9px] font-bold text-primary">
+                      Menu management
+                    </div>
+                    <div className="mt-1 text-sm font-extrabold text-foreground">
+                      Popular dishes
+                    </div>
+                  </div>
+                  <span className="rounded-lg bg-primary px-3 py-2 text-[8px] font-bold text-primary-foreground">
+                    + Add item
+                  </span>
+                </div>
+                <div className="mt-4 space-y-2">
+                  {["Classic Burger", "Chicken Pasta", "Caesar Salad"].map(
+                    (item, index) => (
+                      <div
+                        key={item}
+                        className="grid grid-cols-[32px_1fr_auto] items-center gap-3 rounded-xl border border-border px-3 py-2.5"
+                      >
+                        <div
+                          className={`size-8 rounded-lg ${
+                            index === 0
+                              ? "bg-amber-100"
+                              : index === 1
+                                ? "bg-orange-100"
+                                : "bg-emerald-100"
+                          }`}
+                        />
+                        <div>
+                          <div className="text-[8px] font-bold text-foreground">
+                            {item}
+                          </div>
+                          <div className="mt-0.5 text-[7px] text-muted-foreground">
+                            Available
+                          </div>
+                        </div>
+                        <span className="text-[8px] font-extrabold text-primary">
+                          ${(8.5 + index * 1.75).toFixed(2)}
+                        </span>
+                      </div>
+                    ),
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="lg:pl-8">
+            <div className="text-xs font-extrabold uppercase tracking-[0.2em] text-primary">
+              Designed for clarity
+            </div>
+            <h2 className="mt-4 text-3xl font-extrabold tracking-[-0.04em] text-foreground sm:text-4xl lg:text-5xl">
+              Complex restaurant workflows, presented simply.
+            </h2>
+            <p className="mt-6 text-base leading-8 text-muted-foreground sm:text-lg">
+              The interface keeps actions focused, statuses visible, and
+              information organized—whether someone is browsing a menu or
+              managing an entire restaurant profile.
+            </p>
+
+            <div className="mt-9 space-y-5">
+              {[
+                {
+                  icon: ChefHat,
+                  title: "Restaurant-first organization",
+                  description:
+                    "Profiles, opening hours, categories, and menu items stay connected.",
+                },
+                {
+                  icon: ShieldCheck,
+                  title: "Trust through approval",
+                  description:
+                    "Only reviewed restaurants become part of the public experience.",
+                },
+                {
+                  icon: BadgeCheck,
+                  title: "Consistent feedback",
+                  description:
+                    "Clear loading, success, error, and status states guide each user.",
+                },
+              ].map(({ icon: Icon, title, description }) => (
+                <div key={title} className="flex gap-4">
+                  <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-secondary text-secondary-foreground">
+                    <Icon size={20} />
+                  </div>
+                  <div>
+                    <h3 className="font-extrabold text-foreground">{title}</h3>
+                    <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                      {description}
+                    </p>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
-    </div>
+      <section className="px-4 pb-24 sm:px-6 lg:px-8 lg:pb-32">
+        <div className="relative mx-auto max-w-6xl overflow-hidden rounded-[2.25rem] bg-[#005f4c] px-6 py-14 text-center text-white shadow-[0_30px_80px_-35px_rgba(0,95,76,0.75)] sm:px-10 sm:py-18 lg:px-16">
+          <div
+            aria-hidden="true"
+            className="absolute -left-20 -top-28 size-64 rounded-full border border-white/15"
+          />
+          <div
+            aria-hidden="true"
+            className="absolute -left-10 -top-16 size-44 rounded-full border border-white/10"
+          />
+          <DotPattern className="absolute bottom-7 right-7 opacity-35" />
+
+          <div className="relative mx-auto max-w-3xl">
+            <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-white/12 text-emerald-100">
+              <UtensilsCrossed size={25} />
+            </div>
+            <h2 className="mt-7 text-3xl font-extrabold tracking-[-0.04em] sm:text-4xl lg:text-5xl">
+              Ready to be part of RestoManager?
+            </h2>
+            <p className="mx-auto mt-5 max-w-2xl text-base leading-8 text-emerald-50/80 sm:text-lg">
+              Discover approved restaurants as a customer, or create a
+              professional digital presence for your restaurant.
+            </p>
+            <div className="mt-9 flex flex-col justify-center gap-3 sm:flex-row">
+              <Link
+                to="/restaurants"
+                className="group inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-extrabold text-[#005f4c] transition hover:-translate-y-0.5 hover:bg-emerald-50"
+              >
+                Browse restaurants
+                <ArrowRight
+                  size={17}
+                  className="transition-transform group-hover:translate-x-1"
+                />
+              </Link>
+              <Link
+                to="/restaurant/register"
+                className="inline-flex min-h-12 items-center justify-center rounded-xl border border-white/20 bg-white/8 px-6 py-3 text-sm font-extrabold text-white transition hover:-translate-y-0.5 hover:bg-white/[0.14]"
+              >
+                Register a restaurant
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
   );
 }

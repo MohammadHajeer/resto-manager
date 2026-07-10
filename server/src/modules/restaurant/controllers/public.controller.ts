@@ -6,6 +6,9 @@ import { Category } from "@/modules/category/category.model.js";
 import { sendResponse } from "@/utils/sendResponse.js";
 import { getQueryArray } from "@/utils/getQueryArray.js";
 
+import { PipelineStage } from "mongoose";
+import { getRestaurantOpenStatusPipeline } from "@/utils/restaurantOpenStatusPipeline.js";
+
 const escapeRegex = (value: string) => {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 };
@@ -25,7 +28,7 @@ export const getPublicRestaurants = async (
     const search =
       typeof req.query.search === "string" ? req.query.search.trim() : "";
 
-    const isOpen =
+    const requestedOpenStatus =
       req.query.isOpen === "true"
         ? true
         : req.query.isOpen === "false"
@@ -38,10 +41,6 @@ export const getPublicRestaurants = async (
     const matchStage: Record<string, unknown> = {
       status: "approved",
     };
-
-    if (isOpen !== undefined) {
-      matchStage.isOpen = isOpen;
-    }
 
     if (search) {
       const searchRegex = new RegExp(escapeRegex(search), "i");
@@ -66,10 +65,24 @@ export const getPublicRestaurants = async (
       };
     }
 
-    const [result] = await Restaurant.aggregate([
+    const pipeline: PipelineStage[] = [
       {
         $match: matchStage,
       },
+
+      ...getRestaurantOpenStatusPipeline(),
+    ];
+
+    // Apply the open/closed filter after calculating the real status.
+    if (requestedOpenStatus !== undefined) {
+      pipeline.push({
+        $match: {
+          isOpen: requestedOpenStatus,
+        },
+      });
+    }
+
+    pipeline.push(
       {
         $sort: {
           isOpen: -1,
@@ -80,6 +93,9 @@ export const getPublicRestaurants = async (
         $project: {
           ownerId: 0,
           verification: 0,
+          currentDay: 0,
+          currentTime: 0,
+          todayOpeningHours: 0,
           __v: 0,
         },
       },
@@ -89,7 +105,9 @@ export const getPublicRestaurants = async (
           pagination: [{ $count: "total" }],
         },
       },
-    ]);
+    );
+
+    const [result] = await Restaurant.aggregate(pipeline);
 
     const restaurants = result?.data ?? [];
     const total = result?.pagination?.[0]?.total ?? 0;
@@ -122,12 +140,33 @@ export const getPublicRestaurantBySlug = async (
     const { slug } = req.params;
     const selectedCategorySlug = req.query.category?.trim();
 
-    const restaurant = await Restaurant.findOne({
-      slug,
-      status: "approved",
-    })
-      .select("-ownerId -verification -__v")
-      .lean();
+    const [restaurant] = await Restaurant.aggregate([
+      {
+        $match: {
+          slug,
+          status: "approved",
+        },
+      },
+
+      ...getRestaurantOpenStatusPipeline(),
+
+      {
+        $project: {
+          ownerId: 0,
+          verification: 0,
+          __v: 0,
+
+          // Remove temporary calculation fields.
+          currentDay: 0,
+          currentTime: 0,
+          todayOpeningHours: 0,
+        },
+      },
+
+      {
+        $limit: 1,
+      },
+    ]);
 
     if (!restaurant) {
       return res.status(404).json({
@@ -159,9 +198,13 @@ export const getPublicRestaurantBySlug = async (
 
     const menuItemFilter = {
       restaurantId: restaurant._id,
+
       categoryId: selectedCategory
         ? selectedCategory._id
-        : { $in: categoryIds },
+        : {
+            $in: categoryIds,
+          },
+
       isAvailable: true,
       deletedAt: null,
     };
@@ -174,7 +217,9 @@ export const getPublicRestaurantBySlug = async (
       .select(
         "_id categoryId name slug description price imageUrl ingredients availableAddons isAvailable",
       )
-      .sort({ createdAt: -1 })
+      .sort({
+        createdAt: -1,
+      })
       .lean();
 
     const menuItemsWithCategoryName = menuItems.map((menuItem) => {

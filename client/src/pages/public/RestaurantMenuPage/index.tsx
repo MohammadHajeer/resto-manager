@@ -2,11 +2,16 @@ import { useState } from "react";
 import { ArrowLeft, UtensilsCrossed } from "lucide-react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 
-import { MenuEmptyState } from "./MenuEmptyState";
+import {
+  MenuEmptyState,
+  type MenuEmptyStateVariant,
+} from "./MenuEmptyState";
 import { MenuFilters } from "./MenuFilters";
 import { MenuItemCard } from "./MenuItemCard";
 import { MenuItemDetailsSheet } from "./MenuItemDetailsSheet";
 import { RestaurantBrandingHeader } from "./RestaurantBrandingHeader";
+import { RestaurantMenuPageSkeleton } from "./RestaurantMenuPageSkeleton";
+import { RestaurantOpeningHours } from "./RestaurantOpeningHours";
 import { usePublicRestaurantBySlug } from "@/hooks/public/useRestaurants";
 import type { PublicMenuItem } from "@/services/public/public.types";
 
@@ -16,21 +21,20 @@ export default function RestaurantMenuPage() {
   const [selectedItem, setSelectedItem] = useState<PublicMenuItem | null>(null);
 
   const category = searchParams.get("category");
-
-  const { data, isPending } = usePublicRestaurantBySlug(
+  const restaurantQuery = usePublicRestaurantBySlug(
     restaurantSlug ?? "",
     category,
   );
+  const fullMenuQuery = usePublicRestaurantBySlug(restaurantSlug ?? "", null);
+  const data = restaurantQuery.data;
+  const fullMenuData = fullMenuQuery.data;
 
-  const items = data?.menuItems ?? [];
-  const restaurantBranding = data?.restaurant;
+  const isInitialLoading =
+    (!data && restaurantQuery.isPending) ||
+    (Boolean(category) && !fullMenuData && fullMenuQuery.isPending);
 
-  if (isPending) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-lg font-medium text-muted-foreground">Loading...</p>
-      </div>
-    );
+  if (isInitialLoading) {
+    return <RestaurantMenuPageSkeleton />;
   }
 
   if (!data) {
@@ -43,6 +47,16 @@ export default function RestaurantMenuPage() {
     );
   }
 
+  const items = data.menuItems;
+  const originalItems = fullMenuData?.menuItems ?? data.menuItems;
+  const hasActiveFilters = Array.from(searchParams.values()).some((value) =>
+    Boolean(value.trim()),
+  );
+  const emptyStateVariant = getEmptyStateVariant({
+    originalItemCount: originalItems.length,
+    selectedCategory: category,
+  });
+
   return (
     <div
       className="min-h-screen bg-background text-foreground"
@@ -51,17 +65,23 @@ export default function RestaurantMenuPage() {
       <div className="mx-auto w-full max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
         <Link
           to="/restaurants"
-          className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/30"
+          className="inline-flex items-center gap-2 rounded-md text-sm font-medium text-muted-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/30"
         >
           <ArrowLeft className="size-4" aria-hidden="true" />
           All restaurants
         </Link>
       </div>
 
-      <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
-        <RestaurantBrandingHeader {...restaurantBranding!} />
+      <main className="mx-auto mb-8 w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+        <RestaurantBrandingHeader {...data.restaurant} />
 
-        <div className="mb-5 mt-10 flex items-center gap-3">
+        <div className="mt-5">
+          <RestaurantOpeningHours
+            openingHours={data.restaurant.openingHours}
+          />
+        </div>
+
+        <div className="mb-5 mt-9 flex items-center gap-3 sm:mt-10">
           <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
             <UtensilsCrossed className="size-4" aria-hidden="true" />
           </div>
@@ -78,7 +98,7 @@ export default function RestaurantMenuPage() {
         <MenuFilters categories={data.categories} />
 
         <div className="mb-5 mt-6 flex items-center justify-between gap-4">
-          <p className="text-sm font-medium text-foreground">
+          <p className="text-sm font-medium text-foreground" aria-live="polite">
             {items.length} {items.length === 1 ? "item" : "items"}
           </p>
           <p className="hidden text-xs text-muted-foreground sm:block">
@@ -88,13 +108,13 @@ export default function RestaurantMenuPage() {
 
         {items.length === 0 ? (
           <MenuEmptyState
-            isFiltered={category !== "All"}
-            onShowAll={() => {
-              setSearchParams((prev) => {
-                prev.delete("category");
-                return prev;
-              });
-            }}
+            variant={emptyStateVariant}
+            hasActiveFilters={hasActiveFilters}
+            onClearFilters={
+              hasActiveFilters
+                ? () => setSearchParams({}, { replace: true })
+                : undefined
+            }
           />
         ) : (
           <section
@@ -121,4 +141,16 @@ export default function RestaurantMenuPage() {
       />
     </div>
   );
+}
+
+function getEmptyStateVariant({
+  originalItemCount,
+  selectedCategory,
+}: {
+  originalItemCount: number;
+  selectedCategory: string | null;
+}): MenuEmptyStateVariant {
+  if (originalItemCount === 0) return "menu-unpublished";
+  if (selectedCategory) return "empty-category";
+  return "no-results";
 }

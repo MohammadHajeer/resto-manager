@@ -1,3 +1,5 @@
+import type { OpeningHour } from "../owner/owner.types";
+
 export type RestaurantFilterOption = {
   name: string;
   count: number;
@@ -29,6 +31,7 @@ export type PublicRestaurant = {
     floor?: string;
     locationUrl?: string | null;
   };
+  openingHours: OpeningHour[];
   createdAt: string;
   updatedAt: string;
 };

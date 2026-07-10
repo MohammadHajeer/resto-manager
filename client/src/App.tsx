@@ -54,6 +54,7 @@ import AdminUsersPage from "./pages/admin/AdminUsersPage";
 import NotFoundPage from "./pages/shared/NotFoundPage";
 import AddMenuItemPage from "./pages/owner/AddMenuItemPage";
 import EditMenuItemPage from "./pages/owner/EditMenuItemPage";
+import { AuthLayout } from "./components/layouts/AuthLayout";
 
 export default function App() {
   return (
@@ -63,21 +64,21 @@ export default function App() {
         <Route
           element={
             <GuestRoute>
-              <MainLayout />
+              <AuthLayout />
             </GuestRoute>
           }
         >
           <Route path="/login" element={<LoginPage />} />
           <Route path="/sign-up" element={<CustomerSignUpPage />} />
+          <Route
+            path="/restaurant/register"
+            element={<RestaurantRegisterPage />}
+          />
         </Route>
 
         {/* Public & Customer Browsing Routes */}
         <Route element={<MainLayout />}>
           <Route path="/" element={<LandingPage />} />
-          <Route
-            path="/restaurant/register"
-            element={<RestaurantRegisterPage />}
-          />
           <Route path="/restaurants" element={<RestaurantListingPage />} />
           <Route
             path="/restaurants/:restaurantSlug"

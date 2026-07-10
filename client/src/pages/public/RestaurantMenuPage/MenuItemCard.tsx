@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { ImageIcon } from "lucide-react";
 
 import type { PublicMenuItem } from "@/services/public/public.types";
@@ -8,6 +9,11 @@ type MenuItemCardProps = {
 };
 
 export function MenuItemCard({ item, onSelect }: MenuItemCardProps) {
+  const [failedImageUrl, setFailedImageUrl] = useState<string | null>(null);
+  const hasImage = Boolean(
+    item.imageUrl && failedImageUrl !== item.imageUrl,
+  );
+
   return (
     <button
       type="button"
@@ -16,18 +22,19 @@ export function MenuItemCard({ item, onSelect }: MenuItemCardProps) {
       aria-label={`View details for ${item.name}`}
     >
       <div className="relative aspect-16/10 w-full overflow-hidden bg-muted">
-        {item.imageUrl ? (
+        {hasImage ? (
           <img
-            src={item.imageUrl}
-            alt={item.name}
+            src={item.imageUrl ?? ""}
+            alt={`Photo of ${item.name}`}
             loading="lazy"
             referrerPolicy="no-referrer"
+            onError={() => setFailedImageUrl(item.imageUrl)}
             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
           />
         ) : (
-          <div className="flex h-full flex-col items-center justify-center gap-2 text-muted-foreground">
+          <div className="flex h-full flex-col items-center justify-center gap-2 bg-linear-to-br from-muted to-secondary/40 text-muted-foreground">
             <ImageIcon className="size-8" aria-hidden="true" />
-            <span className="text-xs font-medium">Image coming soon</span>
+            <span className="text-xs font-medium">Image not available</span>
           </div>
         )}
         <span className="absolute left-3 top-3 rounded-full border border-border bg-card/95 px-2.5 py-1 text-xs font-semibold text-foreground shadow-sm">
