@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { addressBaseSchema, objectIdSchema, phoneSchema, quantitySchema, } from "./common.schema.js";
+import { ingredientSchema } from "./menu-item.schema.js";
 export const orderStatusSchema = z.enum([
     "pending",
     "accepted",
