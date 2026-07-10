@@ -134,6 +134,7 @@ export default function RestaurantMenuPage() {
 
       <MenuItemDetailsSheet
         item={selectedItem}
+        isRestaurantOpen={data.restaurant.isOpen}
         onOpenChange={(open) => {
           if (!open) setSelectedItem(null);
         }}
