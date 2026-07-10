@@ -209,8 +209,17 @@ export default function CustomerProfilePage() {
                   </div>
                 </div>
 
+                <Link
+                  to="/addresses"
+                  className="mt-2 flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium text-foreground transition-all hover:bg-accent hover:text-accent-foreground"
+                >
+                  <span className="flex size-9 items-center justify-center rounded-xl bg-muted text-muted-foreground">
+                    <MapPin className="size-4" aria-hidden="true" />
+                  </span>
+                  Saved Addresses
+                </Link>
+
                 {[
-                  { label: "Saved Addresses", icon: MapPin },
                   { label: "Payment Methods", icon: CreditCard },
                   { label: "Preferences", icon: Settings2 },
                 ].map(({ label, icon: Icon }) => (

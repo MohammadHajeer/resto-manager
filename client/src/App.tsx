@@ -37,6 +37,7 @@ import CartPage from "./pages/customer/CartPage";
 import CheckoutPage from "./pages/customer/CheckoutPage";
 import OrderConfirmationPage from "./pages/customer/OrderConfirmationPage";
 import CustomerProfilePage from "./pages/customer/CustomerProfilePage";
+import AddressesPage from "./pages/customer/AddressesPage";
 import CustomerOrderHistoryPage from "./pages/customer/CustomerOrderHistoryPage";
 import CustomerOrderDetailsPage from "./pages/customer/CustomerOrderDetailsPage";
 
@@ -114,6 +115,7 @@ export default function App() {
             element={<OrderConfirmationPage />}
           />
           <Route path="/profile" element={<CustomerProfilePage />} />
+          <Route path="/addresses" element={<AddressesPage />} />
           <Route path="/orders" element={<CustomerOrderHistoryPage />} />
           <Route
             path="/orders/:orderId"
