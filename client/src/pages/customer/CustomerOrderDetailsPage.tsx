@@ -1,5 +1,6 @@
 import {
   ArrowLeft,
+  Banknote,
   Check,
   ChefHat,
   CircleCheck,
@@ -214,6 +215,10 @@ function OrderHeader({ order }: { order: CustomerOrder }) {
  * address, note, and totals.
  */
 export default function CustomerOrderDetailsPage() {
+  const { orderId } = useParams<{ orderId: string }>();
+
+  const { data: order, isPending } = useCustomerOrderById(orderId ?? null);
+
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
       <Link
@@ -318,6 +323,18 @@ export default function CustomerOrderDetailsPage() {
                   <dt className="font-semibold text-foreground">Total</dt>
                   <dd className="font-bold text-foreground">
                     {orderCurrencyFormatter.format(order.totalPrice)}
+                  </dd>
+                </div>
+
+                {/* Display-only payment placeholder — Cash on Delivery is the
+                    platform's only method; nothing is stored or sent for it. */}
+                <div className="flex items-center justify-between border-t border-border pt-2.5">
+                  <dt className="inline-flex items-center gap-1.5 text-muted-foreground">
+                    <Banknote className="size-4" aria-hidden="true" />
+                    Payment method
+                  </dt>
+                  <dd className="font-medium text-foreground">
+                    Cash on Delivery
                   </dd>
                 </div>
               </dl>

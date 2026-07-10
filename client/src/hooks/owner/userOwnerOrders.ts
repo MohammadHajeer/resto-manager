@@ -81,27 +81,31 @@ export const useUpdateOwnerOrderStatus = () => {
         (oldData) => {
           if (!oldData) return oldData;
 
+          let movedOrder: OwnerKitchenOrder | null = null;
+
           const nextColumns: Record<KitchenStatus, OwnerKitchenOrder[]> = {
             pending: [],
             preparing: [],
             ready: [],
           };
 
-          const movedOrder =
-            oldData.columns.pending.find((order) => order._id === orderId) ??
-            oldData.columns.preparing.find((order) => order._id === orderId) ??
-            oldData.columns.ready.find((order) => order._id === orderId);
-
           for (const columnStatus of ["pending", "preparing", "ready"] as const) {
             nextColumns[columnStatus] = oldData.columns[columnStatus].filter(
-              (order) => order._id !== orderId,
+              (order) => {
+                if (order._id === orderId) {
+                  movedOrder = order;
+                  return false;
+                }
+
+                return true;
+              },
             );
           }
 
           if (!movedOrder) return oldData;
 
           const updatedOrder: OwnerKitchenOrder = {
-            ...movedOrder,
+            ...(movedOrder as OwnerKitchenOrder),
             status,
             nextStatus: getNextStatus(status),
             nextActionLabel: getNextActionLabel(status),

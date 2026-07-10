@@ -17,6 +17,7 @@ export type CustomerOrderItem = {
   basePrice: number;
   quantity: number;
   selectedAddons: CustomerOrderAddon[];
+  removedIngredients: string[];
   itemTotal: number;
 };
 
@@ -63,6 +64,7 @@ export type CreateOrderItemInput = {
   menuItemId: string;
   quantity: number;
   selectedAddonNames?: string[];
+  removedIngredientNames?: string[];
 };
 
 export type CreateOrderInput = {
