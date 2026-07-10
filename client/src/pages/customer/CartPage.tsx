@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   ArrowLeft,
   ArrowRight,
@@ -191,6 +192,10 @@ export default function CartPage() {
   const restaurantName = useCartStore((state) => state.restaurantName);
   const clearCart = useCartStore((state) => state.clearCart);
 
+  // AlertDialogAction doesn't auto-close the dialog (unlike Cancel), so we
+  // control it locally and close it right when the clear is confirmed.
+  const [isClearDialogOpen, setIsClearDialogOpen] = useState(false);
+
   const subtotal = calculateCartSubtotal(items);
 
   // Delivery fee is fixed to 0 in the MVP; the server applies the same rule
@@ -228,7 +233,7 @@ export default function CartPage() {
           </p>
         </div>
 
-        <AlertDialog>
+        <AlertDialog open={isClearDialogOpen} onOpenChange={setIsClearDialogOpen}>
           <AlertDialogTrigger
             render={
               <Button variant="ghost" className="w-fit text-muted-foreground" />
@@ -250,7 +255,10 @@ export default function CartPage() {
             <AlertDialogFooter>
               <AlertDialogCancel>Keep items</AlertDialogCancel>
               <AlertDialogAction
-                onClick={clearCart}
+                onClick={() => {
+                  setIsClearDialogOpen(false);
+                  clearCart();
+                }}
                 className="bg-destructive/10 text-destructive hover:bg-destructive/20"
               >
                 Clear cart
