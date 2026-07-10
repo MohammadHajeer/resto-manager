@@ -22,6 +22,9 @@ import RequireApprovedOwner from "./routes/RequireApprovedOwner";
 import LandingPage from "./pages/public/LandingPage";
 import RestaurantListingPage from "./pages/public/RestaurantListingPage";
 import RestaurantMenuPage from "./pages/public/RestaurantMenuPage";
+import Privacy from "./pages/public/Privacy";
+import Terms from "./pages/public/Terms";
+import Support from "./pages/public/Support";
 
 // Pages: Auth
 import LoginPage from "./pages/auth/LoginPage";
@@ -79,6 +82,10 @@ export default function App() {
         {/* Public & Customer Browsing Routes */}
         <Route element={<MainLayout />}>
           <Route path="/" element={<LandingPage />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/support" element={<Support />} />
+
           <Route path="/restaurants" element={<RestaurantListingPage />} />
           <Route
             path="/restaurants/:restaurantSlug"
