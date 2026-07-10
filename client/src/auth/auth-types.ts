@@ -33,7 +33,7 @@ export function getDashboardPath(
     case "restaurant_owner":
       return "/owner/dashboard";
     case "customer":
-      return "/restaurants";
+      return "/profile";
     default:
       return "/";
   }

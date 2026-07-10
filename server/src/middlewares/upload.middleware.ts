@@ -35,3 +35,5 @@ export const uploadRestaurantProfileFiles = upload.fields([
   { name: "logoFile", maxCount: 1 },
   { name: "bannerFile", maxCount: 1 },
 ]);
+
+export const uploadMenuItemImage = upload.single("imageFile");

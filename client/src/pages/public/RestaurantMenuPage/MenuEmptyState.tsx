@@ -1,31 +1,70 @@
-import { UtensilsCrossed } from "lucide-react";
+import { CookingPot, LayoutGrid, SearchX } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
+export type MenuEmptyStateVariant =
+  | "menu-unpublished"
+  | "empty-category"
+  | "no-results";
+
 type MenuEmptyStateProps = {
-  isFiltered: boolean;
-  onShowAll: () => void;
+  variant: MenuEmptyStateVariant;
+  hasActiveFilters?: boolean;
+  onClearFilters?: () => void;
 };
 
-export function MenuEmptyState({ isFiltered, onShowAll }: MenuEmptyStateProps) {
+const emptyStateContent = {
+  "menu-unpublished": {
+    title: "Menu coming soon",
+    description:
+      "This restaurant has not published its menu yet. Please check again later.",
+    icon: CookingPot,
+  },
+  "empty-category": {
+    title: "Nothing in this category yet",
+    description:
+      "Try selecting another category to explore the restaurant’s menu.",
+    icon: LayoutGrid,
+  },
+  "no-results": {
+    title: "No menu items found",
+    description: "Try changing or clearing your current filters.",
+    icon: SearchX,
+  },
+} satisfies Record<
+  MenuEmptyStateVariant,
+  { title: string; description: string; icon: typeof CookingPot }
+>;
+
+export function MenuEmptyState({
+  variant,
+  hasActiveFilters = false,
+  onClearFilters,
+}: MenuEmptyStateProps) {
+  const { title, description, icon: Icon } = emptyStateContent[variant];
+
   return (
-    <div className="flex min-h-64 flex-col items-center justify-center rounded-xl border border-dashed border-border bg-card px-6 py-12 text-center">
+    <section
+      className="flex min-h-64 flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card px-6 py-12 text-center"
+      aria-labelledby="menu-empty-title"
+    >
       <div className="flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary">
-        <UtensilsCrossed className="size-5" aria-hidden="true" />
+        <Icon className="size-5" aria-hidden="true" />
       </div>
-      <h2 className="mt-4 font-heading text-lg font-semibold text-foreground">
-        {isFiltered ? "No items in this category" : "No menu items available"}
+      <h2
+        id="menu-empty-title"
+        className="mt-4 font-heading text-lg font-semibold text-foreground"
+      >
+        {title}
       </h2>
-      <p className="mt-2 max-w-sm text-sm leading-6 text-muted-foreground">
-        {isFiltered
-          ? "Try another category or return to the full menu."
-          : "This restaurant has not added any menu items yet."}
+      <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">
+        {description}
       </p>
-      {isFiltered && (
-        <Button type="button" className="mt-5" onClick={onShowAll}>
-          Show all items
+      {hasActiveFilters && onClearFilters && (
+        <Button type="button" className="mt-5" onClick={onClearFilters}>
+          Clear filters
         </Button>
       )}
-    </div>
+    </section>
   );
 }

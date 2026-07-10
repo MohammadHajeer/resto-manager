@@ -8,6 +8,7 @@ const orderAddonSchema = new Schema(
       trim: true,
       maxlength: 60,
     },
+
     price: {
       type: Number,
       required: true,
@@ -44,13 +45,16 @@ const orderItemSchema = new Schema(
       max: 99,
     },
 
-    removedIngredients: {
-      type: [String],
+    selectedAddons: {
+      type: [orderAddonSchema],
       default: [],
     },
 
-    addedIngredients: {
-      type: [orderAddonSchema],
+    // RES-82: ingredients the customer removed from this line item.
+    // Snapshot of names only (no pricing impact) — validated against the
+    // menu item's own ingredient list at order creation time.
+    removedIngredients: {
+      type: [String],
       default: [],
     },
 
@@ -107,7 +111,8 @@ const deliveryAddressSchema = new Schema(
 const orderSchema = new Schema(
   {
     customerId: {
-      type: String,
+      type: Schema.Types.ObjectId,
+      ref: "AuthUser",
       required: true,
       index: true,
     },
@@ -117,12 +122,6 @@ const orderSchema = new Schema(
       ref: "Restaurant",
       required: true,
       index: true,
-    },
-
-    addressId: {
-      type: Schema.Types.ObjectId,
-      ref: "Address",
-      default: null,
     },
 
     deliveryAddress: {
@@ -174,14 +173,7 @@ const orderSchema = new Schema(
       index: true,
     },
 
-    note: {
-      type: String,
-      trim: true,
-      default: "",
-      maxlength: 500,
-    },
-
-    cancellationReason: {
+    customerNote: {
       type: String,
       trim: true,
       default: "",
@@ -193,11 +185,13 @@ const orderSchema = new Schema(
   },
 );
 
-orderSchema.index({ createdAt: -1 });
+orderSchema.index({ restaurantId: 1, createdAt: -1 });
+orderSchema.index({ customerId: 1, createdAt: -1 });
+orderSchema.index({ status: 1, createdAt: -1 });
 
 type OrderDocument = InferSchemaType<typeof orderSchema> & {
+  _id: Types.ObjectId;
   restaurantId: Types.ObjectId;
-  addressId?: Types.ObjectId | null;
 };
 
 const Order = model("Order", orderSchema);

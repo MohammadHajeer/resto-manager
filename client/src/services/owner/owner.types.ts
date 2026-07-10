@@ -3,6 +3,9 @@ import type {
   UpdateMenuItemInput,
 } from "@restomanager/validators";
 
+// 
+// Owner Restaurant Types
+//
 export const ownerRestaurantStatuses = [
   "pending",
   "approved",
@@ -89,6 +92,9 @@ export type UpdateRestaurantActivityPayload = {
   isOpen: boolean;
 };
 
+//
+// Owner Menu Types
+//
 export type OwnerCategory = {
   _id: string;
   name: string;
@@ -99,6 +105,9 @@ export type OwnerCategory = {
   updatedAt: string;
 };
 
+// 
+// Owner Menu Types
+// 
 export type CreateMenuItemFormInput = Omit<CreateMenuItemInput, "imageUrl"> & {
   imageFile?: File | null;
   imageUrl?: string | null;
@@ -140,6 +149,14 @@ export type OwnerMenuItem = {
   updatedAt: string;
 };
 
+export type OwnerCategorySection = {
+  _id: string;
+  name: string;
+  description?: string;
+  slug: string;
+  isActive: boolean;
+};
+
 export type OwnerMenuSection = {
   _id: string;
   name: string;
@@ -168,4 +185,80 @@ export type OwnerRestaurantMenu = {
 export type OwnerRestaurantMenuParams = {
   search?: string;
   status?: OwnerMenuStatusFilter;
+};
+
+// 
+// Owner Orders Types
+// 
+export type OwnerOrderStatus =
+  | "pending"
+  | "accepted"
+  | "preparing"
+  | "ready"
+  | "completed"
+  | "cancelled";
+
+export type KitchenStatus = "pending" | "preparing" | "ready";
+
+export type OwnerOrderAddon = {
+  name: string;
+  price: number;
+};
+
+export type OwnerOrderItem = {
+  menuItemId: string;
+  name: string;
+  basePrice: number;
+  quantity: number;
+  selectedAddons: OwnerOrderAddon[];
+  itemTotal: number;
+};
+
+export type OwnerDeliveryAddress = {
+  label: string;
+  city: string;
+  street: string;
+  building: string;
+  floor: string;
+  phoneNumber: string;
+};
+
+export type OwnerKitchenOrder = {
+  _id: string;
+  orderCode: string;
+
+  customerId: string;
+
+  deliveryAddress: OwnerDeliveryAddress;
+
+  items: OwnerOrderItem[];
+  itemCount: number;
+
+  subtotal: number;
+  deliveryFee: number;
+  totalPrice: number;
+
+  status: OwnerOrderStatus;
+  customerNote: string;
+
+  nextStatus: OwnerOrderStatus | null;
+  nextActionLabel: string | null;
+
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type OwnerKitchenOrdersResponse = {
+  counts: {
+    pending: number;
+    preparing: number;
+    ready: number;
+    total: number;
+  };
+
+  columns: Record<KitchenStatus, OwnerKitchenOrder[]>;
+};
+
+export type UpdateOwnerOrderStatusInput = {
+  status: OwnerOrderStatus;
 };

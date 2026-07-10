@@ -24,3 +24,15 @@ export const usePublicRestaurants = (params: {
     placeholderData: keepPreviousData,
   });
 };
+
+export const usePublicRestaurantBySlug = (
+  slug: string,
+  category?: string | null,
+) => {
+  return useQuery({
+    queryKey: queryKeys.public.restaurants.slug(slug, category),
+    queryFn: () => publicService.getRestaurantBySlug(slug, category),
+    enabled: Boolean(slug),
+    placeholderData: keepPreviousData,
+  });
+};

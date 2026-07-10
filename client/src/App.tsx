@@ -22,6 +22,9 @@ import RequireApprovedOwner from "./routes/RequireApprovedOwner";
 import LandingPage from "./pages/public/LandingPage";
 import RestaurantListingPage from "./pages/public/RestaurantListingPage";
 import RestaurantMenuPage from "./pages/public/RestaurantMenuPage";
+import Privacy from "./pages/public/Privacy";
+import Terms from "./pages/public/Terms";
+import Support from "./pages/public/Support";
 
 // Pages: Auth
 import LoginPage from "./pages/auth/LoginPage";
@@ -42,7 +45,6 @@ import OwnerDashboardPage from "./pages/owner/OwnerDashboardPage";
 import RestaurantProfilePage from "./pages/owner/RestaurantProfilePage";
 import MenuManagementPage from "./pages/owner/MenuManagementPage";
 import OwnerOrdersPage from "./pages/owner/OwnerOrdersPage";
-import OwnerOrderDetailsPage from "./pages/owner/OwnerOrderDetailsPage";
 import OwnerStatusPage from "./pages/owner/OwnerStatusPage";
 
 // Pages: Admin
@@ -53,6 +55,9 @@ import AdminUsersPage from "./pages/admin/AdminUsersPage";
 
 // Pages: Shared
 import NotFoundPage from "./pages/shared/NotFoundPage";
+import AddMenuItemPage from "./pages/owner/AddMenuItemPage";
+import EditMenuItemPage from "./pages/owner/EditMenuItemPage";
+import { AuthLayout } from "./components/layouts/AuthLayout";
 
 export default function App() {
   return (
@@ -62,21 +67,25 @@ export default function App() {
         <Route
           element={
             <GuestRoute>
-              <MainLayout />
+              <AuthLayout />
             </GuestRoute>
           }
         >
           <Route path="/login" element={<LoginPage />} />
           <Route path="/sign-up" element={<CustomerSignUpPage />} />
+          <Route
+            path="/restaurant/register"
+            element={<RestaurantRegisterPage />}
+          />
         </Route>
 
         {/* Public & Customer Browsing Routes */}
         <Route element={<MainLayout />}>
           <Route path="/" element={<LandingPage />} />
-          <Route
-            path="/restaurant/register"
-            element={<RestaurantRegisterPage />}
-          />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/support" element={<Support />} />
+
           <Route path="/restaurants" element={<RestaurantListingPage />} />
           <Route
             path="/restaurants/:restaurantSlug"
@@ -142,11 +151,12 @@ export default function App() {
             <Route path="/owner/dashboard" element={<OwnerDashboardPage />} />
             <Route path="/owner/profile" element={<RestaurantProfilePage />} />
             <Route path="/owner/menu" element={<MenuManagementPage />} />
-            <Route path="/owner/orders" element={<OwnerOrdersPage />} />
+            <Route path="/owner/menu/new" element={<AddMenuItemPage />} />
             <Route
-              path="/owner/orders/:orderId"
-              element={<OwnerOrderDetailsPage />}
+              path="/owner/menu/:menuItemId/edit"
+              element={<EditMenuItemPage />}
             />
+            <Route path="/owner/orders" element={<OwnerOrdersPage />} />
           </Route>
         </Route>
 
@@ -179,9 +189,7 @@ export default function App() {
         </Route>
 
         {/* Fallback Catch-All Route */}
-        <Route element={<MainLayout />}>
-          <Route path="*" element={<NotFoundPage />} />
-        </Route>
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
       <Toaster richColors position="bottom-right" />
     </BrowserRouter>

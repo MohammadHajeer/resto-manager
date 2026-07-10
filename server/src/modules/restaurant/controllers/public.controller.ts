@@ -6,6 +6,9 @@ import { Category } from "@/modules/category/category.model.js";
 import { sendResponse } from "@/utils/sendResponse.js";
 import { getQueryArray } from "@/utils/getQueryArray.js";
 
+import { PipelineStage } from "mongoose";
+import { getRestaurantOpenStatusPipeline } from "@/utils/restaurantOpenStatusPipeline.js";
+
 const escapeRegex = (value: string) => {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 };
@@ -25,7 +28,7 @@ export const getPublicRestaurants = async (
     const search =
       typeof req.query.search === "string" ? req.query.search.trim() : "";
 
-    const isOpen =
+    const requestedOpenStatus =
       req.query.isOpen === "true"
         ? true
         : req.query.isOpen === "false"
@@ -38,10 +41,6 @@ export const getPublicRestaurants = async (
     const matchStage: Record<string, unknown> = {
       status: "approved",
     };
-
-    if (isOpen !== undefined) {
-      matchStage.isOpen = isOpen;
-    }
 
     if (search) {
       const searchRegex = new RegExp(escapeRegex(search), "i");
@@ -66,10 +65,24 @@ export const getPublicRestaurants = async (
       };
     }
 
-    const [result] = await Restaurant.aggregate([
+    const pipeline: PipelineStage[] = [
       {
         $match: matchStage,
       },
+
+      ...getRestaurantOpenStatusPipeline(),
+    ];
+
+    // Apply the open/closed filter after calculating the real status.
+    if (requestedOpenStatus !== undefined) {
+      pipeline.push({
+        $match: {
+          isOpen: requestedOpenStatus,
+        },
+      });
+    }
+
+    pipeline.push(
       {
         $sort: {
           isOpen: -1,
@@ -80,6 +93,9 @@ export const getPublicRestaurants = async (
         $project: {
           ownerId: 0,
           verification: 0,
+          currentDay: 0,
+          currentTime: 0,
+          todayOpeningHours: 0,
           __v: 0,
         },
       },
@@ -89,7 +105,9 @@ export const getPublicRestaurants = async (
           pagination: [{ $count: "total" }],
         },
       },
-    ]);
+    );
+
+    const [result] = await Restaurant.aggregate(pipeline);
 
     const restaurants = result?.data ?? [];
     const total = result?.pagination?.[0]?.total ?? 0;
@@ -114,19 +132,41 @@ export const getPublicRestaurants = async (
 };
 
 export const getPublicRestaurantBySlug = async (
-  req: Request<{ slug: string }>,
+  req: Request<{ slug: string }, unknown, unknown, { category?: string }>,
   res: Response,
   next: NextFunction,
 ) => {
   try {
     const { slug } = req.params;
+    const selectedCategorySlug = req.query.category?.trim();
 
-    const restaurant = await Restaurant.findOne({
-      slug,
-      status: "approved",
-    })
-      .select("-ownerId -verification -__v")
-      .lean();
+    const [restaurant] = await Restaurant.aggregate([
+      {
+        $match: {
+          slug,
+          status: "approved",
+        },
+      },
+
+      ...getRestaurantOpenStatusPipeline(),
+
+      {
+        $project: {
+          ownerId: 0,
+          verification: 0,
+          __v: 0,
+
+          // Remove temporary calculation fields.
+          currentDay: 0,
+          currentTime: 0,
+          todayOpeningHours: 0,
+        },
+      },
+
+      {
+        $limit: 1,
+      },
+    ]);
 
     if (!restaurant) {
       return res.status(404).json({
@@ -145,40 +185,61 @@ export const getPublicRestaurantBySlug = async (
 
     const categoryIds = categories.map((category) => category._id);
 
-    const menuItems = await MenuItem.find({
+    const selectedCategory = selectedCategorySlug
+      ? categories.find((category) => category.slug === selectedCategorySlug)
+      : null;
+
+    if (selectedCategorySlug && !selectedCategory) {
+      return res.status(404).json({
+        success: false,
+        message: "Category not found for this restaurant",
+      });
+    }
+
+    const menuItemFilter = {
       restaurantId: restaurant._id,
-      categoryId: { $in: categoryIds },
+
+      categoryId: selectedCategory
+        ? selectedCategory._id
+        : {
+            $in: categoryIds,
+          },
+
       isAvailable: true,
       deletedAt: null,
-    })
+    };
+
+    const categoryNameById = new Map(
+      categories.map((category) => [String(category._id), category.name]),
+    );
+
+    const menuItems = await MenuItem.find(menuItemFilter)
       .select(
         "_id categoryId name slug description price imageUrl ingredients availableAddons isAvailable",
       )
-      .sort({ createdAt: -1 })
+      .sort({
+        createdAt: -1,
+      })
       .lean();
 
-    const menuItemsByCategoryId = new Map<string, typeof menuItems>();
+    const menuItemsWithCategoryName = menuItems.map((menuItem) => {
+      const { categoryId, ...restMenuItem } = menuItem;
 
-    for (const menuItem of menuItems) {
-      const categoryId = menuItem.categoryId.toString();
-
-      const existingItems = menuItemsByCategoryId.get(categoryId) ?? [];
-      existingItems.push(menuItem);
-
-      menuItemsByCategoryId.set(categoryId, existingItems);
-    }
-
-    const categoriesWithMenuItems = categories.map((category) => ({
-      ...category,
-      menuItems: menuItemsByCategoryId.get(category._id.toString()) ?? [],
-    }));
+      return {
+        ...restMenuItem,
+        categoryName:
+          categoryNameById.get(String(categoryId)) ?? "Uncategorized",
+      };
+    });
 
     sendResponse(res, 200, {
       success: true,
       message: "Restaurant fetched successfully",
       data: {
         restaurant,
-        categories: categoriesWithMenuItems,
+        categories,
+        menuItems: menuItemsWithCategoryName,
+        totalItems: menuItems.length,
       },
     });
   } catch (error) {
@@ -186,7 +247,7 @@ export const getPublicRestaurantBySlug = async (
   }
 };
 
-export const getPublicRestaurantFilterOptions = async (
+export const getPublicRestaurantsFilterOptions = async (
   _req: Request,
   res: Response,
   next: NextFunction,

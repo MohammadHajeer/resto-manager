@@ -1,47 +1,103 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { ArrowLeft, UtensilsCrossed } from "lucide-react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
+import { toast } from "sonner";
 
-import { MenuEmptyState } from "./MenuEmptyState";
+import {
+  MenuEmptyState,
+  type MenuEmptyStateVariant,
+} from "./MenuEmptyState";
 import { MenuFilters } from "./MenuFilters";
 import { MenuItemCard } from "./MenuItemCard";
 import { MenuItemDetailsSheet } from "./MenuItemDetailsSheet";
-import {
-  RestaurantBrandingHeader,
-  type RestaurantBranding,
-} from "./RestaurantBrandingHeader";
-import { mockMenuItems, type MockMenuItem } from "./mockMenuData";
-
-const categories = [
-  "All",
-  ...Array.from(new Set(mockMenuItems.map((item) => item.category))),
-];
-
-const restaurantBranding: RestaurantBranding = {
-  name: "Green Bowl Bistro",
-  slug: "green-bowl-bistro",
-  status: "pending",
-  description:
-    "A modern healthy-food restaurant serving fresh bowls, salads, wraps, and juices.",
-  bannerUrl:
-    "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1172&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-  logoUrl:
-    "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=300&auto=format&fit=crop",
-  cuisineTypes: ["Healthy", "Salads", "Wraps", "Juices"],
-};
+import { RestaurantBrandingHeader } from "./RestaurantBrandingHeader";
+import { RestaurantMenuPageSkeleton } from "./RestaurantMenuPageSkeleton";
+import { RestaurantOpeningHours } from "./RestaurantOpeningHours";
+import { usePublicRestaurantBySlug } from "@/hooks/public/useRestaurants";
+import { useCartStore } from "@/stores/useCartStore";
+import type {
+  PublicMenuAddon,
+  PublicMenuItem,
+} from "@/services/public/public.types";
 
 export default function RestaurantMenuPage() {
   const { restaurantSlug } = useParams<{ restaurantSlug: string }>();
-  const [selectedCategory, setSelectedCategory] = useState("All");
-  const [selectedItem, setSelectedItem] = useState<MockMenuItem | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [selectedItem, setSelectedItem] = useState<PublicMenuItem | null>(null);
 
-  const visibleItems = useMemo(
-    () =>
-      selectedCategory === "All"
-        ? mockMenuItems
-        : mockMenuItems.filter((item) => item.category === selectedCategory),
-    [selectedCategory],
+  const category = searchParams.get("category");
+  const restaurantQuery = usePublicRestaurantBySlug(
+    restaurantSlug ?? "",
+    category,
   );
+  const fullMenuQuery = usePublicRestaurantBySlug(restaurantSlug ?? "", null);
+  const data = restaurantQuery.data;
+  const fullMenuData = fullMenuQuery.data;
+
+  const addItem = useCartStore((state) => state.addItem);
+  const cartRestaurantId = useCartStore((state) => state.restaurantId);
+
+  const isInitialLoading =
+    (!data && restaurantQuery.isPending) ||
+    (Boolean(category) && !fullMenuData && fullMenuQuery.isPending);
+
+  if (isInitialLoading) {
+    return <RestaurantMenuPageSkeleton />;
+  }
+
+  if (!data) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <p className="text-lg font-medium text-muted-foreground">
+          Restaurant not found
+        </p>
+      </div>
+    );
+  }
+
+  const items = data.menuItems;
+  const originalItems = fullMenuData?.menuItems ?? data.menuItems;
+  const hasActiveFilters = Array.from(searchParams.values()).some((value) =>
+    Boolean(value.trim()),
+  );
+  const emptyStateVariant = getEmptyStateVariant({
+    originalItemCount: originalItems.length,
+    selectedCategory: category,
+  });
+
+  /**
+   * RES-84: push the customized item into the cart store.
+   * The store enforces the one-restaurant-per-cart rule; we only surface
+   * the right feedback message for each case.
+   */
+  const handleAddToCart = (payload: {
+    item: PublicMenuItem;
+    quantity: number;
+    selectedAddons: PublicMenuAddon[];
+    removedIngredients: string[];
+  }) => {
+    const isReplacingCart =
+      cartRestaurantId !== null && cartRestaurantId !== data.restaurant._id;
+
+    addItem({
+      restaurantId: data.restaurant._id,
+      restaurantSlug: data.restaurant.slug,
+      restaurantName: data.restaurant.name,
+      item: payload.item,
+      quantity: payload.quantity,
+      selectedAddons: payload.selectedAddons,
+      removedIngredients: payload.removedIngredients,
+    });
+
+    if (isReplacingCart) {
+      toast.info(
+        `Your cart was replaced with items from ${data.restaurant.name}. You can order from one restaurant at a time.`,
+      );
+      return;
+    }
+
+    toast.success(`${payload.item.name} added to cart`);
+  };
 
   return (
     <div
@@ -51,17 +107,23 @@ export default function RestaurantMenuPage() {
       <div className="mx-auto w-full max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
         <Link
           to="/restaurants"
-          className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/30"
+          className="inline-flex items-center gap-2 rounded-md text-sm font-medium text-muted-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/30"
         >
           <ArrowLeft className="size-4" aria-hidden="true" />
           All restaurants
         </Link>
       </div>
 
-      <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
-        <RestaurantBrandingHeader branding={restaurantBranding} />
+      <main className="mx-auto mb-8 w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+        <RestaurantBrandingHeader {...data.restaurant} />
 
-        <div className="mb-5 mt-10 flex items-center gap-3">
+        <div className="mt-5">
+          <RestaurantOpeningHours
+            openingHours={data.restaurant.openingHours}
+          />
+        </div>
+
+        <div className="mb-5 mt-9 flex items-center gap-3 sm:mt-10">
           <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
             <UtensilsCrossed className="size-4" aria-hidden="true" />
           </div>
@@ -75,34 +137,35 @@ export default function RestaurantMenuPage() {
           </div>
         </div>
 
-        <MenuFilters
-          categories={categories}
-          selectedCategory={selectedCategory}
-          onCategoryChange={setSelectedCategory}
-        />
+        <MenuFilters categories={data.categories} />
 
         <div className="mb-5 mt-6 flex items-center justify-between gap-4">
-          <p className="text-sm font-medium text-foreground">
-            {visibleItems.length} {visibleItems.length === 1 ? "item" : "items"}
+          <p className="text-sm font-medium text-foreground" aria-live="polite">
+            {items.length} {items.length === 1 ? "item" : "items"}
           </p>
           <p className="hidden text-xs text-muted-foreground sm:block">
             Select an item to view its details
           </p>
         </div>
 
-        {visibleItems.length === 0 ? (
+        {items.length === 0 ? (
           <MenuEmptyState
-            isFiltered={selectedCategory !== "All"}
-            onShowAll={() => setSelectedCategory("All")}
+            variant={emptyStateVariant}
+            hasActiveFilters={hasActiveFilters}
+            onClearFilters={
+              hasActiveFilters
+                ? () => setSearchParams({}, { replace: true })
+                : undefined
+            }
           />
         ) : (
           <section
             className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3"
             aria-label="Menu items"
           >
-            {visibleItems.map((item) => (
+            {items.map((item) => (
               <MenuItemCard
-                key={item.id}
+                key={item._id}
                 item={item}
                 onSelect={setSelectedItem}
               />
@@ -116,7 +179,20 @@ export default function RestaurantMenuPage() {
         onOpenChange={(open) => {
           if (!open) setSelectedItem(null);
         }}
+        onAddToCart={handleAddToCart}
       />
     </div>
   );
+}
+
+function getEmptyStateVariant({
+  originalItemCount,
+  selectedCategory,
+}: {
+  originalItemCount: number;
+  selectedCategory: string | null;
+}): MenuEmptyStateVariant {
+  if (originalItemCount === 0) return "menu-unpublished";
+  if (selectedCategory) return "empty-category";
+  return "no-results";
 }

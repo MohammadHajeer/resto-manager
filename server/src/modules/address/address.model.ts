@@ -1,9 +1,10 @@
-import { Schema, model, InferSchemaType } from "mongoose";
+import { Schema, model, InferSchemaType, Types } from "mongoose";
 
 const addressSchema = new Schema(
   {
     userId: {
-      type: String,
+      type: Schema.Types.ObjectId,
+      ref: "User",
       required: true,
       index: true,
     },
@@ -60,9 +61,21 @@ const addressSchema = new Schema(
 );
 
 addressSchema.index({ userId: 1 });
-addressSchema.index({ userId: 1, isDefault: 1 });
+addressSchema.index({ userId: 1, createdAt: -1 });
 
-type AddressDocument = InferSchemaType<typeof addressSchema>;
+addressSchema.index(
+  { userId: 1, isDefault: 1 },
+  {
+    unique: true,
+    partialFilterExpression: {
+      isDefault: true,
+    },
+  },
+);
+
+type AddressDocument = InferSchemaType<typeof addressSchema> & {
+  userId: Types.ObjectId;
+};
 
 const Address = model("Address", addressSchema);
 

@@ -1,7 +1,7 @@
 import { Router } from "express";
 import {
   getPublicRestaurantBySlug,
-  getPublicRestaurantFilterOptions,
+  getPublicRestaurantsFilterOptions,
   getPublicRestaurants,
 } from "../controllers/public.controller.js";
 
@@ -9,7 +9,7 @@ const router = Router();
 
 router.get("/", getPublicRestaurants);
 
-router.get("/filter-options", getPublicRestaurantFilterOptions);
+router.get("/filter-options", getPublicRestaurantsFilterOptions);
 
 router.get("/:slug", getPublicRestaurantBySlug);
 

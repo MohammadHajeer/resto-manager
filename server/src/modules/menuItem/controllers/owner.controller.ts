@@ -8,8 +8,11 @@ import { Category } from "@/modules/category/category.model.js";
 import { createSlug } from "@/utils/createSlug.js";
 import {
   CreateMenuItemInput,
+  createMenuItemSchema,
   UpdateMenuItemInput,
+  updateMenuItemSchema,
 } from "@restomanager/validators";
+import { getPublicFileUrl, uploadFileToSupabase } from "@/utils/storage.js";
 
 const getRestaurantForOwner = async (ownerId: string) => {
   if (!isValidObjectId(ownerId)) return null;
@@ -250,17 +253,49 @@ export const getMyMenuItemById = async (
 };
 
 export const createMenuItem = async (
-  req: AuthedRequest<{}, {}, CreateMenuItemInput>,
+  req: AuthedRequest<{}, {}, { data?: string }>,
   res: Response,
   next: NextFunction,
 ) => {
   try {
     const ownerId = req.auth!.user.id;
 
+    if (!req.body.data) {
+      return res.status(400).json({
+        success: false,
+        message: "Menu item data is required",
+      });
+    }
+
+    let parsedBody: unknown;
+
+    try {
+      parsedBody = JSON.parse(req.body.data);
+    } catch {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid menu item data format",
+      });
+    }
+
+    const validationResult = createMenuItemSchema.safeParse(parsedBody);
+
+    if (!validationResult.success) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid menu item data",
+        errors: validationResult.error.flatten(),
+      });
+    }
+
+    const input = validationResult.data;
+
+    const imageFile = req.file;
+
     const restaurant = await getRestaurantForOwner(ownerId);
 
     if (!restaurant) {
-      return res.status(404).json({
+      return sendResponse(res, 404, {
         success: false,
         message: "Restaurant not found for this owner",
       });
@@ -271,11 +306,10 @@ export const createMenuItem = async (
       name,
       description,
       price,
-      imageUrl,
       ingredients,
       availableAddons,
       isAvailable,
-    } = req.body;
+    } = input;
 
     if (!isValidObjectId(categoryId)) {
       return res.status(400).json({
@@ -287,16 +321,46 @@ export const createMenuItem = async (
     const category = await Category.findOne({
       _id: new Types.ObjectId(categoryId),
       restaurantId: restaurant._id,
+      isActive: true,
     }).lean();
 
     if (!category) {
-      return res.status(404).json({
+      return sendResponse(res, 404, {
         success: false,
         message: "Category not found for this restaurant",
       });
     }
 
     const slug = createSlug(name);
+
+    const existingMenuItem = await MenuItem.exists({
+      restaurantId: restaurant._id,
+      slug,
+    });
+
+    if (existingMenuItem) {
+      return sendResponse(res, 409, {
+        success: false,
+        message: "A menu item with this name already exists",
+      });
+    }
+
+    const publicBucket =
+      process.env.SUPABASE_PUBLIC_BUCKET ?? "restaurant-media";
+
+    const folder = `restaurants/${restaurant.slug}/menu-items/${slug}`;
+
+    let imageUrl: string | null = null;
+
+    if (imageFile) {
+      const imagePath = await uploadFileToSupabase({
+        bucket: publicBucket,
+        folder: `${folder}/images`,
+        file: imageFile,
+      });
+
+      imageUrl = getPublicFileUrl(publicBucket, imagePath);
+    }
 
     const menuItem = await MenuItem.create({
       restaurantId: restaurant._id,
@@ -305,10 +369,10 @@ export const createMenuItem = async (
       slug,
       description,
       price,
-      imageUrl: imageUrl ?? null,
+      imageUrl,
       ingredients: ingredients ?? [],
       availableAddons: availableAddons ?? [],
-      isAvailable: typeof isAvailable === "boolean" ? isAvailable : true,
+      isAvailable: isAvailable ?? true,
     });
 
     sendResponse(res, 201, {
@@ -322,7 +386,7 @@ export const createMenuItem = async (
 };
 
 export const updateMenuItem = async (
-  req: AuthedRequest<{ menuItemId: string }, {}, UpdateMenuItemInput>,
+  req: AuthedRequest<{ menuItemId: string }, {}, { data?: string }>,
   res: Response,
   next: NextFunction,
 ) => {
@@ -331,18 +395,63 @@ export const updateMenuItem = async (
     const { menuItemId } = req.params;
 
     if (!isValidObjectId(menuItemId)) {
-      return res.status(400).json({
+      return sendResponse(res, 400, {
         success: false,
         message: "Invalid menu item ID",
       });
     }
 
+    if (!req.body.data) {
+      return sendResponse(res, 400, {
+        success: false,
+        message: "Menu item data is required",
+      });
+    }
+
+    let parsedBody: unknown;
+
+    try {
+      parsedBody = JSON.parse(req.body.data);
+    } catch {
+      return sendResponse(res, 400, {
+        success: false,
+        message: "Invalid menu item data format",
+      });
+    }
+
+    const validationResult = updateMenuItemSchema.safeParse(parsedBody);
+
+    if (!validationResult.success) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid menu item data",
+        errors: validationResult.error.flatten(),
+      });
+    }
+
+    const input = validationResult.data;
+
+    const imageFile = req.file;
+    console.log("imageFile", imageFile);
+
     const restaurant = await getRestaurantForOwner(ownerId);
 
     if (!restaurant) {
-      return res.status(404).json({
+      return sendResponse(res, 404, {
         success: false,
         message: "Restaurant not found for this owner",
+      });
+    }
+
+    const existingMenuItem = await MenuItem.findOne({
+      _id: new Types.ObjectId(menuItemId),
+      restaurantId: restaurant._id,
+    });
+
+    if (!existingMenuItem) {
+      return sendResponse(res, 404, {
+        success: false,
+        message: "Menu item not found",
       });
     }
 
@@ -355,13 +464,13 @@ export const updateMenuItem = async (
       ingredients,
       availableAddons,
       isAvailable,
-    } = req.body;
+    } = input;
 
     const updateData: Record<string, unknown> = {};
 
     if (typeof categoryId === "string") {
       if (!isValidObjectId(categoryId)) {
-        return res.status(400).json({
+        return sendResponse(res, 400, {
           success: false,
           message: "Invalid category ID",
         });
@@ -374,7 +483,7 @@ export const updateMenuItem = async (
       }).lean();
 
       if (!category) {
-        return res.status(404).json({
+        return sendResponse(res, 404, {
           success: false,
           message: "Category not found for this restaurant",
         });
@@ -384,8 +493,23 @@ export const updateMenuItem = async (
     }
 
     if (typeof name === "string") {
+      const slug = createSlug(name);
+
+      const duplicateMenuItem = await MenuItem.exists({
+        _id: { $ne: existingMenuItem._id },
+        restaurantId: restaurant._id,
+        slug,
+      });
+
+      if (duplicateMenuItem) {
+        return sendResponse(res, 409, {
+          success: false,
+          message: "A menu item with this name already exists",
+        });
+      }
+
       updateData.name = name;
-      updateData.slug = createSlug(name);
+      updateData.slug = slug;
     }
 
     if (typeof description === "string") {
@@ -394,10 +518,6 @@ export const updateMenuItem = async (
 
     if (typeof price === "number") {
       updateData.price = price;
-    }
-
-    if (typeof imageUrl === "string" || imageUrl === null) {
-      updateData.imageUrl = imageUrl;
     }
 
     if (Array.isArray(ingredients)) {
@@ -412,9 +532,33 @@ export const updateMenuItem = async (
       updateData.isAvailable = isAvailable;
     }
 
-    const menuItem = await MenuItem.findOneAndUpdate(
+    if (typeof imageUrl === "string" || imageUrl === null) {
+      updateData.imageUrl = imageUrl;
+    }
+
+    if (imageFile) {
+      const slugForFolder =
+        typeof updateData.slug === "string"
+          ? updateData.slug
+          : existingMenuItem.slug;
+
+      const folder = `restaurants/${restaurant.slug}/menu-items/${slugForFolder}`;
+
+      const publicBucket =
+        process.env.SUPABASE_PUBLIC_BUCKET ?? "restaurant-media";
+
+      const imagePath = await uploadFileToSupabase({
+        bucket: publicBucket,
+        folder: `${folder}/images`,
+        file: imageFile,
+      });
+
+      updateData.imageUrl = getPublicFileUrl(publicBucket, imagePath);
+    }
+
+    const updatedMenuItem = await MenuItem.findOneAndUpdate(
       {
-        _id: new Types.ObjectId(menuItemId),
+        _id: existingMenuItem._id,
         restaurantId: restaurant._id,
       },
       updateData,
@@ -424,17 +568,10 @@ export const updateMenuItem = async (
       },
     );
 
-    if (!menuItem) {
-      return res.status(404).json({
-        success: false,
-        message: "Menu item not found",
-      });
-    }
-
     sendResponse(res, 200, {
       success: true,
       message: "Menu item updated successfully",
-      data: menuItem,
+      data: updatedMenuItem,
     });
   } catch (error) {
     next(error);
@@ -451,7 +588,7 @@ export const deleteMenuItem = async (
     const { menuItemId } = req.params;
 
     if (!isValidObjectId(menuItemId)) {
-      return res.status(400).json({
+      return sendResponse(res, 400, {
         success: false,
         message: "Invalid menu item ID",
       });
@@ -460,7 +597,7 @@ export const deleteMenuItem = async (
     const restaurant = await getRestaurantForOwner(ownerId);
 
     if (!restaurant) {
-      return res.status(404).json({
+      return sendResponse(res, 404, {
         success: false,
         message: "Restaurant not found for this owner",
       });
@@ -503,7 +640,7 @@ export const restoreMenuItem = async (
     const { menuItemId } = req.params;
 
     if (!isValidObjectId(menuItemId)) {
-      return res.status(400).json({
+      return sendResponse(res, 400, {
         success: false,
         message: "Invalid menu item ID",
       });
@@ -512,7 +649,7 @@ export const restoreMenuItem = async (
     const restaurant = await getRestaurantForOwner(ownerId);
 
     if (!restaurant) {
-      return res.status(404).json({
+      return sendResponse(res, 404, {
         success: false,
         message: "Restaurant not found for this owner",
       });
