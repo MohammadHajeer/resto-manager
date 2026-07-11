@@ -5,33 +5,6 @@ import { FileText, ArrowLeft, Mail, Scale, CheckCircle, AlertTriangle, HelpCircl
 export default function Terms() {
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col font-sans selection:bg-primary/20 selection:text-primary">
-      {/* Top Banner Warning for project purpose */}
-      <div className="bg-secondary border-b border-secondary-foreground/10 px-4 py-2 text-center text-xs font-semibold text-secondary-foreground">
-        ⚠️ Notice: This document is a draft prepared for project demonstration purposes and requires professional legal review prior to production deployment.
-      </div>
-
-      {/* Main Navigation Header */}
-      <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-border py-4 px-4 sm:px-8 flex justify-between items-center">
-        <div className="max-w-7xl mx-auto w-full flex justify-between items-center">
-          <Link to="/" className="flex items-center gap-2 group">
-            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white shadow-sm shadow-primary/20 transition-transform group-hover:scale-105">
-              <Scale className="w-5 h-5" />
-            </div>
-            <div>
-              <span className="font-extrabold text-lg text-foreground tracking-tight block">RestoManager</span>
-              <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider block -mt-1">Legal Center</span>
-            </div>
-          </Link>
-          <Link
-            to="/restaurants"
-            className="flex items-center gap-1.5 text-xs font-bold text-foreground hover:text-primary bg-secondary/40 hover:bg-secondary px-4 py-2.5 rounded-xl transition-all"
-          >
-            <ArrowLeft size={14} />
-            <span>Back to Restaurants</span>
-          </Link>
-        </div>
-      </header>
-
       {/* Main Content Area */}
       <main className="flex-1 py-12 px-4 sm:px-6 md:px-8 max-w-4xl mx-auto w-full">
         {/* Title & Last Updated Header */}
@@ -214,17 +187,6 @@ export default function Terms() {
           </section>
         </div>
       </main>
-
-      {/* Footer copyright */}
-      <footer className="bg-white border-t border-border py-8 text-center text-xs text-muted-foreground mt-12">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-4">
-          <p>© {new Date().getFullYear()} RestoManager. All rights reserved.</p>
-          <div className="flex gap-4 font-bold text-foreground">
-            <Link to="/privacy" className="hover:text-primary transition-colors">Privacy</Link>
-            <Link to="/support" className="hover:text-primary transition-colors">Support</Link>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }
