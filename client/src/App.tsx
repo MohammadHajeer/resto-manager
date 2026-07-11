@@ -60,10 +60,12 @@ import NotFoundPage from "./pages/shared/NotFoundPage";
 import AddMenuItemPage from "./pages/owner/AddMenuItemPage";
 import EditMenuItemPage from "./pages/owner/EditMenuItemPage";
 import { AuthLayout } from "./components/layouts/AuthLayout";
+import ScrollToTop from "./components/ScrollToTop";
 
 export default function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Routes>
         {/* Guest Routes */}
         <Route
