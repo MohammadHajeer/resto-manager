@@ -1,4 +1,4 @@
-import { ArrowRight, ChefHat, Search, ShieldCheck, Store } from "lucide-react";
+import { ArrowRight, ChefHat, Search, ShieldCheck } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const footerLinkClass =
@@ -31,10 +31,12 @@ export function SiteFooter() {
               aria-label="Go to RestoManager home page"
               className="group inline-flex items-center gap-2.5 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-4 focus-visible:ring-offset-foreground"
             >
-              <span className="relative flex size-10 items-center justify-center overflow-hidden rounded-xl bg-primary text-primary-foreground shadow-lg shadow-primary/20 transition-transform duration-300 group-hover:-rotate-3 group-hover:scale-105">
-                <span className="absolute inset-0 bg-linear-to-br from-white/25 to-transparent" />
-
-                <Store className="relative size-5" aria-hidden="true" />
+              <span className="relative flex size-10 items-center justify-center overflow-hidden rounded-xl  text-primary-foreground shadow-lg shadow-primary/20 transition-transform duration-300 group-hover:-rotate-3 group-hover:scale-105">
+                <img
+                  src="/logo.png"
+                  alt="RestoManager logo"
+                  className="size-9"
+                />
               </span>
 
               <span className="text-xl font-bold tracking-tight">

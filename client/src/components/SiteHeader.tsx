@@ -5,7 +5,6 @@ import {
   LayoutDashboard,
   Menu,
   ShoppingCart,
-  Store,
   UserRound,
   X,
 } from "lucide-react";
@@ -84,10 +83,10 @@ export function SiteHeader() {
           aria-label="Go to RestoManager home page"
           className="group flex shrink-0 items-center gap-2.5 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         >
-          <span className="relative flex size-9 items-center justify-center overflow-hidden rounded-xl bg-primary text-primary-foreground shadow-sm transition-transform duration-300 group-hover:-rotate-3 group-hover:scale-105">
+          <span className="relative flex size-9 items-center justify-center overflow-hidden rounded-xl bg-linear-to-tl from-primary via-white to-transparent text-primary-foreground shadow-sm transition-transform duration-300 group-hover:-rotate-3 group-hover:scale-105">
             <span className="absolute inset-0 bg-linear-to-br from-white/25 to-transparent" />
 
-            <Store className="relative size-4.5" aria-hidden="true" />
+            <img src="/logo.png" alt="RestoManager logo" className="" />
           </span>
 
           <span className="leading-tight">
