@@ -2,7 +2,6 @@ import {
   ClipboardList,
   LayoutDashboard,
   Store,
-  Users,
   UtensilsCrossed,
 } from "lucide-react";
 
@@ -16,7 +15,6 @@ export const adminNavItems: DashboardNavItem[] = [
     end: true,
   },
   { label: "Restaurants", href: "/admin/restaurants", icon: Store },
-  { label: "Users", href: "/admin/users", icon: Users },
 ];
 
 export const ownerNavItems: DashboardNavItem[] = [

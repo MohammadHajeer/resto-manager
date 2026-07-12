@@ -51,7 +51,6 @@ import OwnerStatusPage from "./pages/owner/OwnerStatusPage";
 import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
 import AdminRestaurantsPage from "./pages/admin/AdminRestaurantsPage";
 import AdminRestaurantReviewPage from "./pages/admin/AdminRestaurantReviewPage";
-import AdminUsersPage from "./pages/admin/AdminUsersPage";
 
 // Pages: Shared
 import NotFoundPage from "./pages/shared/NotFoundPage";
@@ -187,7 +186,6 @@ export default function App() {
             path="/admin/restaurants/:restaurantId"
             element={<AdminRestaurantReviewPage />}
           />
-          <Route path="/admin/users" element={<AdminUsersPage />} />
         </Route>
 
         {/* Fallback Catch-All Route */}

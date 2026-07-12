@@ -2,6 +2,7 @@ import { requireRole } from "@/middlewares/auth.middleware.js";
 import { CustomerAddressRoutes } from "@/modules/address/routes.js";
 import { CategoryOwnerRoutes } from "@/modules/category/routes/owner.routes.js";
 import { OwnerDashboardRoutes } from "@/modules/dashboard/routes/owner.routes.js";
+import { AdminDashboardRoutes } from "@/modules/dashboard/routes/admin.routes.js";
 import { MenuItemOwnerRoutes } from "@/modules/menuItem/routes/owner.routes.js";
 import { CustomerOrderRoutes } from "@/modules/orders/routes/customer.routes.js";
 import { OwnerOrderRoutes } from "@/modules/orders/routes/owner.routes.js";
@@ -21,6 +22,7 @@ router.get("/health", (_req, res) => {
 });
 
 router.use("/admin/restaurants", requireRole("admin"), AdminRestaurantRoutes);
+router.use("/admin/dashboard", requireRole("admin"), AdminDashboardRoutes);
 
 router.use("/owner/restaurant", RestaurantOwnerRoutes);
 router.use(
