@@ -148,11 +148,6 @@ export default function OrderConfirmationPage() {
                   </p>
                 )}
 
-                {(item.removedIngredients?.length ?? 0) > 0 && (
-                  <p className="mt-0.5 text-xs font-medium text-destructive">
-                    No {item.removedIngredients?.join(", ")}
-                  </p>
-                )}
               </div>
 
               <p className="shrink-0 text-sm font-semibold text-foreground">

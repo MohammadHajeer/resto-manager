@@ -81,7 +81,12 @@ export const useUpdateOwnerOrderStatus = () => {
         (oldData) => {
           if (!oldData) return oldData;
 
-          let movedOrder: OwnerKitchenOrder | null = null;
+          const kitchenStatuses = ["pending", "preparing", "ready"] as const;
+          const movedOrder = kitchenStatuses
+            .flatMap((columnStatus) => oldData.columns[columnStatus])
+            .find((order) => order._id === orderId);
+
+          if (!movedOrder) return oldData;
 
           const nextColumns: Record<KitchenStatus, OwnerKitchenOrder[]> = {
             pending: [],
@@ -89,20 +94,11 @@ export const useUpdateOwnerOrderStatus = () => {
             ready: [],
           };
 
-          for (const columnStatus of ["pending", "preparing", "ready"] as const) {
+          for (const columnStatus of kitchenStatuses) {
             nextColumns[columnStatus] = oldData.columns[columnStatus].filter(
-              (order) => {
-                if (order._id === orderId) {
-                  movedOrder = order;
-                  return false;
-                }
-
-                return true;
-              },
+              (order) => order._id !== orderId,
             );
           }
-
-          if (!movedOrder) return oldData;
 
           const updatedOrder: OwnerKitchenOrder = {
             ...movedOrder,

@@ -166,6 +166,7 @@ export function KitchenOrderCard({
                             .join(", ")}
                         </p>
                       )}
+
                     </div>
                   </div>
 

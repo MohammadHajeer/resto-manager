@@ -1,4 +1,4 @@
-import type { PublicRestaurant } from "@/services/restaurant.service";
+import type { PublicRestaurant } from "@/services/public/public.types";
 import { ArrowUpRight, ImageOff, MapPin, Store } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";

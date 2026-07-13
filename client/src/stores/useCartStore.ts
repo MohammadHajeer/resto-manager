@@ -21,12 +21,6 @@ export type CartItem = {
   quantity: number;
   selectedAddons: PublicMenuAddon[];
 
-  // RES-82: ingredients the customer asked to remove from this item.
-  // Pricing-neutral — kept only as a preparation instruction for the
-  // restaurant, and included in the cart item key so e.g. "no pickles"
-  // is tracked as a separate line from the default version of the item.
-  removedIngredients: string[];
-
   itemTotal: number;
 };
 
@@ -37,7 +31,6 @@ type AddCartItemInput = {
   item: PublicMenuItem;
   quantity: number;
   selectedAddons: PublicMenuAddon[];
-  removedIngredients?: string[];
 };
 
 type CartState = {
@@ -65,16 +58,13 @@ const MIN_ITEM_QUANTITY = 1;
 const createCartItemKey = (
   menuItemId: string,
   selectedAddons: PublicMenuAddon[],
-  removedIngredients: string[],
 ) => {
   const addonKey = selectedAddons
     .map((addon) => addon.name)
     .sort()
     .join("|");
 
-  const removedKey = [...removedIngredients].sort().join("|");
-
-  return `${menuItemId}:${addonKey}:${removedKey}`;
+  return `${menuItemId}:${addonKey}`;
 };
 
 /** RES-88: add-ons total for a single unit of an item. */
@@ -84,11 +74,7 @@ export const calculateAddonsTotal = (selectedAddons: PublicMenuAddon[]) => {
   }, 0);
 };
 
-/**
- * RES-87: line total = (base price + add-ons) * quantity.
- * Removed ingredients never affect price — they are a preparation
- * instruction, not a discount.
- */
+/** RES-87: line total = (base price + add-ons) * quantity. */
 export const calculateItemTotal = (
   basePrice: number,
   quantity: number,
@@ -143,14 +129,9 @@ export const useCartStore = create<CartState>()(
         item,
         quantity,
         selectedAddons,
-        removedIngredients = [],
       }) => {
         set((state) => {
-          const cartItemKey = createCartItemKey(
-            item._id,
-            selectedAddons,
-            removedIngredients,
-          );
+          const cartItemKey = createCartItemKey(item._id, selectedAddons);
 
           const itemTotal = calculateItemTotal(
             item.price,
@@ -167,7 +148,6 @@ export const useCartStore = create<CartState>()(
             basePrice: item.price,
             quantity,
             selectedAddons,
-            removedIngredients,
             itemTotal,
           };
 
@@ -265,16 +245,6 @@ export const useCartStore = create<CartState>()(
     }),
     {
       name: "restomanager-cart",
-      version: 2,
-      // v1 -> v2: cart items gained `removedIngredients` and the
-      // cartItemKey format changed to include it. Old persisted carts
-      // are not patchable, so we simply start fresh.
-      migrate: () => ({
-        restaurantId: null,
-        restaurantSlug: null,
-        restaurantName: null,
-        items: [],
-      }),
     },
   ),
 );

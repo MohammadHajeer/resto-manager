@@ -1,7 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { Link } from 'react-router-dom';
 import { 
-  HelpCircle, Search, ArrowLeft, Send, Users, Store, Loader2,
+  Search, Send, Users, Store, Loader2,
   ChevronDown, MessageSquare, Mail, AlertCircle, Sparkles, BookOpen, Clock, Settings, ShoppingBag, Terminal
 } from 'lucide-react';
 import { toast } from 'sonner';

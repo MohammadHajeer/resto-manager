@@ -1,6 +1,4 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { Shield, ArrowLeft, Mail, FileText, Lock, Globe, Eye, RefreshCw } from 'lucide-react';
+import { Mail, Lock, RefreshCw } from 'lucide-react';
 
 export default function Privacy() {
   return (

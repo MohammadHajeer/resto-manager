@@ -19,7 +19,7 @@ const historyOrderStatuses = ["completed", "cancelled"] as const;
 type ActiveOrderStatus = (typeof activeOrderStatuses)[number];
 type HistoryOrderStatus = (typeof historyOrderStatuses)[number];
 
-const formatCustomerOrder = (order: any) => {
+const formatCustomerOrder = <T extends { _id: unknown }>(order: T) => {
   return {
     ...order,
     orderCode: `RM-${String(order._id).slice(-6).toUpperCase()}`,

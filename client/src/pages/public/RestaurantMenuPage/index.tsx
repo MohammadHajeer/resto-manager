@@ -97,7 +97,6 @@ export default function RestaurantMenuPage() {
     item: PublicMenuItem;
     quantity: number;
     selectedAddons: PublicMenuAddon[];
-    removedIngredients: string[];
   }) => {
     const isReplacingCart =
       cartRestaurantId !== null && cartRestaurantId !== data.restaurant._id;
@@ -109,7 +108,6 @@ export default function RestaurantMenuPage() {
       item: payload.item,
       quantity: payload.quantity,
       selectedAddons: payload.selectedAddons,
-      removedIngredients: payload.removedIngredients,
     });
 
     if (isReplacingCart) {

@@ -211,7 +211,6 @@ export default function CheckoutPage() {
           menuItemId: item.menuItemId,
           quantity: item.quantity,
           selectedAddonNames: item.selectedAddons.map((addon) => addon.name),
-          removedIngredientNames: item.removedIngredients,
         })),
         ...(trimmedNote ? { customerNote: trimmedNote } : {}),
       },
@@ -350,11 +349,6 @@ export default function CheckoutPage() {
                       </p>
                     )}
 
-                    {item.removedIngredients.length > 0 && (
-                      <p className="mt-0.5 text-xs font-medium text-destructive">
-                        No {item.removedIngredients.join(", ")}
-                      </p>
-                    )}
                   </div>
 
                   <p className="shrink-0 text-sm font-semibold text-foreground">

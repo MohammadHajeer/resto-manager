@@ -211,7 +211,7 @@ function OrderHeader({ order }: { order: CustomerOrder }) {
  * -------------------------------------------
  * /orders/:orderId — full detail view for one order: live progress
  * timeline (the underlying query is shared with the confirmation page),
- * itemized receipt with add-ons and removed ingredients, delivery
+ * itemized receipt with add-ons, delivery
  * address, note, and totals.
  */
 export default function CustomerOrderDetailsPage() {
@@ -288,11 +288,6 @@ export default function CustomerOrderDetailsPage() {
                         </ul>
                       )}
 
-                      {(item.removedIngredients?.length ?? 0) > 0 && (
-                        <p className="mt-1.5 text-xs font-medium text-destructive">
-                          No {item.removedIngredients?.join(", ")}
-                        </p>
-                      )}
                     </div>
 
                     <p className="shrink-0 text-sm font-semibold text-foreground">

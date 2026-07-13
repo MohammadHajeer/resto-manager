@@ -98,11 +98,6 @@ function CartItemRow({ item }: { item: CartItem }) {
               </ul>
             )}
 
-            {item.removedIngredients.length > 0 && (
-              <p className="mt-2 text-xs font-medium text-destructive">
-                No {item.removedIngredients.join(", ")}
-              </p>
-            )}
           </div>
 
           <p className="shrink-0 text-base font-bold text-foreground">
