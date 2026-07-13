@@ -11,6 +11,8 @@ import { Button } from "../../components/ui/button";
 import { authClient } from "../../lib/auth-client";
 import { toast } from "sonner";
 
+const authInputClassName =
+  "h-12 rounded-xl border-border bg-background px-4 shadow-xs";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -79,20 +81,21 @@ const onSubmit: SubmitHandler<LoginInput> = async (data) => {
 
   return (
     <AuthFormCard
+      eyebrow="Secure account access"
       title="Welcome back"
       description={
         <>
-          New to RestoManager?{" "}
+          Sign in to continue to your RestoManager workspace. New here?{" "}
           <Link
             to="/sign-up"
-            className="font-medium text-primary hover:underline"
+            className="font-semibold text-primary underline-offset-4 hover:underline"
           >
             Create an account
           </Link>
         </>
       }
     >
-      <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-5">
+      <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-6">
         <TextField
           control={control}
           name="email"
@@ -100,6 +103,7 @@ const onSubmit: SubmitHandler<LoginInput> = async (data) => {
           label="Email address"
           placeholder="you@example.com"
           autoComplete="email"
+          inputClassName={authInputClassName}
           required
         />
         <TextField
@@ -109,13 +113,14 @@ const onSubmit: SubmitHandler<LoginInput> = async (data) => {
           label="Password"
           placeholder="Enter your password"
           autoComplete="current-password"
+          inputClassName={authInputClassName}
           required
         />
 
         {serverError && (
           <p
             role="alert"
-            className="rounded-lg border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive"
+            className="rounded-xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm leading-6 text-destructive"
           >
             {serverError}
           </p>
@@ -125,7 +130,7 @@ const onSubmit: SubmitHandler<LoginInput> = async (data) => {
           type="submit"
           size="lg"
           disabled={isSubmitting}
-          className="h-11 w-full rounded-full"
+          className="h-12 w-full rounded-xl text-sm font-semibold shadow-md shadow-primary/15"
         >
           {isSubmitting ? (
             <>
