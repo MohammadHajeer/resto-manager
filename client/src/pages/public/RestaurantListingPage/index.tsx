@@ -6,7 +6,7 @@ import { RestaurantListHeader } from "./RestaurantListHeader";
 import { RestaurantFilters } from "./RestaurantFilters";
 import { usePublicRestaurants } from "@/hooks/public/useRestaurants";
 import { Pagination } from "@/components/common/Pagination";
-import type { PublicRestaurant } from "@/services/restaurant.service";
+import type { PublicRestaurant } from "@/services/public/public.types";
 
 const RESTAURANTS_PER_PAGE = 12;
 

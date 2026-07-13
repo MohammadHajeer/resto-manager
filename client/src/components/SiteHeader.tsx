@@ -94,7 +94,8 @@ export function SiteHeader() {
           <span className="relative flex size-9 items-center justify-center overflow-hidden rounded-xl bg-primary text-primary-foreground shadow-sm transition-transform duration-300 group-hover:-rotate-3 group-hover:scale-105">
             <span className="absolute inset-0 bg-linear-to-br from-white/25 to-transparent" />
 
-            <Store className="relative size-4.5" aria-hidden="true" />
+            <Store className="relative size-4.5 hidden" aria-hidden="true" />
+            <img src="/logo.png" alt="" className="relative size-6" />
           </span>
 
           <span className="leading-tight">

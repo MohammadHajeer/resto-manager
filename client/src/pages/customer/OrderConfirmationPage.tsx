@@ -142,15 +142,15 @@ export default function OrderConfirmationPage() {
                   {item.name}
                 </p>
 
-                {item.selectedAddons.length > 0 && (
+                {(item.selectedAddons?.length ?? 0) > 0 && (
                   <p className="mt-0.5 text-xs text-muted-foreground">
-                    + {item.selectedAddons.map((addon) => addon.name).join(", ")}
+                    + {item.selectedAddons?.map((addon) => addon.name).join(", ")}
                   </p>
                 )}
 
-                {item.removedIngredients.length > 0 && (
+                {(item.removedIngredients?.length ?? 0) > 0 && (
                   <p className="mt-0.5 text-xs font-medium text-destructive">
-                    No {item.removedIngredients.join(", ")}
+                    No {item.removedIngredients?.join(", ")}
                   </p>
                 )}
               </div>

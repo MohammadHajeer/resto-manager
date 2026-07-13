@@ -16,8 +16,8 @@ export type CustomerOrderItem = {
   name: string;
   basePrice: number;
   quantity: number;
-  selectedAddons: CustomerOrderAddon[];
-  removedIngredients: string[];
+  selectedAddons?: CustomerOrderAddon[];
+  removedIngredients?: string[];
   itemTotal: number;
 };
 

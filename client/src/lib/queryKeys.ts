@@ -1,8 +1,14 @@
 import type { CustomerOrderHistoryParams } from "@/services/customer/customer.types";
-import type { OwnerRestaurantMenuParams } from "@/services/owner/owner.types";
+import type {
+  OwnerDashboardPeriod,
+  OwnerRestaurantMenuParams,
+} from "@/services/owner/owner.types";
+import type { AdminDashboardPeriod } from "@/services/admin/admin.types";
 
 export const queryKeys = {
   admin: {
+    dashboard: (period: AdminDashboardPeriod) =>
+      ["admin", "dashboard", { period }] as const,
     restaurants: {
       all: ["admin", "restaurants"] as const,
       list: (params: { page: number; limit: number; status?: string }) =>
@@ -12,6 +18,9 @@ export const queryKeys = {
     },
   },
   owner: {
+    dashboard: (period: OwnerDashboardPeriod) =>
+      ["owner", "dashboard", { period }] as const,
+
     restaurantStatus: ["owner", "restaurant-status"] as const,
 
     restaurant: ["owner", "restaurant"] as const,

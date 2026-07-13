@@ -1,8 +1,19 @@
+import { Navigate, useParams } from "react-router-dom";
+
+/**
+ * MenuItemDetailsPage
+ * --------------------
+ * The full item-detail experience lives in the RestaurantMenuPage's
+ * responsive Sheet/Drawer (MenuItemDetailsSheet). This route exists so
+ * that a direct link like /restaurants/:slug/items/:itemSlug doesn't
+ * 404 — it simply redirects to the restaurant's menu page where the
+ * customer can find and open the item from the sheet.
+ */
 export default function MenuItemDetailsPage() {
-  return (
-    <main className="min-h-screen bg-[#F8FAF9] p-6 text-[#0F172A]">
-      <h1 className="text-2xl font-semibold">Menu Item Details Page</h1>
-      <p className="mt-2 text-[#6B7280]">This page is under construction.</p>
-    </main>
-  );
+  const { restaurantSlug } = useParams<{
+    restaurantSlug: string;
+    itemSlug: string;
+  }>();
+
+  return <Navigate to={`/restaurants/${restaurantSlug ?? ""}`} replace />;
 }

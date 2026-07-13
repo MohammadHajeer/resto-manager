@@ -355,7 +355,7 @@ export const createMenuItem = async (
     if (imageFile) {
       const imagePath = await uploadFileToSupabase({
         bucket: publicBucket,
-        folder: `${folder}/images`,
+        folder: `${folder}`,
         file: imageFile,
       });
 
@@ -549,7 +549,7 @@ export const updateMenuItem = async (
 
       const imagePath = await uploadFileToSupabase({
         bucket: publicBucket,
-        folder: `${folder}/images`,
+        folder: `${folder}`,
         file: imageFile,
       });
 

@@ -271,12 +271,12 @@ export default function CustomerOrderDetailsPage() {
                         {orderCurrencyFormatter.format(item.basePrice)} each
                       </p>
 
-                      {Boolean(item.selectedAddons?.length) && (
+                      {(item.selectedAddons?.length ?? 0) > 0 && (
                         <ul
                           className="mt-2 flex flex-wrap gap-1.5"
                           aria-label={`Add-ons for ${item.name}`}
                         >
-                          {item.selectedAddons.map((addon) => (
+                          {item.selectedAddons?.map((addon) => (
                             <li
                               key={addon.name}
                               className="rounded-full bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground"
@@ -288,7 +288,7 @@ export default function CustomerOrderDetailsPage() {
                         </ul>
                       )}
 
-                      {Boolean(item.removedIngredients?.length) && (
+                      {(item.removedIngredients?.length ?? 0) > 0 && (
                         <p className="mt-1.5 text-xs font-medium text-destructive">
                           No {item.removedIngredients?.join(", ")}
                         </p>

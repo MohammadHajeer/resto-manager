@@ -262,3 +262,53 @@ export type OwnerKitchenOrdersResponse = {
 export type UpdateOwnerOrderStatusInput = {
   status: OwnerOrderStatus;
 };
+
+//
+// Owner Dashboard Types
+//
+export type OwnerDashboardPeriod = 7 | 30;
+
+export type OwnerDashboardResponse = {
+  restaurant: {
+    id: string;
+    name: string;
+    slug: string;
+    isOpen: boolean;
+    logoUrl: string | null;
+    bannerUrl: string | null;
+    status: OwnerRestaurantStatus;
+  };
+  statistics: {
+    totalOrders: number;
+    activeOrders: number;
+    pendingOrders: number;
+    completedOrders: number;
+    cancelledOrders: number;
+    completedOrderValue: number;
+    totalCategories: number;
+    totalMenuItems: number;
+    availableMenuItems: number;
+    unavailableMenuItems: number;
+  };
+  period: OwnerDashboardPeriod;
+  ordersByDate: Array<{
+    date: string;
+    orders: number;
+  }>;
+  ordersByStatus: Array<{
+    status: OwnerOrderStatus;
+    count: number;
+  }>;
+  recentOrders: Array<{
+    id: string;
+    orderCode: string;
+    total: number;
+    itemCount: number;
+    status: OwnerOrderStatus;
+    createdAt: string;
+  }>;
+  health: {
+    categoriesWithoutItems: number;
+    hasCompleteOpeningHours: boolean;
+  };
+};

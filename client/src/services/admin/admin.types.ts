@@ -1,7 +1,7 @@
 export type RestaurantReview = {
   _id: string;
   name: string;
-  status: "pending" | "approved" | "rejected";
+  status: AdminRestaurantStatus;
   createdAt: string;
 
   owner?: {
@@ -80,4 +80,63 @@ export type PaginatedRestaurantReviewsResponse = {
 export type RejectRestaurantInput = {
   restaurantId: string;
   rejectionReason: string;
+};
+
+export type AdminDashboardPeriod = 7 | 30;
+export type AdminRestaurantStatus =
+  | "pending"
+  | "approved"
+  | "rejected"
+  | "suspended";
+export type AdminOrderStatus =
+  | "pending"
+  | "accepted"
+  | "preparing"
+  | "ready"
+  | "completed"
+  | "cancelled";
+
+export type AdminDashboardResponse = {
+  statistics: {
+    totalRestaurants: number;
+    pendingRestaurants: number;
+    approvedRestaurants: number;
+    rejectedRestaurants: number;
+    suspendedRestaurants: number;
+    totalCustomers: number;
+    totalOrders: number;
+    activeOrders: number;
+    pendingOrders: number;
+    completedOrders: number;
+    cancelledOrders: number;
+  };
+  period: AdminDashboardPeriod;
+  restaurantsByStatus: Array<{
+    status: AdminRestaurantStatus;
+    count: number;
+  }>;
+  ordersByStatus: Array<{
+    status: AdminOrderStatus;
+    count: number;
+  }>;
+  ordersByDate: Array<{ date: string; orders: number }>;
+  pendingRestaurants: Array<{
+    id: string;
+    name: string;
+    slug: string;
+    logoUrl: string | null;
+    cuisineTypes: string[];
+    city: string;
+    ownerName?: string;
+    createdAt: string;
+  }>;
+  recentOrders: Array<{
+    id: string;
+    orderCode: string;
+    restaurantName: string;
+    itemCount: number;
+    total: number;
+    status: AdminOrderStatus;
+    createdAt: string;
+  }>;
 };
