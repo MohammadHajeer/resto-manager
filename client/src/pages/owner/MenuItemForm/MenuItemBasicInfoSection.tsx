@@ -19,6 +19,8 @@ export function MenuItemBasicInfoSection() {
 
   const { data: categories = [], isLoading } = useOwnerCategories();
 
+  const categoriesIds = new Map(categories.map((cat) => [cat._id, cat.name]));
+
   return (
     <Card className="rounded-3xl">
       <CardHeader>
@@ -57,7 +59,9 @@ export function MenuItemBasicInfoSection() {
                 disabled={isLoading}
               >
                 <SelectTrigger className="h-11 rounded-lg">
-                  <SelectValue placeholder="Select category" />
+                  <SelectValue placeholder="Select category">
+                    {categoriesIds.get(field.value)}
+                  </SelectValue>
                 </SelectTrigger>
 
                 <SelectContent>

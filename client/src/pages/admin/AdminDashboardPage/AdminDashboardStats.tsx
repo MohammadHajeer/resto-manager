@@ -31,7 +31,6 @@ export function AdminDashboardStats({
       value: statistics.totalCustomers,
       detail: "Customer accounts only",
       icon: Users,
-      href: "/admin/users",
     },
     {
       label: "Total orders",
@@ -42,7 +41,10 @@ export function AdminDashboardStats({
   ];
 
   return (
-    <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Platform statistics">
+    <section
+      className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
+      aria-label="Platform statistics"
+    >
       {cards.map(({ label, value, detail, icon: Icon, href, emphasized }) => {
         const content = (
           <Card
@@ -54,11 +56,15 @@ export function AdminDashboardStats({
           >
             <CardContent className="flex items-start justify-between gap-4">
               <div className="min-w-0">
-                <p className="text-sm font-medium text-muted-foreground">{label}</p>
+                <p className="text-sm font-medium text-muted-foreground">
+                  {label}
+                </p>
                 <p className="mt-2 text-3xl font-semibold tracking-tight tabular-nums text-foreground">
                   {formatCount(value)}
                 </p>
-                <p className="mt-2 text-xs leading-5 text-muted-foreground">{detail}</p>
+                <p className="mt-2 text-xs leading-5 text-muted-foreground">
+                  {detail}
+                </p>
               </div>
               <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <Icon className="size-5" aria-hidden="true" />
@@ -68,7 +74,11 @@ export function AdminDashboardStats({
         );
 
         return href ? (
-          <Link key={label} to={href} className="rounded-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
+          <Link
+            key={label}
+            to={href}
+            className="rounded-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+          >
             {content}
           </Link>
         ) : (

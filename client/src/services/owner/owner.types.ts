@@ -99,8 +99,9 @@ export type OwnerCategory = {
   _id: string;
   name: string;
   description?: string;
+  slug: string;
   restaurantId: string;
-  isDeleted?: boolean;
+  isActive: boolean;
   createdAt: string;
   updatedAt: string;
 };

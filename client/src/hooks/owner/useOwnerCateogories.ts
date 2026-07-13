@@ -65,9 +65,14 @@ export const useDeleteOwnerCategory = () => {
       ownerCategoriesService.deleteOwnerCategory(categoryId),
 
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.owner.categories,
-      });
+      return Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.owner.categories,
+        }),
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.owner.menuList.all,
+        }),
+      ]);
     },
   });
 };
@@ -80,9 +85,14 @@ export const useRestoreOwnerCategory = () => {
       ownerCategoriesService.restoreOwnerCategory(categoryId),
 
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.owner.categories,
-      });
+      return Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.owner.categories,
+        }),
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.owner.menuList.all,
+        }),
+      ]);
     },
   });
 };

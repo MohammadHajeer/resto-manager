@@ -538,7 +538,6 @@ export const getOwnerRestaurantMenu = async (
     const [categories, menuItems, statsResult] = await Promise.all([
       Category.find({
         restaurantId: restaurant._id,
-        isActive: true,
       })
         .select("_id name slug description isActive createdAt updatedAt")
         .sort({ createdAt: 1 })
