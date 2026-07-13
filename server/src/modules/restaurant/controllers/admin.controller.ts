@@ -228,17 +228,45 @@ export const reviewRestaurantRegistration = async (
       });
     }
 
+    const currentStatus = restaurant.status;
+    const allowedTransitions: Record<
+      "pending" | "approved" | "suspended" | "rejected",
+      Array<RestaurantReviewInput["status"]>
+    > = {
+      pending: ["approved", "rejected"],
+      approved: ["suspended"],
+      suspended: ["approved"],
+      rejected: ["approved"],
+    };
+
+    if (!allowedTransitions[currentStatus].includes(input.status)) {
+      return sendResponse(res, 409, {
+        success: false,
+        message: `A ${currentStatus} restaurant cannot be changed to ${input.status}`,
+        data: null,
+      });
+    }
+
     restaurant.status = input.status;
     restaurant.verification!.reviewedAt = new Date();
     restaurant.verification!.reviewedBy = adminId;
 
     if (input.status === "approved") {
       restaurant.verification!.rejectionReason = null;
+      restaurant.verification!.suspensionReason = null;
     }
 
     if (input.status === "rejected") {
       restaurant.isOpen = false;
-      restaurant.verification!.rejectionReason = input.rejectionReason ?? "";
+      restaurant.verification!.rejectionReason = input.rejectionReason!.trim();
+      restaurant.verification!.suspensionReason = null;
+    }
+
+    if (input.status === "suspended") {
+      restaurant.isOpen = false;
+      restaurant.verification!.suspensionReason =
+        input.suspensionReason!.trim();
+      restaurant.verification!.rejectionReason = null;
     }
 
     await restaurant.save();
@@ -246,49 +274,13 @@ export const reviewRestaurantRegistration = async (
     sendResponse(res, 200, {
       success: true,
       message:
-        input.status === "approved"
-          ? "Restaurant approved successfully"
-          : "Restaurant rejected successfully",
-      data: restaurant,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const suspendRestaurant = async (
-  req: AuthedRequest,
-  res: Response,
-  next: NextFunction,
-) => {
-  try {
-    const adminId = req.auth?.user.id;
-    const { restaurantId } = req.params;
-
-    if (!isValidObjectId(restaurantId as string)) {
-      return res.status(400).json({
-        message: "Invalid restaurant ID",
-      });
-    }
-
-    const restaurant = await Restaurant.findById(restaurantId);
-
-    if (!restaurant) {
-      return res.status(404).json({
-        message: "Restaurant not found",
-      });
-    }
-
-    restaurant.status = "suspended";
-    restaurant.isOpen = false;
-    restaurant.verification!.reviewedAt = new Date();
-    restaurant.verification!.reviewedBy = adminId;
-
-    await restaurant.save();
-
-    sendResponse(res, 200, {
-      success: true,
-      message: "Restaurant suspended successfully",
+        input.status === "rejected"
+          ? "Restaurant rejected successfully"
+          : input.status === "suspended"
+            ? "Restaurant suspended successfully"
+            : currentStatus === "suspended"
+              ? "Restaurant reactivated successfully"
+              : "Restaurant approved successfully",
       data: restaurant,
     });
   } catch (error) {

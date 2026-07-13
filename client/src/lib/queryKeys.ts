@@ -7,6 +7,7 @@ import type { AdminDashboardPeriod } from "@/services/admin/admin.types";
 
 export const queryKeys = {
   admin: {
+    dashboardAll: ["admin", "dashboard"] as const,
     dashboard: (period: AdminDashboardPeriod) =>
       ["admin", "dashboard", { period }] as const,
     restaurants: {

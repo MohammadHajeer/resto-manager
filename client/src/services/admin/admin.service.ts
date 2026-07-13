@@ -3,9 +3,22 @@ import type {
   AdminRestaurantDetails,
   PaginatedRestaurantReviewsResponse,
   RejectRestaurantInput,
+  RestaurantStatusUpdatePayload,
+  SuspendRestaurantInput,
 } from "./admin.types";
 
 const endpoint = "/admin/restaurants";
+
+const updateRestaurantStatus = async (
+  restaurantId: string,
+  payload: RestaurantStatusUpdatePayload,
+): Promise<AdminRestaurantDetails> => {
+  const response = await api.patch(
+    `${endpoint}/${restaurantId}/status`,
+    payload,
+  );
+  return response.data.data;
+};
 
 export const adminService = {
   getAdminRestaurants: async ({
@@ -37,22 +50,34 @@ export const adminService = {
   approveRestaurant: async (
     restaurantId: string,
   ): Promise<AdminRestaurantDetails> => {
-    const response = await api.patch(`${endpoint}/${restaurantId}/status`, {
+    return updateRestaurantStatus(restaurantId, {
       status: "approved",
     });
-
-    return response.data.data;
   },
 
   rejectRestaurant: async ({
     restaurantId,
     rejectionReason,
   }: RejectRestaurantInput): Promise<AdminRestaurantDetails> => {
-    const response = await api.patch(`${endpoint}/${restaurantId}/status`, {
+    return updateRestaurantStatus(restaurantId, {
       status: "rejected",
       rejectionReason,
     });
+  },
 
-    return response.data.data;
+  suspendRestaurant: async ({
+    restaurantId,
+    suspensionReason,
+  }: SuspendRestaurantInput): Promise<AdminRestaurantDetails> => {
+    return updateRestaurantStatus(restaurantId, {
+      status: "suspended",
+      suspensionReason,
+    });
+  },
+
+  reactivateRestaurant: async (
+    restaurantId: string,
+  ): Promise<AdminRestaurantDetails> => {
+    return updateRestaurantStatus(restaurantId, { status: "approved" });
   },
 };

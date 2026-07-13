@@ -469,6 +469,7 @@ export const getOwnerRestaurantStatus = async (
         slug: restaurant.slug,
         status: restaurant.status,
         rejectionReason: restaurant.verification?.rejectionReason ?? null,
+        suspensionReason: restaurant.verification?.suspensionReason ?? null,
         createdAt: restaurant.createdAt,
         updatedAt: restaurant.updatedAt,
       },

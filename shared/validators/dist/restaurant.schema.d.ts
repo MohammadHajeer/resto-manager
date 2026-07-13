@@ -99,8 +99,10 @@ export declare const restaurantReviewSchema: z.ZodObject<{
     status: z.ZodEnum<{
         approved: "approved";
         rejected: "rejected";
+        suspended: "suspended";
     }>;
     rejectionReason: z.ZodUnion<[z.ZodOptional<z.ZodString>, z.ZodLiteral<"">]>;
+    suspensionReason: z.ZodUnion<[z.ZodOptional<z.ZodString>, z.ZodLiteral<"">]>;
 }, z.core.$strip>;
 export declare const restaurantListQuerySchema: z.ZodObject<{
     q: z.ZodOptional<z.ZodString>;
