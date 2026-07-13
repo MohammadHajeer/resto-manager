@@ -5,7 +5,6 @@ import {
   LayoutDashboard,
   Menu,
   ShoppingCart,
-  Store,
   UserRound,
   X,
 } from "lucide-react";
@@ -22,6 +21,7 @@ import {
 } from "@/stores/useCartStore";
 import { Button } from "./ui/button";
 import { LogoutConfirmDialog } from "./common/LogoutConfirmDialog";
+import { BrandLogo } from "./BrandLogo";
 
 type NavigationLink = {
   label: string;
@@ -91,22 +91,7 @@ export function SiteHeader() {
           aria-label="Go to RestoManager home page"
           className="group flex shrink-0 items-center gap-2.5 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         >
-          <span className="relative flex size-9 items-center justify-center overflow-hidden rounded-xl bg-primary text-primary-foreground shadow-sm transition-transform duration-300 group-hover:-rotate-3 group-hover:scale-105">
-            <span className="absolute inset-0 bg-linear-to-br from-white/25 to-transparent" />
-
-            <Store className="relative size-4.5 hidden" aria-hidden="true" />
-            <img src="/logo.png" alt="" className="relative size-6" />
-          </span>
-
-          <span className="leading-tight">
-            <span className="block text-lg font-bold tracking-tight text-foreground">
-              <span className="text-primary">Resto</span>Manager
-            </span>
-
-            <span className="hidden text-[9px] font-medium tracking-wide text-muted-foreground sm:block">
-              Discover. Manage. Grow.
-            </span>
-          </span>
+          <BrandLogo subtitle="Discover. Manage. Grow." />
         </Link>
 
         {/* Desktop navigation */}

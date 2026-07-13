@@ -1,8 +1,9 @@
 import { useState, type ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
-import { ExternalLink, Menu, UtensilsCrossed, X } from "lucide-react";
+import { ExternalLink, Menu, X } from "lucide-react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 
+import { BrandLogo } from "@/components/BrandLogo";
 import { LogoutConfirmDialog } from "@/components/common/LogoutConfirmDialog";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
@@ -49,19 +50,9 @@ function DashboardSidebar({
         <Link
           to={homeHref}
           onClick={onNavigate}
-          className="flex items-center gap-3"
+          className="group flex items-center gap-3"
         >
-          <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <UtensilsCrossed className="size-5" aria-hidden="true" />
-          </span>
-          <span className="min-w-0">
-            <span className="block text-base font-semibold text-foreground">
-              RestoManager
-            </span>
-            <span className="block truncate text-xs text-muted-foreground">
-              {title}
-            </span>
-          </span>
+          <BrandLogo size="sm" subtitle={title} />
         </Link>
       </div>
 

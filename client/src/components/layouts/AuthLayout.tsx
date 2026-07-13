@@ -1,6 +1,8 @@
 import { ArrowLeft } from "lucide-react";
 import { Link, Outlet } from "react-router-dom";
 
+import { BrandLogo } from "@/components/BrandLogo";
+
 export function AuthLayout() {
   const currentYear = new Date().getFullYear();
 
@@ -26,15 +28,7 @@ export function AuthLayout() {
             className="group flex items-center gap-2.5 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             aria-label="Go to RestoManager home page"
           >
-            <span className="relative flex size-9 items-center justify-center overflow-hidden rounded-xl bg-linear-to-tl from-primary via-white to-transparent text-primary-foreground shadow-sm transition-transform duration-300 group-hover:-rotate-3 group-hover:scale-105">
-              <span className="absolute inset-0 bg-linear-to-br from-white/25 to-transparent" />
-
-              <img src="/logo.png" alt="RestoManager logo" className="" />
-            </span>
-
-            <span className="text-lg font-bold tracking-tight text-foreground">
-              <span className="text-primary">Resto</span>Manager
-            </span>
+            <BrandLogo />
           </Link>
 
           <Link
