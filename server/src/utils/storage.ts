@@ -61,11 +61,6 @@ export async function createPrivateSignedUrl(filePath: string) {
   return data.signedUrl;
 }
 
-type DeleteFileOptions = {
-  bucket: string;
-  filePath?: string | null;
-};
-
 export async function deleteFilesFromSupabase({
   bucket,
   filePaths,
