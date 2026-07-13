@@ -6,6 +6,7 @@ import {
   phoneSchema,
   quantitySchema,
 } from "./common.schema.js";
+import { ingredientSchema } from "./menu-item.schema.js";
 
 export const orderStatusSchema = z.enum([
   "pending",

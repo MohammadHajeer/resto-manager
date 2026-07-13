@@ -5,6 +5,7 @@ import {
   LayoutDashboard,
   Menu,
   ShoppingCart,
+  Store,
   UserRound,
   X,
 } from "lucide-react";
@@ -15,6 +16,10 @@ import {
   type UserRole,
 } from "../auth/auth-types";
 import { authClient } from "../lib/auth-client";
+import {
+  calculateCartItemCount,
+  useCartStore,
+} from "@/stores/useCartStore";
 import { Button } from "./ui/button";
 import { LogoutConfirmDialog } from "./common/LogoutConfirmDialog";
 
@@ -63,6 +68,9 @@ export function SiteHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const { data: session, isPending } = authClient.useSession();
+  const cartItemCount = useCartStore((state) =>
+    calculateCartItemCount(state.items),
+  );
 
   const user = session?.user;
   const role = normalizeRole(user?.role);
@@ -83,10 +91,11 @@ export function SiteHeader() {
           aria-label="Go to RestoManager home page"
           className="group flex shrink-0 items-center gap-2.5 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         >
-          <span className="relative flex size-9 items-center justify-center overflow-hidden rounded-xl bg-linear-to-tl from-primary via-white to-transparent text-primary-foreground shadow-sm transition-transform duration-300 group-hover:-rotate-3 group-hover:scale-105">
+          <span className="relative flex size-9 items-center justify-center overflow-hidden rounded-xl bg-primary text-primary-foreground shadow-sm transition-transform duration-300 group-hover:-rotate-3 group-hover:scale-105">
             <span className="absolute inset-0 bg-linear-to-br from-white/25 to-transparent" />
 
-            <img src="/logo.png" alt="RestoManager logo" className="" />
+            <Store className="relative size-4.5 hidden" aria-hidden="true" />
+            <img src="/logo.png" alt="" className="relative size-6" />
           </span>
 
           <span className="leading-tight">
@@ -152,11 +161,23 @@ export function SiteHeader() {
                   variant="ghost"
                   size="icon"
                   nativeButton={false}
-                  aria-label="View cart"
+                  aria-label={
+                    cartItemCount > 0
+                      ? `View cart, ${cartItemCount} ${cartItemCount === 1 ? "item" : "items"}`
+                      : "View cart"
+                  }
                   className="relative rounded-full text-muted-foreground hover:bg-accent hover:text-primary"
                   render={<Link to="/cart" onClick={closeMenu} />}
                 >
                   <ShoppingCart className="size-4.5" aria-hidden="true" />
+                  {cartItemCount > 0 && (
+                    <span
+                      aria-hidden="true"
+                      className="absolute -right-0.5 -top-0.5 flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-primary-foreground"
+                    >
+                      {cartItemCount > 99 ? "99+" : cartItemCount}
+                    </span>
+                  )}
                 </Button>
               )}
 
@@ -323,7 +344,14 @@ export function SiteHeader() {
                 }
               >
                 <span>Cart</span>
-                <ShoppingCart className="size-4" aria-hidden="true" />
+                <span className="inline-flex items-center gap-2">
+                  {cartItemCount > 0 && (
+                    <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[11px] font-bold text-primary-foreground">
+                      {cartItemCount > 99 ? "99+" : cartItemCount}
+                    </span>
+                  )}
+                  <ShoppingCart className="size-4" aria-hidden="true" />
+                </span>
               </NavLink>
             )}
 

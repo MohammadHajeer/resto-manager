@@ -1,5 +1,4 @@
-import React from "react";
-import { AlertCircle, ArrowRight, Clock3, RefreshCw, Store, Users, CheckCircle } from "lucide-react";
+import { AlertCircle, ArrowRight, Clock3, RefreshCw, ShieldCheck } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
@@ -8,19 +7,13 @@ import { Pagination } from "@/components/common/Pagination";
 import { Button } from "@/components/ui/button";
 import { queryKeys } from "@/lib/queryKeys";
 import { adminService, type PendingRestaurant } from "@/services/admin.service";
-import { RestaurantStatusFilters } from "./RestaurantStatusFilters";
-import RestaurantStatusBadge from "./RestaurantStatusBadge";
+import RestaurantStatusBadge from "./AdminRestaurantsPage/RestaurantStatusBadge";
 
 // ── helpers ────────────────────────────────────────────────────────────────
 
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
   year: "numeric", month: "short", day: "numeric",
 });
-
-function parsePositiveInteger(value: string | null, fallback: number) {
-  const parsed = Number(value);
-  return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback;
-}
 
 function formatDate(value: string) {
   const date = new Date(value);
@@ -31,29 +24,23 @@ function relativeLabel(iso: string): { text: string; cls: string } {
   const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
   if (days === 0) return { text: "Today",     cls: "text-primary font-medium" };
   if (days === 1) return { text: "Yesterday", cls: "text-muted-foreground" };
-  return            { text: `${days} days ago`, cls: "text-destructive font-medium" };
+  return            { text: `${days}d ago`,   cls: "text-destructive font-medium" };
+}
+
+function parsePositiveInt(value: string | null, fallback: number) {
+  const n = Number(value);
+  return Number.isInteger(n) && n > 0 ? n : fallback;
 }
 
 // ── stat card ──────────────────────────────────────────────────────────────
 
-function StatCard({
-  icon: Icon,
-  label,
-  value,
-  highlight = false,
-}: {
-  icon: React.ComponentType<{ className?: string }>;
-  label: string;
-  value: string | number;
-  highlight?: boolean;
+function StatCard({ label, value, highlight = false }: {
+  label: string; value: string | number; highlight?: boolean;
 }) {
   return (
-    <div className="rounded-xl border border-border bg-card px-5 py-4 shadow-sm">
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">{label}</p>
-        <Icon className="size-4 text-muted-foreground" />
-      </div>
-      <p className={`mt-2 text-2xl font-bold ${highlight ? "text-primary" : "text-foreground"}`}>
+    <div className="rounded-md border border-border bg-card px-5 py-4 shadow-sm">
+      <p className="text-sm text-muted-foreground">{label}</p>
+      <p className={`mt-1 text-2xl font-bold ${highlight ? "text-primary" : "text-foreground"}`}>
         {value}
       </p>
     </div>
@@ -62,64 +49,39 @@ function StatCard({
 
 // ── component ──────────────────────────────────────────────────────────────
 
-export default function AdminRestaurantsPage() {
+export default function AdminApprovalsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const page   = parsePositiveInteger(searchParams.get("page"),  1);
-  const limit  = parsePositiveInteger(searchParams.get("limit"), 10);
-  const status = searchParams.get("status") || undefined;
+  const page  = parsePositiveInt(searchParams.get("page"),  1);
+  const limit = parsePositiveInt(searchParams.get("limit"), 10);
 
-  // Main list query — uses the current status filter
   const { data, isLoading, isError, isFetching, refetch } = useQuery({
-    queryKey: queryKeys.admin.restaurants.list({ page, limit, status }),
-    queryFn:  () => adminService.getAdminRestaurants({ page, limit, status }),
+    queryKey: queryKeys.admin.restaurants.list({ page, limit, status: "pending" }),
+    queryFn: () => adminService.getAdminRestaurants({ page, limit, status: "pending" }),
     placeholderData: keepPreviousData,
   });
 
-  // Separate query just for the pending count badge (always fetch, ignores status filter)
-  const { data: pendingData } = useQuery({
-    queryKey: queryKeys.admin.restaurants.list({ page: 1, limit: 1, status: "pending" }),
-    queryFn:  () => adminService.getAdminRestaurants({ page: 1, limit: 1, status: "pending" }),
-    staleTime: 60_000,
-  });
-
-  const restaurants  = data?.restaurants ?? [];
-  const pagination: PaginationMeta = data?.pagination ?? {
-    page,
-    limit,
-    total: 0,
-    totalPages: 1,
-    hasNextPage: false,
-    hasPrevPage: false,
-  };
-  const pendingCount = pendingData?.pagination?.total ?? 0;
-  const totalCount   = pagination.total;
-
-  // ── columns ──────────────────────────────────────────────────────────────
+  const restaurants = data?.restaurants ?? [];
+  const pagination  = data?.pagination;
 
   const columns: DataTableColumn<PendingRestaurant>[] = [
-    {
-      key: "index",
-      header: "#",
-      render: (_r, idx) => (page - 1) * limit + idx + 1,
-      cellClassName: "w-12 text-muted-foreground",
-    },
     {
       key: "restaurant",
       header: "Restaurant Name",
       render: (r) => (
         <div className="flex items-center gap-3">
-          <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-primary/10 text-xs font-bold text-primary">
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-primary/10 text-sm font-bold text-primary">
             {r.name[0]?.toUpperCase() ?? "R"}
           </span>
           <div className="min-w-0">
-            <p className="font-semibold text-foreground truncate max-w-52">{r.name}</p>
+            <p className="font-semibold text-foreground truncate max-w-48">{r.name}</p>
+            <p className="text-xs text-muted-foreground">{r.owner?.email ?? "—"}</p>
           </div>
         </div>
       ),
     },
     {
       key: "owner",
-      header: "Owner Name",
+      header: "Owner",
       render: (r) => (
         <div>
           <p className="font-medium text-foreground">{r.owner?.name ?? "—"}</p>
@@ -129,7 +91,7 @@ export default function AdminRestaurantsPage() {
     },
     {
       key: "submitted",
-      header: "Submitted Date",
+      header: "Submitted",
       render: (r) => {
         const rel = relativeLabel(r.createdAt);
         return (
@@ -152,7 +114,7 @@ export default function AdminRestaurantsPage() {
       headerClassName: "text-right",
       cellClassName: "text-right",
       render: (r) => (
-        <Link to={r._id}>
+        <Link to={`/admin/restaurants/${r._id}`}>
           <Button type="button" size="xs" className="rounded-md">
             Review <ArrowRight aria-hidden="true" />
           </Button>
@@ -170,11 +132,6 @@ export default function AdminRestaurantsPage() {
     });
   };
 
-  const statusLabel =
-    !status || status === "all" ? "total restaurants" : `${status} restaurants`;
-
-  // ── render ────────────────────────────────────────────────────────────────
-
   return (
     <div className="space-y-6">
 
@@ -182,93 +139,75 @@ export default function AdminRestaurantsPage() {
       <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-            Restaurant Applications
+            Restaurant Approvals
           </h1>
           <p className="mt-1 max-w-2xl text-sm leading-6 text-muted-foreground">
-            Review, approve, reject, and monitor restaurant registration
-            requests before they become active on the platform.
+            Review and manage pending merchant submissions to the RestoManager network.
           </p>
         </div>
 
         {!isLoading && !isError && (
           <div className="inline-flex w-fit items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 text-sm font-medium text-muted-foreground shadow-sm">
             <Clock3 className="size-4" aria-hidden="true" />
-            <span>{totalCount} {statusLabel}</span>
+            <span>{pagination?.total ?? restaurants.length} pending</span>
           </div>
         )}
       </header>
 
       {/* ── STATS ROW ── */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <StatCard
-          icon={Clock3}
-          label="Pending Reviews"
-          value={isLoading ? "—" : pendingCount}
-          highlight
-        />
-        <StatCard
-          icon={Store}
-          label="Total Restaurants"
-          value={isLoading ? "—" : totalCount}
-        />
-        <StatCard
-          icon={CheckCircle}
-          label="Avg. Response Time"
-          value="4.2 hrs"
-        />
-        <StatCard
-          icon={Users}
-          label="Submission Volume"
-          value="+15%"
-        />
+        <StatCard label="Pending Reviews"    value={isLoading ? "—" : (pagination?.total ?? 0)} highlight />
+        <StatCard label="Avg. Response Time" value="4.2 hrs" />
+        <StatCard label="Page"               value={`${page} / ${pagination?.totalPages ?? 1}`} />
+        <StatCard label="Per Page"           value={limit} />
       </div>
 
-      {/* ── ERROR ── */}
+      {/* ── ERROR STATE ── */}
       {isError && (
-        <section className="rounded-xl border border-destructive/20 bg-destructive/5 px-6 py-10 text-center">
+        <section className="rounded-md border border-destructive/20 bg-destructive/5 px-6 py-10 text-center">
           <AlertCircle className="mx-auto size-8 text-destructive" aria-hidden="true" />
           <h2 className="mt-3 text-base font-semibold text-foreground">
-            Failed to load restaurants
+            Failed to load pending restaurants
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Check your connection and try again.
           </p>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => refetch()}
-            className="mt-5 rounded-md"
-          >
-            <RefreshCw aria-hidden="true" />
-            Try again
+          <Button type="button" variant="outline" onClick={() => refetch()} className="mt-5 rounded-md">
+            <RefreshCw aria-hidden="true" /> Try again
           </Button>
         </section>
       )}
 
-      {/* ── TABLE CARD ── */}
+      {/* ── TABLE ── */}
       {!isError && (
-        <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
+        <>
+          <DataTable
+            data={restaurants}
+            columns={columns}
+            getRowKey={(r) => r._id}
+            emptyMessage="No pending restaurant registrations right now."
+            isLoading={isLoading}
+            loadingRows={5}
+          />
 
-          {/* Filters inside card */}
-          <div className="border-b border-border px-5 py-3">
-            <RestaurantStatusFilters />
-          </div>
-
-          <div className="px-5 py-5 space-y-5">
-            <DataTable
-              data={restaurants}
-              columns={columns}
-              getRowKey={(r) => r._id}
-              emptyMessage="No restaurants found matching the current filter."
-              isLoading={isLoading}
-            />
-
+          {pagination && (
             <Pagination
               pagination={pagination}
               onPageChange={handlePageChange}
               disabled={isFetching}
             />
-          </div>
+          )}
+        </>
+      )}
+
+      {/* ── EMPTY ICON when all caught up ── */}
+      {!isLoading && !isError && restaurants.length === 0 && (
+        <div className="flex flex-col items-center justify-center py-10 text-center">
+          <ShieldCheck className="size-10 text-primary" aria-hidden="true" />
+          <p className="mt-3 text-base font-semibold text-foreground">All caught up!</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            No pending registrations at the moment.
+          </p>
         </div>
       )}
     </div>

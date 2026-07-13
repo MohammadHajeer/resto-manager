@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { ArrowLeft, UtensilsCrossed } from "lucide-react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
+import { toast } from "sonner";
 
 import {
   MenuEmptyState,
@@ -13,7 +14,12 @@ import { RestaurantBrandingHeader } from "./RestaurantBrandingHeader";
 import { RestaurantMenuPageSkeleton } from "./RestaurantMenuPageSkeleton";
 import { RestaurantOpeningHours } from "./RestaurantOpeningHours";
 import { usePublicRestaurantBySlug } from "@/hooks/public/useRestaurants";
-import type { PublicMenuItem } from "@/services/public/public.types";
+import { useDebounce } from "@/hooks/useDebounce";
+import { useCartStore } from "@/stores/useCartStore";
+import type {
+  PublicMenuAddon,
+  PublicMenuItem,
+} from "@/services/public/public.types";
 
 export default function RestaurantMenuPage() {
   const { restaurantSlug } = useParams<{ restaurantSlug: string }>();
@@ -21,6 +27,9 @@ export default function RestaurantMenuPage() {
   const [selectedItem, setSelectedItem] = useState<PublicMenuItem | null>(null);
 
   const category = searchParams.get("category");
+  const rawSearch = searchParams.get("search") ?? "";
+  const debouncedSearch = useDebounce(rawSearch, 300);
+
   const restaurantQuery = usePublicRestaurantBySlug(
     restaurantSlug ?? "",
     category,
@@ -28,6 +37,29 @@ export default function RestaurantMenuPage() {
   const fullMenuQuery = usePublicRestaurantBySlug(restaurantSlug ?? "", null);
   const data = restaurantQuery.data;
   const fullMenuData = fullMenuQuery.data;
+
+  const addItem = useCartStore((state) => state.addItem);
+  const cartRestaurantId = useCartStore((state) => state.restaurantId);
+
+  // RES-75: debounced client-side search over the already-loaded menu
+  // items — no extra API call needed since all items are fetched by the
+  // slug endpoint. Matches against name, description, and category name.
+  const items = useMemo(() => {
+    const source = data?.menuItems ?? [];
+
+    if (!debouncedSearch) return source;
+
+    const query = debouncedSearch.toLowerCase();
+
+    return source.filter(
+      (item) =>
+        item.name.toLowerCase().includes(query) ||
+        item.description.toLowerCase().includes(query) ||
+        item.categoryName.toLowerCase().includes(query),
+    );
+  }, [data?.menuItems, debouncedSearch]);
+
+  const originalItems = fullMenuData?.menuItems ?? data?.menuItems ?? [];
 
   const isInitialLoading =
     (!data && restaurantQuery.isPending) ||
@@ -47,15 +79,48 @@ export default function RestaurantMenuPage() {
     );
   }
 
-  const items = data.menuItems;
-  const originalItems = fullMenuData?.menuItems ?? data.menuItems;
   const hasActiveFilters = Array.from(searchParams.values()).some((value) =>
     Boolean(value.trim()),
   );
   const emptyStateVariant = getEmptyStateVariant({
     originalItemCount: originalItems.length,
     selectedCategory: category,
+    searchQuery: debouncedSearch,
   });
+
+  /**
+   * RES-84: push the customized item into the cart store.
+   * The store enforces the one-restaurant-per-cart rule; we only surface
+   * the right feedback message for each case.
+   */
+  const handleAddToCart = (payload: {
+    item: PublicMenuItem;
+    quantity: number;
+    selectedAddons: PublicMenuAddon[];
+    removedIngredients: string[];
+  }) => {
+    const isReplacingCart =
+      cartRestaurantId !== null && cartRestaurantId !== data.restaurant._id;
+
+    addItem({
+      restaurantId: data.restaurant._id,
+      restaurantSlug: data.restaurant.slug,
+      restaurantName: data.restaurant.name,
+      item: payload.item,
+      quantity: payload.quantity,
+      selectedAddons: payload.selectedAddons,
+      removedIngredients: payload.removedIngredients,
+    });
+
+    if (isReplacingCart) {
+      toast.info(
+        `Your cart was replaced with items from ${data.restaurant.name}. You can order from one restaurant at a time.`,
+      );
+      return;
+    }
+
+    toast.success(`${payload.item.name} added to cart`);
+  };
 
   return (
     <div
@@ -138,7 +203,7 @@ export default function RestaurantMenuPage() {
         onOpenChange={(open) => {
           if (!open) setSelectedItem(null);
         }}
-        onAddToCart={() => {}}
+        onAddToCart={handleAddToCart}
       />
     </div>
   );
@@ -147,11 +212,14 @@ export default function RestaurantMenuPage() {
 function getEmptyStateVariant({
   originalItemCount,
   selectedCategory,
+  searchQuery,
 }: {
   originalItemCount: number;
   selectedCategory: string | null;
+  searchQuery: string;
 }): MenuEmptyStateVariant {
   if (originalItemCount === 0) return "menu-unpublished";
+  if (searchQuery) return "no-results";
   if (selectedCategory) return "empty-category";
   return "no-results";
 }
