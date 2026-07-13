@@ -91,7 +91,7 @@ The repository contains three npm packages: a React frontend, an Express API, an
 | Tailwind CSS 4 and shadcn | Styling, design tokens, and reusable UI components. |
 | Recharts 3 | Owner and administrator dashboard charts. |
 | Better Auth client | Session-aware frontend authentication. |
-| Framer Motion, Lucide React, and Sonner | Motion, icons, and toast notifications. |
+| Lucide React, and Sonner | Icons, and toast notifications. |
 
 ### Backend
 
