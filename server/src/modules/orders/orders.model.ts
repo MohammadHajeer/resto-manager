@@ -50,14 +50,6 @@ const orderItemSchema = new Schema(
       default: [],
     },
 
-    // RES-82: ingredients the customer removed from this line item.
-    // Snapshot of names only (no pricing impact) — validated against the
-    // menu item's own ingredient list at order creation time.
-    removedIngredients: {
-      type: [String],
-      default: [],
-    },
-
     itemTotal: {
       type: Number,
       required: true,

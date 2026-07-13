@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsc && tsc-alias",
+    "seed": "tsx src/seeds/seedDatabase.ts",
+    "seed:reset": "tsx src/seeds/seedDatabase.ts --reset",
     "start": "node dist/server.js"
   },
   "keywords": [],

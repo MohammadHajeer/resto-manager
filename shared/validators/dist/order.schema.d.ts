@@ -12,7 +12,6 @@ export declare const createOrderItemSchema: z.ZodObject<{
     menuItemId: z.ZodString;
     quantity: z.ZodCoercedNumber<unknown>;
     selectedAddonNames: z.ZodDefault<z.ZodArray<z.ZodString>>;
-    removedIngredientNames: z.ZodDefault<z.ZodArray<z.ZodString>>;
 }, z.core.$strip>;
 export declare const deliveryAddressSnapshotSchema: z.ZodObject<{
     city: z.ZodString;
@@ -36,7 +35,6 @@ export declare const createOrderSchema: z.ZodObject<{
         menuItemId: z.ZodString;
         quantity: z.ZodCoercedNumber<unknown>;
         selectedAddonNames: z.ZodDefault<z.ZodArray<z.ZodString>>;
-        removedIngredientNames: z.ZodDefault<z.ZodArray<z.ZodString>>;
     }, z.core.$strip>>;
     customerNote: z.ZodDefault<z.ZodOptional<z.ZodString>>;
 }, z.core.$strip>;

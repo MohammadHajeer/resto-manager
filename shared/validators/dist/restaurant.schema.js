@@ -87,8 +87,9 @@ export const restaurantProfileUpdateSchema = z.object({
 });
 export const restaurantReviewSchema = z
     .object({
-    status: z.enum(["approved", "rejected"]),
+    status: z.enum(["approved", "rejected", "suspended"]),
     rejectionReason: z.string().trim().max(500).optional().or(z.literal("")),
+    suspensionReason: z.string().trim().max(500).optional().or(z.literal("")),
 })
     .superRefine((data, ctx) => {
     if (data.status === "rejected" && !data.rejectionReason?.trim()) {
@@ -96,6 +97,13 @@ export const restaurantReviewSchema = z
             code: "custom",
             message: "Rejection reason is required when rejecting a restaurant",
             path: ["rejectionReason"],
+        });
+    }
+    if (data.status === "suspended" && !data.suspensionReason?.trim()) {
+        ctx.addIssue({
+            code: "custom",
+            message: "Suspension reason is required when suspending a restaurant",
+            path: ["suspensionReason"],
         });
     }
 });

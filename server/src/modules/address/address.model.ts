@@ -60,7 +60,6 @@ const addressSchema = new Schema(
   },
 );
 
-addressSchema.index({ userId: 1 });
 addressSchema.index({ userId: 1, createdAt: -1 });
 
 addressSchema.index(

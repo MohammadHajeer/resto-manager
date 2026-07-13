@@ -104,10 +104,8 @@ export const useUpdateOwnerOrderStatus = () => {
 
           if (!movedOrder) return oldData;
 
-          const orderToUpdate: OwnerKitchenOrder = movedOrder!;
-
           const updatedOrder: OwnerKitchenOrder = {
-            ...orderToUpdate,
+            ...movedOrder,
             status,
             nextStatus: getNextStatus(status),
             nextActionLabel: getNextActionLabel(status),

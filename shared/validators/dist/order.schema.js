@@ -14,10 +14,6 @@ export const createOrderItemSchema = z.object({
     menuItemId: objectIdSchema,
     quantity: quantitySchema,
     selectedAddonNames: z.array(selectedAddonNameSchema).max(30).default([]),
-    // RES-82: ingredients the customer asked to remove from this line item.
-    // Validated against the menu item's own `ingredients` list on creation
-    // (see orders customer controller) so only real ingredients can be removed.
-    removedIngredientNames: z.array(ingredientSchema).max(30).default([]),
 });
 export const deliveryAddressSnapshotSchema = addressBaseSchema.extend({
     label: z.string().trim().max(40).optional().default(""),

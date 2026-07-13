@@ -33,7 +33,6 @@ type AddToCartPayload = {
   item: PublicMenuItem;
   quantity: number;
   selectedAddons: PublicMenuAddon[];
-  removedIngredients: string[];
 };
 
 type MenuItemDetailsSheetProps = {
@@ -47,13 +46,11 @@ type MenuItemDetailsContentProps = {
   item: PublicMenuItem;
   quantity: number;
   selectedAddonNames: string[];
-  removedIngredients: string[];
   itemTotal: number;
   isRestaurantOpen: boolean;
   showCloseButton?: boolean;
   onClose: () => void;
   onToggleAddon: (addonName: string) => void;
-  onToggleIngredient: (ingredientName: string) => void;
   onQuantityChange: (quantity: number) => void;
   onAddToCart: () => void;
 };
@@ -69,7 +66,6 @@ export function MenuItemDetailsSheet({
   const isDesktop = useMediaQuery(DESKTOP_MEDIA_QUERY);
   const [quantity, setQuantity] = useState(1);
   const [selectedAddonNames, setSelectedAddonNames] = useState<string[]>([]);
-  const [removedIngredients, setRemovedIngredients] = useState<string[]>([]);
 
   useEffect(() => {
     if (!item) return;
@@ -77,7 +73,6 @@ export function MenuItemDetailsSheet({
     const animationFrame = requestAnimationFrame(() => {
       setQuantity(1);
       setSelectedAddonNames([]);
-      setRemovedIngredients([]);
     });
 
     return () => cancelAnimationFrame(animationFrame);
@@ -94,8 +89,6 @@ export function MenuItemDetailsSheet({
   const addonsTotal = selectedAddons.reduce((total, addon) => {
     return total + addon.price;
   }, 0);
-  // Removed ingredients never affect the price — they are a preparation
-  // instruction, not a discount (mirrors the server's pricing rule).
   const itemTotal = item ? (item.price + addonsTotal) * quantity : 0;
   const isOpen = item !== null;
 
@@ -106,7 +99,6 @@ export function MenuItemDetailsSheet({
       item,
       quantity,
       selectedAddons,
-      removedIngredients,
     });
     onOpenChange(false);
   };
@@ -117,7 +109,6 @@ export function MenuItemDetailsSheet({
       item={item}
       quantity={quantity}
       selectedAddonNames={selectedAddonNames}
-      removedIngredients={removedIngredients}
       itemTotal={itemTotal}
       isRestaurantOpen={isRestaurantOpen}
       showCloseButton={!isDesktop}
@@ -129,15 +120,6 @@ export function MenuItemDetailsSheet({
           current.includes(addonName)
             ? current.filter((name) => name !== addonName)
             : [...current, addonName],
-        );
-      }}
-      onToggleIngredient={(ingredientName) => {
-        if (!isRestaurantOpen || !item.isAvailable) return;
-
-        setRemovedIngredients((current) =>
-          current.includes(ingredientName)
-            ? current.filter((name) => name !== ingredientName)
-            : [...current, ingredientName],
         );
       }}
       onQuantityChange={(nextQuantity) => {
@@ -184,13 +166,11 @@ function MenuItemDetailsContent({
   item,
   quantity,
   selectedAddonNames,
-  removedIngredients,
   itemTotal,
   isRestaurantOpen,
   showCloseButton = false,
   onClose,
   onToggleAddon,
-  onToggleIngredient,
   onQuantityChange,
   onAddToCart,
 }: MenuItemDetailsContentProps) {
@@ -305,44 +285,20 @@ function MenuItemDetailsContent({
                   What’s included
                 </h3>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  {canCustomize
-                    ? "Tap an ingredient to remove it from your order."
-                    : "The standard ingredients in this item."}
+                  The standard ingredients in this item.
                 </p>
               </div>
 
               <ul className="flex flex-wrap gap-2">
-                {item.ingredients.map((ingredient) => {
-                  const isRemoved = removedIngredients.includes(ingredient);
-
-                  return (
-                    <li key={ingredient}>
-                      <button
-                        type="button"
-                        onClick={() => onToggleIngredient(ingredient)}
-                        disabled={!canCustomize}
-                        aria-pressed={isRemoved}
-                        className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/30 disabled:cursor-not-allowed disabled:opacity-60 ${
-                          isRemoved
-                            ? "border-destructive/30 bg-destructive/10 text-destructive line-through"
-                            : "border-border bg-muted/50 text-foreground hover:border-destructive/30 hover:bg-destructive/5 hover:text-destructive"
-                        }`}
-                      >
-                        {isRemoved && (
-                          <X className="size-3" aria-hidden="true" />
-                        )}
-                        {ingredient}
-                      </button>
-                    </li>
-                  );
-                })}
+                {item.ingredients.map((ingredient) => (
+                  <li
+                    key={ingredient}
+                    className="rounded-full border border-border bg-muted/50 px-3 py-1.5 text-sm font-medium text-foreground"
+                  >
+                    {ingredient}
+                  </li>
+                ))}
               </ul>
-
-              {removedIngredients.length > 0 && (
-                <p className="mt-2 text-xs font-medium text-destructive">
-                  Removing: {removedIngredients.join(", ")}
-                </p>
-              )}
             </section>
           )}
 

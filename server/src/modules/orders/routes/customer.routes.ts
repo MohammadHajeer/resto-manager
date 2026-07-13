@@ -1,7 +1,4 @@
 import { Router } from "express";
-
-import { createOrderSchema } from "@restomanager/validators";
-
 import {
   createOrder,
   getMyCurrentOrders,
@@ -9,6 +6,7 @@ import {
   getMyOrderHistory,
 } from "../controllers/customer.controller.js";
 import { validate } from "@/middlewares/validate.middleware.js";
+import { createOrderSchema } from "@restomanager/validators";
 
 const router = Router();
 

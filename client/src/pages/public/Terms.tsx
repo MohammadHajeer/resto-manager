@@ -1,4 +1,6 @@
-import { FileText, Scale, CheckCircle, AlertTriangle, RefreshCw } from 'lucide-react';
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { FileText, ArrowLeft, Mail, Scale, CheckCircle, AlertTriangle, HelpCircle, RefreshCw } from 'lucide-react';
 
 export default function Terms() {
   return (

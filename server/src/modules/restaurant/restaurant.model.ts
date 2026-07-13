@@ -216,11 +216,13 @@ const restaurantSchema = new Schema(
       rejectionReason: {
         type: String,
         trim: true,
+        maxlength: 500,
         default: null,
       },
       suspensionReason: {
         type: String,
         trim: true,
+        maxlength: 500,
         default: null,
       },
     },

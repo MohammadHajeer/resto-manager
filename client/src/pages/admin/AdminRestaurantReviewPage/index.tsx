@@ -3,6 +3,7 @@ import { useState } from "react";
 import {
   AlertCircle,
   ArrowLeft,
+  Ban,
   CalendarDays,
   CheckCircle2,
   FileText,
@@ -13,6 +14,7 @@ import {
   MapPin,
   Phone,
   RefreshCw,
+  RotateCcw,
   Store,
   UserRound,
   XCircle,
@@ -35,8 +37,10 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
   useApproveRestaurant,
+  useReactivateRestaurant,
   useRejectRestaurant,
   useRestaurantById,
+  useSuspendRestaurant,
 } from "@/hooks/admin/useAdminRestaurants";
 import axios from "axios";
 import { ResourceNotFound } from "@/components/common/ResourceNotFound";
@@ -69,6 +73,17 @@ function formatDate(value?: string | null) {
     ? "Not available"
     : dateFormatter.format(date);
 }
+
+function getActionErrorMessage(error: unknown, fallback: string) {
+  if (
+    axios.isAxiosError(error) &&
+    typeof error.response?.data?.message === "string"
+  ) {
+    return error.response.data.message;
+  }
+  return fallback;
+}
+
 function StatusBadge({ status }: { status: RestaurantStatus }) {
   return (
     <span
@@ -124,6 +139,10 @@ export default function AdminRestaurantReviewPage() {
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
   const [rejectionReasonError, setRejectionReasonError] = useState("");
+  const [suspendDialogOpen, setSuspendDialogOpen] = useState(false);
+  const [suspensionReason, setSuspensionReason] = useState("");
+  const [suspensionReasonError, setSuspensionReasonError] = useState("");
+  const [reactivateDialogOpen, setReactivateDialogOpen] = useState(false);
   const {
     data: restaurant,
     isLoading,
@@ -133,12 +152,22 @@ export default function AdminRestaurantReviewPage() {
   } = useRestaurantById(restaurantId ?? "");
   const approveRestaurant = useApproveRestaurant();
   const rejectRestaurant = useRejectRestaurant();
-  const isMutating = approveRestaurant.isPending || rejectRestaurant.isPending;
+  const suspendRestaurant = useSuspendRestaurant();
+  const reactivateRestaurant = useReactivateRestaurant();
+  const isMutating =
+    approveRestaurant.isPending ||
+    rejectRestaurant.isPending ||
+    suspendRestaurant.isPending ||
+    reactivateRestaurant.isPending;
   const isRestaurantNotFound =
     axios.isAxiosError(error) && error.response?.status === 404;
 
   const handleApproveRestaurant = () => {
-    if (!restaurant?._id) return;
+    if (
+      !restaurant?._id ||
+      !["pending", "rejected"].includes(restaurant.status)
+    )
+      return;
 
     approveRestaurant.mutate(restaurant._id, {
       onSuccess: () => {
@@ -146,14 +175,19 @@ export default function AdminRestaurantReviewPage() {
         toast.success("Restaurant approved successfully.");
         navigate("/admin/restaurants");
       },
-      onError: () => {
-        toast.error("Failed to approve restaurant. Please try again.");
+      onError: (mutationError) => {
+        toast.error(
+          getActionErrorMessage(
+            mutationError,
+            "Failed to approve restaurant. Please try again.",
+          ),
+        );
       },
     });
   };
 
   const handleRejectRestaurant = () => {
-    if (!restaurant?._id) return;
+    if (!restaurant?._id || restaurant.status !== "pending") return;
 
     const trimmedReason = rejectionReason.trim();
     if (!trimmedReason) {
@@ -174,8 +208,13 @@ export default function AdminRestaurantReviewPage() {
           toast.success("Restaurant rejected successfully.");
           navigate("/admin/restaurants");
         },
-        onError: () => {
-          toast.error("Failed to reject restaurant. Please try again.");
+        onError: (mutationError) => {
+          toast.error(
+            getActionErrorMessage(
+              mutationError,
+              "Failed to reject restaurant. Please try again.",
+            ),
+          );
         },
       },
     );
@@ -189,6 +228,70 @@ export default function AdminRestaurantReviewPage() {
       setRejectionReason("");
       setRejectionReasonError("");
     }
+  };
+
+  const handleSuspendRestaurant = () => {
+    if (!restaurant?._id || restaurant.status !== "approved") return;
+
+    const trimmedReason = suspensionReason.trim();
+    if (!trimmedReason) {
+      setSuspensionReasonError("A suspension reason is required.");
+      return;
+    }
+
+    suspendRestaurant.mutate(
+      {
+        restaurantId: restaurant._id,
+        suspensionReason: trimmedReason,
+      },
+      {
+        onSuccess: () => {
+          setSuspendDialogOpen(false);
+          setSuspensionReason("");
+          setSuspensionReasonError("");
+          toast.success("Restaurant suspended successfully.");
+          navigate("/admin/restaurants");
+        },
+        onError: (mutationError) => {
+          toast.error(
+            getActionErrorMessage(
+              mutationError,
+              "Failed to suspend restaurant. Please try again.",
+            ),
+          );
+        },
+      },
+    );
+  };
+
+  const handleSuspendDialogChange = (nextOpen: boolean) => {
+    if (suspendRestaurant.isPending) return;
+
+    setSuspendDialogOpen(nextOpen);
+    if (!nextOpen) {
+      setSuspensionReason("");
+      setSuspensionReasonError("");
+    }
+  };
+
+  const handleReactivateRestaurant = () => {
+    if (!restaurant?._id || restaurant.status !== "suspended") return;
+
+    reactivateRestaurant.mutate(restaurant._id, {
+      onSuccess: () => {
+        setReactivateDialogOpen(false);
+        toast.success("Restaurant reactivated successfully.");
+        navigate("/admin/restaurants");
+      },
+      onError: (mutationError) => {
+        toast.error(
+          getActionErrorMessage(
+            mutationError,
+            "Failed to reactivate restaurant. Please try again.",
+          ),
+        );
+      },
+    });
   };
 
   if (isLoading) return <ReviewPageSkeleton />;
@@ -305,25 +408,78 @@ export default function AdminRestaurantReviewPage() {
           </p>
         </div>
 
-        {restaurant.status === "pending" && (
-          <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {restaurant.status === "pending" && (
+            <>
+              <Button
+                type="button"
+                variant="destructive"
+                disabled={isMutating}
+                onClick={() => setRejectDialogOpen(true)}
+                className="rounded-md"
+              >
+                {rejectRestaurant.isPending ? (
+                  <LoaderCircle className="animate-spin" aria-hidden="true" />
+                ) : (
+                  <XCircle aria-hidden="true" />
+                )}
+                {rejectRestaurant.isPending ? "Rejecting..." : "Reject"}
+              </Button>
+              <Button
+                type="button"
+                disabled={isMutating}
+                onClick={() => setApproveDialogOpen(true)}
+                className="rounded-md"
+              >
+                {approveRestaurant.isPending ? (
+                  <LoaderCircle className="animate-spin" aria-hidden="true" />
+                ) : (
+                  <CheckCircle2 aria-hidden="true" />
+                )}
+                {approveRestaurant.isPending ? "Approving..." : "Approve"}
+              </Button>
+            </>
+          )}
+
+          {restaurant.status === "approved" && (
             <Button
               type="button"
               variant="destructive"
-              disabled={restaurant.status !== "pending" || isMutating}
-              onClick={() => setRejectDialogOpen(true)}
+              disabled={isMutating}
+              onClick={() => setSuspendDialogOpen(true)}
               className="rounded-md"
             >
-              {rejectRestaurant.isPending ? (
+              {suspendRestaurant.isPending ? (
                 <LoaderCircle className="animate-spin" aria-hidden="true" />
               ) : (
-                <XCircle aria-hidden="true" />
+                <Ban aria-hidden="true" />
               )}
-              {rejectRestaurant.isPending ? "Rejecting..." : "Reject"}
+              {suspendRestaurant.isPending ? "Suspending..." : "Suspend"}
             </Button>
+          )}
+
+          {restaurant.status === "suspended" && (
             <Button
               type="button"
-              disabled={restaurant.status !== "pending" || isMutating}
+              disabled={isMutating}
+              onClick={() => setReactivateDialogOpen(true)}
+              className="rounded-md"
+            >
+              {reactivateRestaurant.isPending ? (
+                <LoaderCircle className="animate-spin" aria-hidden="true" />
+              ) : (
+                <RotateCcw aria-hidden="true" />
+              )}
+              {reactivateRestaurant.isPending
+                ? "Reactivating..."
+                : "Reactivate"}
+            </Button>
+          )}
+
+          {restaurant.status === "rejected" && (
+            <Button
+              type="button"
+              disabled={isMutating}
               onClick={() => setApproveDialogOpen(true)}
               className="rounded-md"
             >
@@ -334,8 +490,8 @@ export default function AdminRestaurantReviewPage() {
               )}
               {approveRestaurant.isPending ? "Approving..." : "Approve"}
             </Button>
-          </div>
-        )}
+          )}
+        </div>
       </header>
 
       <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(24rem,0.9fr)]">
@@ -477,6 +633,17 @@ export default function AdminRestaurantReviewPage() {
                 </p>
               </div>
             )}
+
+            {restaurant.verification.suspensionReason && (
+              <div className="mt-5 rounded-md border border-amber-200 bg-amber-50 p-4">
+                <p className="text-xs font-semibold uppercase text-amber-800">
+                  Suspension reason
+                </p>
+                <p className="mt-1 text-sm leading-6 text-foreground/80">
+                  {restaurant.verification.suspensionReason}
+                </p>
+              </div>
+            )}
           </SectionCard>
         </div>
 
@@ -535,12 +702,14 @@ export default function AdminRestaurantReviewPage() {
               <CheckCircle2 className="size-5" aria-hidden="true" />
             </AlertDialogMedia>
             <AlertDialogTitle className="text-xl font-semibold text-foreground">
-              Approve restaurant?
+              {restaurant.status === "rejected"
+                ? "Approve rejected restaurant?"
+                : "Approve restaurant?"}
             </AlertDialogTitle>
             <AlertDialogDescription className="leading-6 text-muted-foreground">
-              Are you sure you want to approve this restaurant? Once approved,
-              the owner will be able to access the restaurant dashboard and
-              start managing the restaurant.
+              {restaurant.status === "rejected"
+                ? "Approving this restaurant will clear its rejection reason and restore the owner's access to restaurant management."
+                : "Are you sure you want to approve this restaurant? Once approved, the owner will be able to access the restaurant dashboard and start managing the restaurant."}
             </AlertDialogDescription>
           </AlertDialogHeader>
 
@@ -610,6 +779,7 @@ export default function AdminRestaurantReviewPage() {
                 if (event.target.value.trim()) setRejectionReasonError("");
               }}
               placeholder="Write the rejection reason..."
+              maxLength={500}
               disabled={rejectRestaurant.isPending}
               aria-invalid={Boolean(rejectionReasonError)}
               aria-describedby={
@@ -655,6 +825,150 @@ export default function AdminRestaurantReviewPage() {
                 <>
                   <XCircle aria-hidden="true" />
                   Reject restaurant
+                </>
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog
+        open={suspendDialogOpen}
+        onOpenChange={handleSuspendDialogChange}
+      >
+        <AlertDialogContent className="max-w-[calc(100%-2rem)] gap-0 overflow-hidden rounded-lg border border-border bg-card p-0 text-card-foreground shadow-xl sm:max-w-md">
+          <AlertDialogHeader className="gap-2 p-6 pb-4 sm:gap-x-4">
+            <AlertDialogMedia className="mb-1 size-12 bg-destructive/10 text-destructive sm:mb-0">
+              <Ban className="size-5" aria-hidden="true" />
+            </AlertDialogMedia>
+            <AlertDialogTitle className="text-xl font-semibold text-foreground">
+              Suspend restaurant?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="leading-6 text-muted-foreground">
+              Please provide a reason for suspending this restaurant. The
+              restaurant will stop accepting orders and the reason may be shown
+              to the owner.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <div className="px-6 pb-6">
+            <label
+              htmlFor="suspension-reason"
+              className="mb-2 block text-sm font-medium text-foreground"
+            >
+              Suspension reason <span className="text-destructive">*</span>
+            </label>
+            <Textarea
+              id="suspension-reason"
+              value={suspensionReason}
+              onChange={(event) => {
+                setSuspensionReason(event.target.value);
+                if (event.target.value.trim()) setSuspensionReasonError("");
+              }}
+              placeholder="Write the suspension reason..."
+              maxLength={500}
+              disabled={suspendRestaurant.isPending}
+              aria-invalid={Boolean(suspensionReasonError)}
+              aria-describedby={
+                suspensionReasonError ? "suspension-reason-error" : undefined
+              }
+              className="min-h-28 resize-none"
+            />
+            {suspensionReasonError && (
+              <p
+                id="suspension-reason-error"
+                role="alert"
+                className="mt-2 text-sm text-destructive"
+              >
+                {suspensionReasonError}
+              </p>
+            )}
+          </div>
+
+          <AlertDialogFooter className="border-t border-border bg-muted/30 p-4 sm:px-6">
+            <AlertDialogCancel
+              size="lg"
+              disabled={suspendRestaurant.isPending}
+              className="rounded-md"
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              size="lg"
+              disabled={
+                suspendRestaurant.isPending || !suspensionReason.trim()
+              }
+              onClick={(event) => {
+                event.preventDefault();
+                handleSuspendRestaurant();
+              }}
+              className="rounded-md"
+            >
+              {suspendRestaurant.isPending ? (
+                <>
+                  <LoaderCircle className="animate-spin" aria-hidden="true" />
+                  Suspending...
+                </>
+              ) : (
+                <>
+                  <Ban aria-hidden="true" />
+                  Suspend restaurant
+                </>
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog
+        open={reactivateDialogOpen}
+        onOpenChange={(nextOpen) => {
+          if (!reactivateRestaurant.isPending)
+            setReactivateDialogOpen(nextOpen);
+        }}
+      >
+        <AlertDialogContent className="max-w-[calc(100%-2rem)] gap-0 overflow-hidden rounded-lg border border-border bg-card p-0 text-card-foreground shadow-xl sm:max-w-md">
+          <AlertDialogHeader className="gap-2 p-6 sm:gap-x-4">
+            <AlertDialogMedia className="mb-1 size-12 bg-primary/10 text-primary sm:mb-0">
+              <RotateCcw className="size-5" aria-hidden="true" />
+            </AlertDialogMedia>
+            <AlertDialogTitle className="text-xl font-semibold text-foreground">
+              Reactivate restaurant?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="leading-6 text-muted-foreground">
+              Reactivating this restaurant will clear its suspension reason and
+              restore the owner&apos;s access. The owner can choose when to start
+              accepting orders again.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <AlertDialogFooter className="border-t border-border bg-muted/30 p-4 sm:px-6">
+            <AlertDialogCancel
+              size="lg"
+              disabled={reactivateRestaurant.isPending}
+              className="rounded-md"
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              size="lg"
+              disabled={reactivateRestaurant.isPending}
+              onClick={(event) => {
+                event.preventDefault();
+                handleReactivateRestaurant();
+              }}
+              className="rounded-md"
+            >
+              {reactivateRestaurant.isPending ? (
+                <>
+                  <LoaderCircle className="animate-spin" aria-hidden="true" />
+                  Reactivating...
+                </>
+              ) : (
+                <>
+                  <RotateCcw aria-hidden="true" />
+                  Reactivate restaurant
                 </>
               )}
             </AlertDialogAction>

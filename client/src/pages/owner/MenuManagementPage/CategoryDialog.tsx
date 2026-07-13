@@ -1,7 +1,8 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
+import { EyeOff, Loader2 } from "lucide-react";
 
 import {
   createCategorySchema,
@@ -17,16 +18,31 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Switch } from "@/components/ui/switch";
 
 import { TextField } from "@/components/form/TextField";
 import { TextareaField } from "@/components/form/TextareaField";
 
 import {
   useCreateOwnerCategory,
+  useDeleteOwnerCategory,
+  useRestoreOwnerCategory,
   useUpdateOwnerCategory,
 } from "@/hooks/owner/useOwnerCateogories";
 
 import type { OwnerCategorySection } from "@/services/owner/owner.types";
+import { cn } from "@/lib/utils";
 
 type CategoryDialogMode = "create" | "edit";
 
@@ -43,10 +59,18 @@ export function CategoryDialog({
   mode,
   category,
 }: CategoryDialogProps) {
+  const [isDeactivateDialogOpen, setIsDeactivateDialogOpen] = useState(false);
   const createCategoryMutation = useCreateOwnerCategory();
   const updateCategoryMutation = useUpdateOwnerCategory();
+  const deactivateCategoryMutation = useDeleteOwnerCategory();
+  const restoreCategoryMutation = useRestoreOwnerCategory();
 
-  const { control, handleSubmit, reset, formState: {isDirty} } = useForm<CreateCategoryInput>({
+  const {
+    control,
+    handleSubmit,
+    reset,
+    formState: { isDirty },
+  } = useForm<CreateCategoryInput>({
     resolver: zodResolver(createCategorySchema),
     defaultValues: {
       name: "",
@@ -56,17 +80,23 @@ export function CategoryDialog({
 
   const isEditMode = mode === "edit";
 
-  const isPending =
+  const isFormPending =
     createCategoryMutation.isPending || updateCategoryMutation.isPending;
+  const isStatusPending =
+    deactivateCategoryMutation.isPending || restoreCategoryMutation.isPending;
+  const isPending = isFormPending || isStatusPending;
 
+  const categoryId = category?._id;
+  const categoryName = category?.name;
+  const categoryDescription = category?.description;
 
   useEffect(() => {
     if (!open) return;
 
-    if (isEditMode && category) {
+    if (isEditMode && categoryId && categoryName) {
       reset({
-        name: category.name,
-        description: category.description ?? "",
+        name: categoryName,
+        description: categoryDescription ?? "",
       });
 
       return;
@@ -76,7 +106,14 @@ export function CategoryDialog({
       name: "",
       description: "",
     });
-  }, [open, isEditMode, category, reset]);
+  }, [
+    open,
+    isEditMode,
+    categoryId,
+    categoryName,
+    categoryDescription,
+    reset,
+  ]);
 
   const onSubmit = (values: CreateCategoryInput) => {
     const payload = {
@@ -120,11 +157,46 @@ export function CategoryDialog({
   };
 
   const handleOpenChange = (nextOpen: boolean) => {
+    if (!nextOpen && isPending) return;
+
     if (!nextOpen) {
       reset();
+      setIsDeactivateDialogOpen(false);
     }
 
     onOpenChange(nextOpen);
+  };
+
+  const handleStatusChange = (nextIsActive: boolean) => {
+    if (!category?._id || isStatusPending) return;
+
+    if (!nextIsActive) {
+      setIsDeactivateDialogOpen(true);
+      return;
+    }
+
+    restoreCategoryMutation.mutate(category._id, {
+      onSuccess: () => {
+        toast.success("Category restored successfully");
+      },
+      onError: () => {
+        toast.error("Failed to restore category");
+      },
+    });
+  };
+
+  const handleDeactivate = () => {
+    if (!category?._id) return;
+
+    deactivateCategoryMutation.mutate(category._id, {
+      onSuccess: () => {
+        toast.success("Category deactivated successfully");
+        setIsDeactivateDialogOpen(false);
+      },
+      onError: () => {
+        toast.error("Failed to deactivate category");
+      },
+    });
   };
 
   return (
@@ -160,6 +232,55 @@ export function CategoryDialog({
             disabled={isPending}
           />
 
+          {isEditMode && category && (
+            <div
+              className={cn(
+                "flex items-center justify-between gap-4 rounded-2xl border p-4 transition-colors",
+                category.isActive
+                  ? "border-primary/20 bg-primary/5"
+                  : "border-destructive/20 bg-destructive/5",
+              )}
+            >
+              <div>
+                <div className="flex items-center gap-2">
+                  <p className="font-medium text-foreground">
+                    Active Category
+                  </p>
+                  <span
+                    className={cn(
+                      "rounded-full px-2 py-0.5 text-xs font-semibold",
+                      category.isActive
+                        ? "bg-primary/10 text-primary"
+                        : "bg-destructive/10 text-destructive",
+                    )}
+                  >
+                    {category.isActive ? "Active" : "Inactive"}
+                  </span>
+                </div>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {category.isActive
+                    ? "This category is available on your customer-facing menu."
+                    : "This category and its items are hidden from customers."}
+                </p>
+              </div>
+
+              <div className="flex shrink-0 items-center gap-2">
+                {isStatusPending && (
+                  <Loader2
+                    className="size-4 animate-spin text-muted-foreground"
+                    aria-hidden="true"
+                  />
+                )}
+                <Switch
+                  checked={category.isActive}
+                  disabled={isPending}
+                  onCheckedChange={handleStatusChange}
+                  aria-label="Toggle category active status"
+                />
+              </div>
+            </div>
+          )}
+
           <DialogFooter className="gap-2 sm:gap-0">
             <Button
               type="button"
@@ -171,7 +292,7 @@ export function CategoryDialog({
             </Button>
 
             <Button type="submit" disabled={isPending || !isDirty}>
-              {isPending
+              {isFormPending
                 ? isEditMode
                   ? "Saving..."
                   : "Creating..."
@@ -182,6 +303,67 @@ export function CategoryDialog({
           </DialogFooter>
         </form>
       </DialogContent>
+
+      <AlertDialog
+        open={isDeactivateDialogOpen}
+        onOpenChange={(nextOpen) => {
+          if (!deactivateCategoryMutation.isPending) {
+            setIsDeactivateDialogOpen(nextOpen);
+          }
+        }}
+      >
+        <AlertDialogContent className="max-w-[calc(100%-2rem)] gap-0 overflow-hidden rounded-lg border border-border bg-card p-0 text-card-foreground shadow-xl sm:max-w-md">
+          <AlertDialogHeader className="gap-2 p-6 sm:gap-x-4">
+            <AlertDialogMedia className="mb-1 size-12 bg-destructive/10 text-destructive sm:mb-0">
+              <EyeOff className="size-5" aria-hidden="true" />
+            </AlertDialogMedia>
+
+            <AlertDialogTitle className="text-xl font-semibold text-foreground">
+              Deactivate {category?.name}?
+            </AlertDialogTitle>
+
+            <AlertDialogDescription className="leading-6 text-muted-foreground">
+              This category and all of its menu items will be hidden from
+              customers. The items will not be deleted, and their availability
+              settings will stay the same. Turn the category back on anytime to
+              restore them to the menu.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <AlertDialogFooter className="border-t border-border bg-muted/30 p-4 sm:px-6">
+            <AlertDialogCancel
+              size="lg"
+              disabled={deactivateCategoryMutation.isPending}
+              className="rounded-md"
+            >
+              Keep active
+            </AlertDialogCancel>
+
+            <AlertDialogAction
+              variant="destructive"
+              size="lg"
+              disabled={deactivateCategoryMutation.isPending}
+              onClick={(event) => {
+                event.preventDefault();
+                handleDeactivate();
+              }}
+              className="rounded-md"
+            >
+              {deactivateCategoryMutation.isPending ? (
+                <>
+                  <Loader2
+                    className="size-4 animate-spin"
+                    aria-hidden="true"
+                  />
+                  Deactivating...
+                </>
+              ) : (
+                "Deactivate category"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Dialog>
   );
 }

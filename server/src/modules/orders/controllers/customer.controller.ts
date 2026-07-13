@@ -129,22 +129,6 @@ export const createOrder = async (
         });
       }
 
-      // RES-82: only allow removing ingredients that actually belong to
-      // this menu item. Removing an ingredient never changes pricing, it
-      // is a preparation instruction for the restaurant.
-      const removedIngredientNames = item.removedIngredientNames ?? [];
-
-      const invalidRemovedIngredient = removedIngredientNames.find(
-        (ingredientName) => !menuItem.ingredients.includes(ingredientName),
-      );
-
-      if (invalidRemovedIngredient) {
-        return sendResponse(res, 400, {
-          success: false,
-          message: `Invalid ingredient to remove: ${invalidRemovedIngredient}`,
-        });
-      }
-
       const addonsTotal = selectedAddons.reduce((total, addon) => {
         return total + addon.price;
       }, 0);
@@ -157,7 +141,6 @@ export const createOrder = async (
         basePrice: menuItem.price,
         quantity: item.quantity,
         selectedAddons,
-        removedIngredients: removedIngredientNames,
         itemTotal,
       });
     }

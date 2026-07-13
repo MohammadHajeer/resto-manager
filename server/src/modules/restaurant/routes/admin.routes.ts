@@ -3,7 +3,6 @@ import {
   getAdminRestaurants,
   getRestaurantForAdmin,
   reviewRestaurantRegistration,
-  suspendRestaurant,
 } from "../controllers/admin.controller.js";
 import { validate } from "@/middlewares/validate.middleware.js";
 import { restaurantReviewSchema } from "@restomanager/validators";
@@ -19,7 +18,5 @@ router.patch(
   validate(restaurantReviewSchema),
   reviewRestaurantRegistration,
 );
-
-router.patch("/:restaurantId/suspend", suspendRestaurant);
 
 export { router as AdminRestaurantRoutes };

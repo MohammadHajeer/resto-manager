@@ -190,7 +190,7 @@ export const deleteCategory = async (
       });
     }
 
-    // Soft delete for MVP
+    // Soft delete the category without changing or deleting its menu items.
     const category = await Category.findOneAndUpdate(
       {
         _id: categoryId,
@@ -213,7 +213,7 @@ export const deleteCategory = async (
 
     sendResponse(res, 200, {
       success: true,
-      message: "Category deleted successfully",
+      message: "Category deactivated successfully",
       data: category,
     });
   } catch (error) {
@@ -246,7 +246,7 @@ export const restoreCategory = async (
       });
     }
 
-    // Soft delete for MVP
+    // Restore the category and make its existing menu items reachable again.
     const category = await Category.findOneAndUpdate(
       {
         _id: categoryId,

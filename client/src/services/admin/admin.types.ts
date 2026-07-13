@@ -58,6 +58,7 @@ export type AdminRestaurantDetails = {
     reviewedAt: string | null;
     reviewedBy: string | null;
     rejectionReason: string | null;
+    suspensionReason: string | null;
   };
 
   owner?: {
@@ -81,6 +82,16 @@ export type RejectRestaurantInput = {
   restaurantId: string;
   rejectionReason: string;
 };
+
+export type SuspendRestaurantInput = {
+  restaurantId: string;
+  suspensionReason: string;
+};
+
+export type RestaurantStatusUpdatePayload =
+  | { status: "approved" }
+  | { status: "rejected"; rejectionReason: string }
+  | { status: "suspended"; suspensionReason: string };
 
 export type AdminDashboardPeriod = 7 | 30;
 export type AdminRestaurantStatus =
