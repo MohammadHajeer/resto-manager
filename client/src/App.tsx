@@ -5,7 +5,7 @@ import {
   Navigate,
   Outlet,
 } from "react-router-dom";
-import { Toaster } from "sonner";
+import { Toaster } from "./components/ui/sonner";
 
 // Layouts
 import { MainLayout } from "./components/layouts/MainLayout";
@@ -195,7 +195,7 @@ export default function App() {
         {/* Fallback Catch-All Route */}
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
-      <Toaster richColors position="bottom-right" />
+      <Toaster />
     </BrowserRouter>
   );
 }
