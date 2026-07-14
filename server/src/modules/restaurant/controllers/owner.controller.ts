@@ -251,8 +251,8 @@ export const updateMyRestaurant = async (
     const oldLogoUrl = restaurant.logoUrl ?? null;
     const oldBannerUrl = restaurant.bannerUrl ?? null;
 
-    let nextLogoUrl: string | undefined;
-    let nextBannerUrl: string | undefined;
+    let nextLogoUrl: string | null | undefined;
+    let nextBannerUrl: string | null | undefined;
 
     let nextSlug = restaurant.slug;
 
@@ -285,6 +285,8 @@ export const updateMyRestaurant = async (
 
       newlyUploadedPaths.push(logoPath);
       nextLogoUrl = getPublicFileUrl(publicBucket, logoPath);
+    } else if (input.logoUrl === "" && oldLogoUrl) {
+      nextLogoUrl = null;
     }
 
     if (bannerFile) {
@@ -296,6 +298,8 @@ export const updateMyRestaurant = async (
 
       newlyUploadedPaths.push(bannerPath);
       nextBannerUrl = getPublicFileUrl(publicBucket, bannerPath);
+    } else if (input.bannerUrl === "" && oldBannerUrl) {
+      nextBannerUrl = null;
     }
 
     if (input.name !== undefined) {

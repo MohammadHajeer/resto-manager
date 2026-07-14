@@ -7,14 +7,24 @@ import {
 } from "react-hook-form";
 import { useDropzone, type Accept, type FileRejection } from "react-dropzone";
 import {
-  CheckCircle,
+  Camera,
+  CheckCircle2,
   FileWarning,
-  Image,
+  ImageIcon,
   Pencil,
+  Trash2,
   Upload,
   X,
   type LucideIcon,
 } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 
 const DEFAULT_IMAGE_ACCEPT: Accept = {
   "image/jpeg": [".jpg", ".jpeg"],
@@ -37,6 +47,7 @@ type FileUploadProps<TFieldValues extends FieldValues> = {
   maxFiles?: number;
   invalidTypeMessage?: string;
   fallbackPreview?: string;
+  onRemoveExisting?: () => void;
   variant?: "logo" | "banner" | "document";
   icon?: LucideIcon;
 };
@@ -55,6 +66,7 @@ type FileUploadControlProps = {
   maxFiles: number;
   invalidTypeMessage: string;
   fallbackPreview?: string;
+  onRemoveExisting?: () => void;
   variant?: "logo" | "banner" | "document";
   icon?: LucideIcon;
 };
@@ -66,18 +78,11 @@ function fileRejectionMessage(
 ) {
   const firstError = rejections[0]?.errors[0];
 
-  if (!firstError) {
-    return "The selected file could not be uploaded";
-  }
-
-  if (firstError.code === "file-invalid-type") {
-    return invalidTypeMessage;
-  }
-
+  if (!firstError) return "The selected file could not be uploaded";
+  if (firstError.code === "file-invalid-type") return invalidTypeMessage;
   if (firstError.code === "file-too-large") {
     return `File must be ${Math.round(maxSize / (1024 * 1024))}MB or smaller`;
   }
-
   if (firstError.code === "too-many-files") {
     return "Please upload one file only";
   }
@@ -99,6 +104,7 @@ function FileUploadControl({
   maxFiles,
   invalidTypeMessage,
   fallbackPreview,
+  onRemoveExisting,
   variant = "document",
   icon: Icon = Upload,
 }: FileUploadControlProps) {
@@ -106,6 +112,7 @@ function FileUploadControl({
   const file = value instanceof File ? value : null;
   const isBanner = variant === "banner";
   const isLogo = variant === "logo";
+  const isImage = isLogo || isBanner;
   const isDisabled = disabled || loading;
 
   const previewUrl = useMemo(() => {
@@ -134,10 +141,7 @@ function FileUploadControl({
       }
 
       const selectedFile = acceptedFiles[0];
-
-      if (!selectedFile) {
-        return;
-      }
+      if (!selectedFile) return;
 
       setDropError(null);
       onChange(selectedFile);
@@ -145,19 +149,40 @@ function FileUploadControl({
     [invalidTypeMessage, maxSize, onChange],
   );
 
-  const { getRootProps, getInputProps, isDragActive, isDragReject } =
-    useDropzone({
-      accept,
-      disabled: isDisabled,
-      maxFiles,
-      maxSize,
-      multiple: maxFiles > 1,
-      onDrop: handleDrop,
-    });
+  const {
+    getRootProps,
+    getInputProps,
+    isDragActive,
+    isDragReject,
+    open,
+  } = useDropzone({
+    accept,
+    disabled: isDisabled,
+    maxFiles,
+    maxSize,
+    multiple: maxFiles > 1,
+    noClick: isImage,
+    noKeyboard: isImage,
+    onDrop: handleDrop,
+  });
 
   const visibleError = dropError ?? error;
-  const showImagePreview = Boolean(previewUrl && (isLogo || isBanner));
-  const UploadIcon = isBanner ? Pencil : file ? CheckCircle : Icon;
+  const canRemove = Boolean(file || (previewUrl && onRemoveExisting));
+
+  const handleRemove = () => {
+    setDropError(null);
+
+    if (file) {
+      onChange(null);
+      return;
+    }
+
+    onRemoveExisting?.();
+  };
+
+  const removeLabel = file
+    ? `Remove selected ${isLogo ? "logo" : "banner"}`
+    : `Remove existing ${isLogo ? "logo" : "banner"}`;
 
   return (
     <div className="space-y-2">
@@ -166,110 +191,238 @@ function FileUploadControl({
         {required && <span className="text-destructive"> *</span>}
       </label>
 
-      <div
-        {...getRootProps({
-          role: "button",
-          "aria-disabled": isDisabled,
-          "aria-label": label,
-        })}
-        className={`group relative w-full cursor-pointer overflow-hidden rounded-xl border border-dashed shadow-xs transition-all ${
-          isBanner
-            ? "h-40 bg-cover bg-center"
-            : "flex min-h-36 flex-col items-center justify-center gap-3 bg-background p-5"
-        } ${
-          visibleError || isDragReject
-            ? "border-destructive bg-destructive/5"
-            : file
+      {isLogo ? (
+        <div
+          {...getRootProps()}
+          className={cn(
+            "relative mx-auto w-fit rounded-full",
+            isDragActive && "ring-4 ring-primary/20",
+          )}
+        >
+          <input {...getInputProps()} />
+          <div
+            className={cn(
+              "group/logo relative size-32 overflow-hidden rounded-full border-2 border-dashed bg-background shadow-sm transition sm:size-36",
+              previewUrl ? "border-border" : "border-border hover:border-primary",
+              (visibleError || isDragReject) && "border-destructive",
+            )}
+          >
+            {previewUrl ? (
+              <>
+                <img
+                  src={previewUrl}
+                  alt={`${label} preview`}
+                  className="size-full rounded-full object-cover"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  disabled={isDisabled}
+                  onClick={open}
+                  aria-label="Change logo"
+                  className="absolute inset-0 h-full w-full flex-col gap-1 rounded-full border-0 bg-black/15 text-white opacity-100 shadow-none transition hover:bg-black/40 hover:text-white focus-visible:bg-black/40 focus-visible:text-white focus-visible:ring-4 focus-visible:ring-white/60"
+                >
+                  {isDragActive ? (
+                    <Upload className="size-5 drop-shadow" aria-hidden="true" />
+                  ) : (
+                    <Camera className="size-5 drop-shadow" aria-hidden="true" />
+                  )}
+                  <span className="text-xs font-semibold drop-shadow-md">
+                    {isDragActive ? "Drop logo" : "Change logo"}
+                  </span>
+                </Button>
+              </>
+            ) : (
+              <Button
+                type="button"
+                variant="ghost"
+                disabled={isDisabled}
+                onClick={open}
+                className="h-full w-full flex-col gap-2 rounded-full text-muted-foreground hover:bg-primary/5 hover:text-primary focus-visible:ring-4 focus-visible:ring-primary/20"
+              >
+                <span className="flex size-10 items-center justify-center rounded-full border border-border bg-card shadow-sm">
+                  <ImageIcon className="size-5" aria-hidden="true" />
+                </span>
+                <span className="text-xs font-semibold">Upload logo</span>
+              </Button>
+            )}
+          </div>
+
+          {canRemove && (
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <Button
+                    type="button"
+                    size="icon-sm"
+                    variant="destructive"
+                    disabled={isDisabled}
+                    onClick={handleRemove}
+                    aria-label={removeLabel}
+                    className="absolute -right-1 -top-1 z-20 border border-destructive/25 bg-card text-destructive shadow-md hover:bg-destructive hover:text-white focus-visible:ring-destructive/30"
+                  />
+                }
+              >
+                <Trash2 className="size-3.5" aria-hidden="true" />
+              </TooltipTrigger>
+              <TooltipContent>{removeLabel}</TooltipContent>
+            </Tooltip>
+          )}
+        </div>
+      ) : isBanner ? (
+        <div
+          {...getRootProps()}
+          className={cn(
+            "group/banner relative min-h-40 w-full overflow-hidden rounded-xl border border-dashed bg-background shadow-xs transition",
+            previewUrl ? "aspect-[16/5] border-border" : "h-40 border-border",
+            isDragActive && "border-primary ring-4 ring-primary/15",
+            (visibleError || isDragReject) && "border-destructive",
+          )}
+        >
+          <input {...getInputProps()} />
+          {previewUrl ? (
+            <>
+              <img
+                src={previewUrl}
+                alt={`${label} preview`}
+                className="absolute inset-0 size-full object-cover"
+              />
+              <span className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-black/5" />
+              <div className="absolute bottom-3 right-3 z-10 flex items-center gap-2">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  disabled={isDisabled}
+                  onClick={open}
+                  className="h-9 rounded-xl border-white/25 bg-black/55 px-3 text-white shadow-lg backdrop-blur-md hover:border-white/40 hover:bg-black/70 hover:text-white focus-visible:border-white/60 focus-visible:ring-white/50"
+                >
+                  {isDragActive ? (
+                    <Upload className="size-4" aria-hidden="true" />
+                  ) : (
+                    <Pencil className="size-4" aria-hidden="true" />
+                  )}
+                  {isDragActive ? "Drop banner" : "Change banner"}
+                </Button>
+
+                {canRemove && (
+                  <Tooltip>
+                    <TooltipTrigger
+                      render={
+                        <Button
+                          type="button"
+                          size="icon-lg"
+                          variant="destructive"
+                          disabled={isDisabled}
+                          onClick={handleRemove}
+                          aria-label={removeLabel}
+                          className="rounded-xl border border-white/25 bg-black/55 text-white shadow-lg backdrop-blur-md hover:border-destructive/70 hover:bg-destructive focus-visible:border-white/60 focus-visible:ring-white/50"
+                        />
+                      }
+                    >
+                      <Trash2 className="size-4" aria-hidden="true" />
+                    </TooltipTrigger>
+                    <TooltipContent>{removeLabel}</TooltipContent>
+                  </Tooltip>
+                )}
+              </div>
+            </>
+          ) : (
+            <div className="flex h-full min-h-40 flex-col items-center justify-center gap-3 px-4 text-center">
+              <span className="flex size-10 items-center justify-center rounded-full border border-border bg-card shadow-sm">
+                <Upload className="size-5 text-muted-foreground" aria-hidden="true" />
+              </span>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                disabled={isDisabled}
+                onClick={open}
+                className="rounded-xl"
+              >
+                {buttonText}
+              </Button>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div
+          {...getRootProps({
+            role: "button",
+            "aria-disabled": isDisabled,
+            "aria-label": label,
+          })}
+          className={cn(
+            "group flex min-h-36 w-full cursor-pointer flex-col items-center justify-center gap-3 overflow-hidden rounded-xl border border-dashed bg-background p-5 shadow-xs transition-all",
+            file
               ? "border-primary/50 bg-primary/5"
               : isDragActive
                 ? "border-primary bg-primary/10 ring-3 ring-ring/15"
-                : "border-border bg-background hover:border-primary hover:bg-primary/5"
-        } ${isDisabled ? "cursor-not-allowed opacity-70" : ""}`}
-        style={
-          isBanner && previewUrl
-            ? { backgroundImage: `url('${previewUrl}')` }
-            : undefined
-        }
-      >
-        <input {...getInputProps()} />
-
-        {isBanner && previewUrl && (
-          <span className="absolute inset-0 bg-foreground/35 transition-colors group-hover:bg-foreground/45" />
-        )}
-
-        {isLogo && showImagePreview ? (
-          <span className="flex flex-col items-center gap-2">
-            <img
-              src={previewUrl ?? ""}
-              alt={`${label} preview`}
-              className="h-20 w-20 rounded-lg border border-border object-cover"
+                : "border-border hover:border-primary hover:bg-primary/5",
+            (visibleError || isDragReject) &&
+              "border-destructive bg-destructive/5",
+            isDisabled && "cursor-not-allowed opacity-70",
+          )}
+        >
+          <input {...getInputProps()} />
+          {visibleError ? (
+            <FileWarning className="size-10 text-destructive" aria-hidden="true" />
+          ) : file ? (
+            <CheckCircle2 className="size-10 text-primary" aria-hidden="true" />
+          ) : (
+            <Icon
+              className="size-10 text-muted-foreground transition-colors group-hover:text-primary"
+              aria-hidden="true"
             />
-            <span className="max-w-60 truncate text-sm font-medium text-primary">
-              {file?.name}
-            </span>
+          )}
+          <span className="max-w-full truncate text-center text-sm text-muted-foreground transition-colors group-hover:text-primary">
+            {loading
+              ? "Uploading..."
+              : isDragActive
+                ? "Drop the file here"
+                : file
+                  ? file.name
+                  : buttonText}
           </span>
-        ) : (
-          <span
-            className={`relative z-10 flex items-center gap-2 ${
-              isBanner
-                ? "rounded-full bg-card/90 px-4 py-2 shadow-sm group-hover:bg-primary group-hover:text-primary-foreground"
-                : "flex-col"
-            } transition-all`}
-          >
-            {visibleError ? (
-              <FileWarning
-                className={`${
-                  isBanner ? "h-5 w-5" : "h-10 w-10"
-                } text-destructive`}
-                aria-hidden="true"
-              />
-            ) : (
-              <UploadIcon
-                className={`${
-                  isBanner ? "h-5 w-5" : "h-10 w-10"
-                } ${
-                  file
-                    ? "text-primary"
-                    : "text-muted-foreground group-hover:text-primary"
-                } transition-colors`}
-                aria-hidden="true"
-              />
-            )}
-            <span className="text-center text-sm text-muted-foreground transition-colors group-hover:text-primary">
-              {loading
-                ? "Uploading..."
-                : isDragActive
-                  ? "Drop the image here"
-                  : file
-                    ? file.name
-                    : buttonText}
-            </span>
-          </span>
-        )}
-      </div>
+        </div>
+      )}
 
-      {file && (
+      {isImage && file && (
+        <p className="flex items-center justify-center gap-2 text-xs font-medium text-primary">
+          <CheckCircle2 className="size-3.5" aria-hidden="true" />
+          <span className="max-w-64 truncate">{file.name}</span>
+          <span>ready to submit</span>
+        </p>
+      )}
+
+      {!isImage && file && (
         <div className="flex flex-wrap items-center gap-3">
-          <button
+          <Button
             type="button"
+            size="sm"
+            variant="ghost"
             disabled={isDisabled}
-            className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:text-primary/80 disabled:cursor-not-allowed disabled:opacity-50"
             onClick={() => {
               setDropError(null);
               onChange(null);
             }}
+            className="text-primary hover:text-primary"
           >
-            <X className="h-4 w-4" aria-hidden="true" />
+            <X className="size-4" aria-hidden="true" />
             Remove file
-          </button>
+          </Button>
           <span className="inline-flex items-center gap-2 text-sm text-primary">
-            <Image className="h-4 w-4" aria-hidden="true" />
+            <CheckCircle2 className="size-4" aria-hidden="true" />
             Ready to submit
           </span>
         </div>
       )}
 
-      {visibleError && <p className="text-sm text-destructive">{visibleError}</p>}
+      {visibleError && (
+        <p role="alert" className="text-sm text-destructive">
+          {visibleError}
+        </p>
+      )}
     </div>
   );
 }
@@ -287,6 +440,7 @@ export function FileUpload<TFieldValues extends FieldValues>({
   maxFiles = 1,
   invalidTypeMessage = "Please upload a JPG, PNG, or WEBP image",
   fallbackPreview,
+  onRemoveExisting,
   variant = "document",
   icon: Icon = Upload,
 }: FileUploadProps<TFieldValues>) {
@@ -309,6 +463,7 @@ export function FileUpload<TFieldValues extends FieldValues>({
           maxFiles={maxFiles}
           invalidTypeMessage={invalidTypeMessage}
           fallbackPreview={fallbackPreview}
+          onRemoveExisting={onRemoveExisting}
           variant={variant}
           icon={Icon}
         />
