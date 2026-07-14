@@ -1,5 +1,6 @@
-import { ArrowLeft, Banknote, Check, Lock } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Banknote, Check, Lock } from "lucide-react";
+
+import { CustomerAccountPageHeader } from "@/components/customer/CustomerAccountPageHeader";
 
 /**
  * PaymentMethodsPage
@@ -15,34 +16,21 @@ import { Link } from "react-router-dom";
  */
 export default function PaymentMethodsPage() {
   return (
-    <div className="mx-auto w-full max-w-2xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
-      <Link
-        to="/profile"
-        className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/30"
-      >
-        <ArrowLeft className="size-4" aria-hidden="true" />
-        Back to profile
-      </Link>
-
-      <div className="mt-4">
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-          Payment Methods
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Manage how you pay for your orders.
-        </p>
-      </div>
+    <div className="space-y-6">
+      <CustomerAccountPageHeader
+        title="Payment Methods"
+        description="Manage how you pay for your orders."
+      />
 
       <div
         role="radiogroup"
         aria-label="Payment method options"
-        className="mt-6"
       >
         <div
           role="radio"
           aria-checked="true"
           aria-disabled="true"
-          className="flex w-full items-start gap-3 rounded-2xl border border-primary bg-primary/5 p-5"
+          className="flex w-full items-start gap-3 rounded-2xl border border-primary/40 bg-primary/5 p-5"
         >
           <span
             aria-hidden="true"

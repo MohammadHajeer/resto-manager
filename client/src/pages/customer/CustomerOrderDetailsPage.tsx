@@ -220,7 +220,7 @@ export default function CustomerOrderDetailsPage() {
   const { data: order, isPending } = useCustomerOrderById(orderId ?? null);
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+    <div className="w-full">
       <Link
         to="/orders"
         className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/30"

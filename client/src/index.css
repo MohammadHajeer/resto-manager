@@ -277,36 +277,56 @@
 
 @keyframes resto-toast-success-in {
   from {
-    box-shadow: 0 0 26px
-      color-mix(in oklch, var(--success) 34%, transparent);
+    filter: drop-shadow(
+      0 0 0.75rem color-mix(in oklch, var(--success) 34%, transparent)
+    );
+  }
+  to {
+    filter: none;
   }
 }
 
 @keyframes resto-toast-error-in {
   from {
-    box-shadow: 0 0 26px
-      color-mix(in oklch, var(--destructive) 34%, transparent);
+    filter: drop-shadow(
+      0 0 0.75rem color-mix(in oklch, var(--destructive) 34%, transparent)
+    );
+  }
+  to {
+    filter: none;
   }
 }
 
 @keyframes resto-toast-warning-in {
   from {
-    box-shadow: 0 0 22px
-      color-mix(in oklch, var(--warning) 28%, transparent);
+    filter: drop-shadow(
+      0 0 0.625rem color-mix(in oklch, var(--warning) 28%, transparent)
+    );
+  }
+  to {
+    filter: none;
   }
 }
 
 @keyframes resto-toast-info-in {
   from {
-    box-shadow: 0 0 22px
-      color-mix(in oklch, var(--primary) 25%, transparent);
+    filter: drop-shadow(
+      0 0 0.625rem color-mix(in oklch, var(--primary) 25%, transparent)
+    );
+  }
+  to {
+    filter: none;
   }
 }
 
 @keyframes resto-toast-loading-in {
   from {
-    box-shadow: 0 0 18px
-      color-mix(in oklch, var(--primary) 20%, transparent);
+    filter: drop-shadow(
+      0 0 0.5rem color-mix(in oklch, var(--primary) 20%, transparent)
+    );
+  }
+  to {
+    filter: none;
   }
 }
 

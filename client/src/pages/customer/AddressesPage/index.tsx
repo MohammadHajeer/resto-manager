@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { ArrowLeft, MapPinPlus, MapPinned } from "lucide-react";
-import { Link } from "react-router-dom";
+import { MapPinPlus, MapPinned } from "lucide-react";
 
+import { CustomerAccountPageHeader } from "@/components/customer/CustomerAccountPageHeader";
 import { Button } from "@/components/ui/button";
 import {
   useCustomerAddresses,
@@ -28,7 +28,7 @@ function AddressesSkeleton() {
 
 function EmptyAddressesState({ onAddNew }: { onAddNew: () => void }) {
   return (
-    <div className="flex flex-col items-center rounded-2xl border border-dashed border-border bg-card py-16 text-center">
+    <div className="flex flex-col items-center rounded-2xl border border-dashed border-border bg-background px-5 py-14 text-center">
       <div className="flex size-16 items-center justify-center rounded-2xl bg-primary/10 text-primary">
         <MapPinned className="size-8" aria-hidden="true" />
       </div>
@@ -42,7 +42,7 @@ function EmptyAddressesState({ onAddNew }: { onAddNew: () => void }) {
         time you order.
       </p>
 
-      <Button size="lg" className="mt-6 rounded-full px-6" onClick={onAddNew}>
+      <Button size="lg" className="mt-6 rounded-xl px-6" onClick={onAddNew}>
         <MapPinPlus className="size-4" aria-hidden="true" />
         Add your first address
       </Button>
@@ -98,34 +98,21 @@ export default function AddressesPage() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
-      <Link
-        to="/profile"
-        className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/30"
-      >
-        <ArrowLeft className="size-4" aria-hidden="true" />
-        Back to profile
-      </Link>
+    <div className="space-y-6">
+      <CustomerAccountPageHeader
+        title="Saved Addresses"
+        description="Manage the delivery addresses linked to your account."
+        actions={
+          addresses && addresses.length > 0 ? (
+            <Button className="h-10 rounded-xl px-4" onClick={openCreateForm}>
+              <MapPinPlus className="size-4" aria-hidden="true" />
+              Add new address
+            </Button>
+          ) : undefined
+        }
+      />
 
-      <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-            Saved Addresses
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Manage the delivery addresses linked to your account.
-          </p>
-        </div>
-
-        {addresses && addresses.length > 0 && (
-          <Button className="w-fit rounded-full px-5" onClick={openCreateForm}>
-            <MapPinPlus className="size-4" aria-hidden="true" />
-            Add new address
-          </Button>
-        )}
-      </div>
-
-      <div className="mt-6">
+      <div>
         {isPending ? (
           <AddressesSkeleton />
         ) : !addresses || addresses.length === 0 ? (

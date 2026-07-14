@@ -10,6 +10,7 @@ import { Toaster } from "./components/ui/sonner";
 // Layouts
 import { MainLayout } from "./components/layouts/MainLayout";
 import { DashboardLayout } from "./components/layouts/DashboardLayout";
+import { CustomerAccountLayout } from "./components/layouts/CustomerAccountLayout";
 import { adminNavItems, ownerNavItems } from "./config/dashboard-navigation";
 
 // Route Guards
@@ -116,14 +117,19 @@ export default function App() {
             path="/orders/success/:orderId"
             element={<OrderConfirmationPage />}
           />
-          <Route path="/profile" element={<CustomerProfilePage />} />
-          <Route path="/addresses" element={<AddressesPage />} />
-          <Route path="/payment-methods" element={<PaymentMethodsPage />} />
-          <Route path="/orders" element={<CustomerOrderHistoryPage />} />
-          <Route
-            path="/orders/:orderId"
-            element={<CustomerOrderDetailsPage />}
-          />
+          <Route element={<CustomerAccountLayout />}>
+            <Route path="/profile" element={<CustomerProfilePage />} />
+            <Route path="/addresses" element={<AddressesPage />} />
+            <Route
+              path="/payment-methods"
+              element={<PaymentMethodsPage />}
+            />
+            <Route path="/orders" element={<CustomerOrderHistoryPage />} />
+            <Route
+              path="/orders/:orderId"
+              element={<CustomerOrderDetailsPage />}
+            />
+          </Route>
         </Route>
 
         {/* Protected Owner Routes */}

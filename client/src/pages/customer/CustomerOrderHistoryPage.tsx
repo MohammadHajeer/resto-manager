@@ -1,6 +1,7 @@
 import { ChevronRight, ClockFading, ReceiptText, Store } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 
+import { CustomerAccountPageHeader } from "@/components/customer/CustomerAccountPageHeader";
 import { Button } from "@/components/ui/button";
 import { Pagination } from "@/components/common/Pagination";
 import {
@@ -185,16 +186,14 @@ export default function CustomerOrderHistoryPage() {
     hasCurrentOrders || historyOrders.length > 0 || filter !== "all" || page > 1;
 
   return (
-    <div className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
-      <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-        My Orders
-      </h1>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Track active orders and revisit your order history.
-      </p>
+    <div className="space-y-8">
+      <CustomerAccountPageHeader
+        title="My Orders"
+        description="Track active orders and revisit your order history."
+      />
 
       {/* Active orders */}
-      <section className="mt-8" aria-label="Active orders">
+      <section aria-label="Active orders">
         <div className="mb-3 flex items-center gap-2">
           <ClockFading className="size-4 text-primary" aria-hidden="true" />
           <h2 className="text-lg font-semibold text-foreground">
@@ -218,7 +217,7 @@ export default function CustomerOrderHistoryPage() {
       </section>
 
       {/* History */}
-      <section className="mt-10" aria-label="Order history">
+      <section aria-label="Order history">
         <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2">
             <ReceiptText className="size-4 text-primary" aria-hidden="true" />
