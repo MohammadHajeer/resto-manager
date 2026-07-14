@@ -19,22 +19,25 @@ export function RestaurantDetailsStep({
 }: RestaurantDetailsStepProps) {
   return (
     <section className="animate-fade-in">
-      <div className="mb-8">
-        <h2 className="text-xl font-semibold text-foreground">
+      <div className="mb-6 border-b border-border/80 pb-5 sm:mb-7">
+        <p className="text-xs font-bold uppercase tracking-[0.14em] text-primary">
+          Step 2 of 4
+        </p>
+        <h2 className="mt-2 text-xl font-bold tracking-tight text-foreground sm:text-2xl">
           Tell us about your restaurant
         </h2>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <p className="mt-1.5 text-sm leading-6 text-muted-foreground">
           This information will be displayed to customers on the platform.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-x-5 gap-y-5 md:grid-cols-2">
+      <div className="grid grid-cols-1 items-start gap-x-5 gap-y-5 lg:grid-cols-2">
         <TextField
           control={control}
           name="restaurant.name"
           label="Restaurant Legal Name"
           placeholder="Gourmet Bistro Inc."
-          className="md:col-span-2"
+          className="lg:col-span-2"
           required
           disabled={disabled}
         />
@@ -43,7 +46,7 @@ export function RestaurantDetailsStep({
           name="restaurant.description"
           label="Restaurant Description"
           placeholder="Describe your food, atmosphere, and service style."
-          className="md:col-span-2"
+          className="lg:col-span-2"
           required
           disabled={disabled}
         />
@@ -119,7 +122,7 @@ export function RestaurantDetailsStep({
             };
 
             return (
-              <div className="space-y-3 md:col-span-2 mt-3">
+              <div className="mt-3 space-y-3 lg:col-span-2">
                 <div className="flex items-start gap-3">
                   <div className="rounded-xl bg-muted p-2 text-muted-foreground">
                     <Tags className="h-4 w-4" aria-hidden="true" />

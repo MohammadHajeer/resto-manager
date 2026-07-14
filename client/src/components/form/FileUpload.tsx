@@ -172,10 +172,10 @@ function FileUploadControl({
           "aria-disabled": isDisabled,
           "aria-label": label,
         })}
-        className={`group relative w-full cursor-pointer overflow-hidden rounded-lg border border-dashed transition-all ${
+        className={`group relative w-full cursor-pointer overflow-hidden rounded-xl border border-dashed shadow-xs transition-all ${
           isBanner
-            ? "h-44 bg-cover bg-center"
-            : "flex min-h-40 flex-col items-center justify-center gap-3 p-6"
+            ? "h-40 bg-cover bg-center"
+            : "flex min-h-36 flex-col items-center justify-center gap-3 bg-background p-5"
         } ${
           visibleError || isDragReject
             ? "border-destructive bg-destructive/5"
@@ -183,7 +183,7 @@ function FileUploadControl({
               ? "border-primary/50 bg-primary/5"
               : isDragActive
                 ? "border-primary bg-primary/10 ring-3 ring-ring/15"
-                : "border-border bg-muted/30 hover:border-primary hover:bg-primary/5"
+                : "border-border bg-background hover:border-primary hover:bg-primary/5"
         } ${isDisabled ? "cursor-not-allowed opacity-70" : ""}`}
         style={
           isBanner && previewUrl

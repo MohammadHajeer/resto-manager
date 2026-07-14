@@ -1,6 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, ArrowRight, CheckCircle2 } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  CheckCircle2,
+  LoaderCircle,
+  ShieldCheck,
+} from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import {
   type FieldErrors,
@@ -90,7 +96,7 @@ function RestaurantRegisterPage() {
       >,
     ) as unknown as Resolver<RestaurantRegisterFormValues>,
     defaultValues: initialValues,
-    mode: "onChange"
+    mode: "onChange",
   });
 
   const watchedValues = useWatch({ control });
@@ -268,14 +274,19 @@ function RestaurantRegisterPage() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-background text-foreground">
-      <main className="mx-auto w-full max-w-4xl grow px-4 py-10 sm:px-6 sm:py-14">
-        <header className="mb-8 text-center sm:mb-10">
-          <h1 className="text-3xl font-semibold tracking-normal text-foreground sm:text-4xl">
+    <div className="flex min-h-full flex-col text-foreground">
+      <main className="mx-auto w-full max-w-5xl grow px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-10">
+        <header className="mb-5 text-center sm:mb-7">
+          <div className="inline-flex items-center gap-2 rounded-full border border-primary/15 bg-secondary/65 px-3 py-1.5 text-xs font-bold text-secondary-foreground">
+            <ShieldCheck className="size-3.5" aria-hidden="true" />
+            Restaurant partner onboarding
+          </div>
+          <h1 className="mt-3 text-3xl font-extrabold tracking-[-0.035em] text-foreground sm:text-4xl">
             Grow your business with us
           </h1>
-          <p className="mx-auto mt-2 max-w-xl text-sm text-muted-foreground sm:text-base">
-            Join the next generation of restaurant management.
+          <p className="mx-auto mt-2 max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
+            Create your owner account, introduce your restaurant, and prepare
+            your application for review.
           </p>
         </header>
 
@@ -284,13 +295,13 @@ function RestaurantRegisterPage() {
         <form
           onSubmit={handleSubmit(onSubmit, onInvalid)}
           aria-busy={isFormLocked}
-          className="overflow-hidden rounded-xl border border-border bg-card text-card-foreground shadow-[0_1px_2px_rgba(15,23,42,0.03)]"
+          className="overflow-hidden rounded-2xl border border-border/90 bg-card text-card-foreground shadow-[0_24px_65px_-40px_rgba(15,23,42,0.35)]"
         >
           <fieldset
             disabled={isFormLocked}
             className="m-0 min-w-0 border-0 p-0 disabled:opacity-75"
           >
-            <div className="p-5 sm:p-8 md:p-10">
+            <div className="p-5 sm:p-7 lg:p-9">
               {currentStep === 1 && (
                 <BasicInfoStep control={control} disabled={isFormLocked} />
               )}
@@ -309,14 +320,14 @@ function RestaurantRegisterPage() {
               {currentStep === 4 && <ReviewStep values={getValues()} />}
             </div>
 
-            <div className="flex items-center justify-between gap-4 border-t border-border bg-muted/20 px-5 py-5 sm:px-8 md:px-10">
+            <div className="flex items-center justify-between gap-3 border-t border-border/80 bg-muted/25 px-5 py-4 sm:px-7 lg:px-9">
               <Button
                 type="button"
                 variant="outline"
                 size="lg"
                 onClick={handlePrev}
                 disabled={isFormLocked}
-                className={`h-10 rounded-full px-5 shadow-none ${
+                className={`h-11 rounded-xl bg-background px-5 font-semibold shadow-xs ${
                   currentStep === 1 ? "invisible pointer-events-none" : ""
                 }`}
               >
@@ -330,9 +341,9 @@ function RestaurantRegisterPage() {
                   size="lg"
                   onClick={handleNext}
                   disabled={isFormLocked}
-                  className="h-10 rounded-full px-6 shadow-none"
+                  className="h-11 rounded-xl px-6 font-semibold shadow-md shadow-primary/15"
                 >
-                  Continue
+                  {currentStep === totalSteps - 1 ? "Review" : "Continue"}
                   <ArrowRight className="h-4 w-4" aria-hidden="true" />
                 </Button>
               ) : (
@@ -340,10 +351,25 @@ function RestaurantRegisterPage() {
                   type="submit"
                   size="lg"
                   disabled={isFormLocked}
-                  className="h-10 rounded-full px-6 shadow-none"
+                  className="h-11 rounded-xl px-5 font-semibold shadow-md shadow-primary/15 sm:px-6"
                 >
-                  Submit for Approval
-                  <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
+                  {isSubmitting ? (
+                    <>
+                      <LoaderCircle
+                        className="h-4 w-4 animate-spin"
+                        aria-hidden="true"
+                      />
+                      Submitting...
+                    </>
+                  ) : (
+                    <>
+                      <span className="hidden sm:inline">
+                        Submit for Approval
+                      </span>
+                      <span className="sm:hidden">Submit</span>
+                      <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
+                    </>
+                  )}
                 </Button>
               )}
             </div>

@@ -94,7 +94,7 @@ export function TextareaField<TFieldValues extends FieldValues>({
               aria-invalid={fieldState.invalid}
               aria-describedby={describedBy || undefined}
               className={cn(
-                "min-h-24 rounded-lg border-input bg-background px-3 py-2.5 shadow-none",
+                "min-h-24 rounded-xl border-input bg-background px-4 py-3 shadow-xs",
                 "transition-[border-color,box-shadow]",
                 "focus-visible:border-primary focus-visible:ring-primary/20",
                 fieldState.error &&
