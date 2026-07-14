@@ -57,9 +57,9 @@ function hasNestedError(
 function RestaurantRegisterPage() {
   const [showProgress, setShowProgress] = useState(false);
   const [isSubmitResolved, setIsSubmitResolved] = useState(false);
-  const [progressPhase, setProgressPhase] = useState<
-    "registration" | "login"
-  >("registration");
+  const [progressPhase, setProgressPhase] = useState<"registration" | "login">(
+    "registration",
+  );
   const [resolveProgressCompletion, setResolveProgressCompletion] = useState<
     (() => void) | null
   >(null);
@@ -142,7 +142,6 @@ function RestaurantRegisterPage() {
     setProgressPhase("registration");
 
     const cleanData = toSubmitData(data);
-
     const formData = new FormData();
 
     formData.append("data", JSON.stringify(cleanData));
@@ -165,21 +164,12 @@ function RestaurantRegisterPage() {
 
     let registrationSucceeded = false;
 
-    const finishProgressPhase = () =>
-      new Promise<void>((resolve) => {
-        setResolveProgressCompletion(() => resolve);
-        setIsSubmitResolved(true);
-      });
+    const submissionRequest = async () => {
+      const response = await api.post("/owner/restaurant/register", formData);
 
-    const submissionRequest = (async () => {
-      const response = await api.post(
-        "/owner/restaurant/register",
-        formData,
-      );
       registrationSucceeded = true;
 
-      await finishProgressPhase();
-
+      // Registration completed; move the UI to the login phase.
       setProgressPhase("login");
       setIsSubmitResolved(false);
 
@@ -207,44 +197,44 @@ function RestaurantRegisterPage() {
         );
       }
 
-      await finishProgressPhase();
+      // Mark the final progress phase as complete, but do not await the UI.
+      setIsSubmitResolved(true);
 
       return response;
-    })();
+    };
 
     try {
       await toast
-        .promise(
-          submissionRequest,
-          {
-            loading: "Submitting restaurant registration...",
-            success: "Restaurant registration submitted successfully",
-            error: (error: unknown) => {
-              if (error instanceof AutomaticLoginError) {
-                return error.message;
-              }
+        .promise(submissionRequest(), {
+          loading: "Submitting restaurant registration...",
+          success: "Restaurant registration submitted successfully",
+          error: (error: unknown) => {
+            if (error instanceof AutomaticLoginError) {
+              return error.message;
+            }
 
-              if (isAxiosError<{ message?: string }>(error)) {
-                return (
-                  error.response?.data?.message ??
-                  "Failed to submit restaurant registration"
-                );
-              }
+            if (isAxiosError<{ message?: string }>(error)) {
+              return (
+                error.response?.data?.message ??
+                "Failed to submit restaurant registration"
+              );
+            }
 
-              return "Failed to submit restaurant registration";
-            },
+            return "Failed to submit restaurant registration";
           },
-        )
+        })
         .unwrap();
+
       clearRegistration();
-      setShowProgress(false);
       navigate("/owner/status", { replace: true });
     } catch {
-      // The rejection is presented by toast.promise.
+      // The rejection is already displayed by toast.promise.
       if (registrationSucceeded) {
         navigate("/login", {
           replace: true,
-          state: { email: data.owner.email.trim().toLowerCase() },
+          state: {
+            email: data.owner.email.trim().toLowerCase(),
+          },
         });
       }
     } finally {
@@ -312,10 +302,7 @@ function RestaurantRegisterPage() {
                 />
               )}
               {currentStep === 3 && (
-                <VerificationStep
-                  control={control}
-                  disabled={isFormLocked}
-                />
+                <VerificationStep control={control} disabled={isFormLocked} />
               )}
               {currentStep === 4 && <ReviewStep values={getValues()} />}
             </div>
