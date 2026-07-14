@@ -8,6 +8,7 @@
     "build": "tsc && tsc-alias",
     "seed": "tsx src/seeds/seedDatabase.ts",
     "seed:reset": "tsx src/seeds/seedDatabase.ts --reset",
+    "seed:customers-orders": "tsx src/seeds/seedCustomersOrders.ts",
     "start": "node dist/server.js"
   },
   "keywords": [],
