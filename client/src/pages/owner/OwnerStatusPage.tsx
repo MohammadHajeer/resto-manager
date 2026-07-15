@@ -3,10 +3,13 @@ import {
   CheckCircle2,
   Clock3,
   FileSearch,
+  RefreshCw,
   ShieldAlert,
+  Store,
   XCircle,
 } from "lucide-react";
-import { Navigate } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 import { OwnerStatusErrorState } from "@/components/owner/OwnerStatusErrorState";
 import { RouteLoadingState } from "@/components/RouteLoadingState";
 import { useOwnerRestaurantStatus } from "@/hooks/owner/useOwnerRestaurant";
@@ -163,6 +166,30 @@ export default function OwnerStatusPage() {
               </div>
             </div>
           </section>
+        </div>
+
+        <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <Button
+            type="button"
+            onClick={() => void statusQuery.refetch()}
+            disabled={statusQuery.isFetching}
+          >
+            <RefreshCw
+              className={statusQuery.isFetching ? "animate-spin" : undefined}
+              aria-hidden="true"
+            />
+
+            {statusQuery.isFetching
+              ? "Checking for updates..."
+              : "Check for updates"}
+          </Button>
+
+          <Link to="/restaurants">
+            <Button variant="outline">
+              <Store aria-hidden="true" />
+              Browse restaurants
+            </Button>
+          </Link>
         </div>
       </div>
     </main>

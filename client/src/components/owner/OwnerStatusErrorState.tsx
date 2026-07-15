@@ -1,4 +1,5 @@
-import { AlertCircle, RefreshCw } from "lucide-react";
+import { AlertCircle, RefreshCw, Store } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
 type OwnerStatusErrorStateProps = {
@@ -30,17 +31,25 @@ export function OwnerStatusErrorState({
 
         <p className="mt-3 max-w-md text-sm leading-6 text-muted-foreground sm:text-base">
           Your account is still secure. Check your internet connection and try
-          again before continuing.
+          again, or continue browsing restaurants.
         </p>
 
-        <Button className="mt-7" onClick={onRetry} disabled={isRetrying}>
-          <RefreshCw
-            className={isRetrying ? "animate-spin" : undefined}
-            aria-hidden="true"
-          />
+        <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+          <Button onClick={onRetry} disabled={isRetrying}>
+            <RefreshCw
+              className={isRetrying ? "animate-spin" : undefined}
+              aria-hidden="true"
+            />
+            {isRetrying ? "Checking again..." : "Try again"}
+          </Button>
 
-          {isRetrying ? "Checking again..." : "Try again"}
-        </Button>
+          <Link to="/restaurants">
+            <Button variant="outline">
+              <Store aria-hidden="true" />
+              Browse restaurants
+            </Button>
+          </Link>
+        </div>
       </div>
     </main>
   );
