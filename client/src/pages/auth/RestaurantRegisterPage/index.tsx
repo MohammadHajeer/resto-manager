@@ -1,4 +1,12 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type FormEventHandler,
+  type MouseEventHandler,
+} from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   ArrowLeft,
@@ -63,6 +71,7 @@ function RestaurantRegisterPage() {
   const [resolveProgressCompletion, setResolveProgressCompletion] = useState<
     (() => void) | null
   >(null);
+  const submissionInFlightRef = useRef(false);
   const navigate = useNavigate();
   const storedStep = useRestaurantRegisterStore((state) => state.currentStep);
   const storedValues = useRestaurantRegisterStore((state) => state.formValues);
@@ -86,6 +95,7 @@ function RestaurantRegisterPage() {
     handleSubmit,
     trigger,
     getValues,
+    getFieldState,
     setFocus,
     formState: { isSubmitting },
   } = useForm<RestaurantRegisterFormValues>({
@@ -114,6 +124,29 @@ function RestaurantRegisterPage() {
     setResolveProgressCompletion(null);
   }, [resolveProgressCompletion]);
 
+  const moveToFirstInvalidField = (
+    hasError: (field: (typeof fieldStepMap)[number]["fields"][number]) => boolean,
+  ) => {
+    const firstInvalidStep = fieldStepMap.find(({ fields }) =>
+      fields.some(hasError),
+    );
+    const firstInvalidField = firstInvalidStep?.fields.find(hasError);
+
+    if (firstInvalidStep) {
+      setStoredStep(firstInvalidStep.step);
+    }
+
+    if (firstInvalidField) {
+      setTimeout(() => setFocus(firstInvalidField), 0);
+    }
+  };
+
+  const onInvalid: SubmitErrorHandler<RestaurantRegisterFormValues> = (
+    errors,
+  ) => {
+    moveToFirstInvalidField((field) => Boolean(hasNestedError(errors, field)));
+  };
+
   const handleNext = async () => {
     if (isFormLocked) return;
 
@@ -122,9 +155,26 @@ function RestaurantRegisterPage() {
       fieldsToValidate.length === 0 ||
       (await trigger(fieldsToValidate, { shouldFocus: true }));
 
-    if (isStepValid && currentStep < totalSteps) {
+    if (isStepValid && currentStep < totalSteps - 1) {
       setStoredStep(currentStep + 1);
     }
+  };
+
+  const handleReview: MouseEventHandler<HTMLButtonElement> = async (event) => {
+    // Prevent this click from becoming a submit if React reuses the button DOM
+    // node when the review step replaces it with the final submit button.
+    event.preventDefault();
+
+    if (isFormLocked) return;
+
+    const isFormValid = await trigger(undefined, { shouldFocus: false });
+
+    if (!isFormValid) {
+      moveToFirstInvalidField((field) => getFieldState(field).invalid);
+      return;
+    }
+
+    setStoredStep(totalSteps);
   };
 
   const handlePrev = () => {
@@ -134,9 +184,13 @@ function RestaurantRegisterPage() {
       setStoredStep(currentStep - 1);
     }
   };
-  const onSubmit: SubmitHandler<RestaurantRegisterFormValues> = async (
+  const submitRegistration: SubmitHandler<RestaurantRegisterFormValues> = async (
     data,
   ) => {
+    // The API path is only reachable through the guarded submit event on the
+    // review step. This also protects against future accidental submit buttons.
+    if (currentStep !== totalSteps || !submissionInFlightRef.current) return;
+
     setShowProgress(true);
     setIsSubmitResolved(false);
     setProgressPhase("registration");
@@ -244,23 +298,21 @@ function RestaurantRegisterPage() {
       setProgressPhase("registration");
     }
   };
-  const onInvalid: SubmitErrorHandler<RestaurantRegisterFormValues> = (
-    errors,
-  ) => {
-    const firstInvalidStep = fieldStepMap.find(({ fields }) =>
-      fields.some((field) => hasNestedError(errors, field)),
-    );
-    const firstInvalidField = firstInvalidStep?.fields.find((field) =>
-      hasNestedError(errors, field),
-    );
-
-    if (firstInvalidStep) {
-      setStoredStep(firstInvalidStep.step);
+  const handleFinalSubmit: FormEventHandler<HTMLFormElement> = (event) => {
+    if (
+      currentStep !== totalSteps ||
+      isFormLocked ||
+      submissionInFlightRef.current
+    ) {
+      event.preventDefault();
+      return;
     }
 
-    if (firstInvalidField) {
-      setTimeout(() => setFocus(firstInvalidField), 0);
-    }
+    submissionInFlightRef.current = true;
+
+    void handleSubmit(submitRegistration, onInvalid)(event).finally(() => {
+      submissionInFlightRef.current = false;
+    });
   };
 
   return (
@@ -283,7 +335,7 @@ function RestaurantRegisterPage() {
         <StepIndicator currentStep={currentStep} />
 
         <form
-          onSubmit={handleSubmit(onSubmit, onInvalid)}
+          onSubmit={handleFinalSubmit}
           aria-busy={isFormLocked}
           className="overflow-hidden rounded-2xl border border-border/90 bg-card text-card-foreground shadow-[0_24px_65px_-40px_rgba(15,23,42,0.35)]"
         >
@@ -324,9 +376,16 @@ function RestaurantRegisterPage() {
 
               {currentStep < totalSteps ? (
                 <Button
+                  key={
+                    currentStep === totalSteps - 1 ? "review" : "continue"
+                  }
                   type="button"
                   size="lg"
-                  onClick={handleNext}
+                  onClick={
+                    currentStep === totalSteps - 1
+                      ? handleReview
+                      : handleNext
+                  }
                   disabled={isFormLocked}
                   className="h-11 rounded-xl px-6 font-semibold shadow-md shadow-primary/15"
                 >
@@ -335,6 +394,7 @@ function RestaurantRegisterPage() {
                 </Button>
               ) : (
                 <Button
+                  key="submit"
                   type="submit"
                   size="lg"
                   disabled={isFormLocked}
