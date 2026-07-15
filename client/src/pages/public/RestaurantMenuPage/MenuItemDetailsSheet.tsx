@@ -175,9 +175,7 @@ function MenuItemDetailsContent({
   onAddToCart,
 }: MenuItemDetailsContentProps) {
   const [failedImageUrl, setFailedImageUrl] = useState<string | null>(null);
-  const hasImage = Boolean(
-    item.imageUrl && failedImageUrl !== item.imageUrl,
-  );
+  const hasImage = Boolean(item.imageUrl && failedImageUrl !== item.imageUrl);
   const canCustomize = isRestaurantOpen && item.isAvailable;
 
   return (
@@ -419,8 +417,7 @@ function MenuItemDetailsContent({
                 Restaurant currently closed
               </p>
               <p className="mt-0.5 text-sm leading-5 text-muted-foreground">
-                This restaurant is currently closed and is not accepting
-                orders.
+                This restaurant is currently closed and is not accepting orders.
               </p>
             </div>
           </div>
