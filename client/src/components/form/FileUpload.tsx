@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import {
   Controller,
   type Control,
@@ -71,6 +71,45 @@ type FileUploadControlProps = {
   icon?: LucideIcon;
 };
 
+type FilePreviewImageProps = {
+  file: File | null;
+  fallbackPreview?: string;
+  alt: string;
+  className: string;
+};
+
+function FilePreviewImage({
+  file,
+  fallbackPreview,
+  alt,
+  className,
+}: FilePreviewImageProps) {
+  const imageRef = useRef<HTMLImageElement | null>(null);
+
+  useLayoutEffect(() => {
+    if (!file) return;
+
+    const objectUrl = URL.createObjectURL(file);
+
+    if (imageRef.current) {
+      imageRef.current.src = objectUrl;
+    }
+
+    return () => {
+      URL.revokeObjectURL(objectUrl);
+    };
+  }, [file]);
+
+  return (
+    <img
+      ref={imageRef}
+      src={file ? undefined : fallbackPreview}
+      alt={alt}
+      className={className}
+    />
+  );
+}
+
 function fileRejectionMessage(
   rejections: FileRejection[],
   maxSize: number,
@@ -114,22 +153,8 @@ function FileUploadControl({
   const isLogo = variant === "logo";
   const isImage = isLogo || isBanner;
   const isDisabled = disabled || loading;
-
-  const previewUrl = useMemo(() => {
-    if (!file || !file.type.startsWith("image/")) {
-      return fallbackPreview ?? null;
-    }
-
-    return URL.createObjectURL(file);
-  }, [fallbackPreview, file]);
-
-  useEffect(() => {
-    return () => {
-      if (previewUrl && previewUrl !== fallbackPreview) {
-        URL.revokeObjectURL(previewUrl);
-      }
-    };
-  }, [fallbackPreview, previewUrl]);
+  const imageFile = file?.type.startsWith("image/") ? file : null;
+  const hasPreview = Boolean(imageFile || fallbackPreview);
 
   const handleDrop = useCallback(
     (acceptedFiles: File[], fileRejections: FileRejection[]) => {
@@ -167,7 +192,7 @@ function FileUploadControl({
   });
 
   const visibleError = dropError ?? error;
-  const canRemove = Boolean(file || (previewUrl && onRemoveExisting));
+  const canRemove = Boolean(file || (fallbackPreview && onRemoveExisting));
 
   const handleRemove = () => {
     setDropError(null);
@@ -203,14 +228,17 @@ function FileUploadControl({
           <div
             className={cn(
               "group/logo relative size-32 overflow-hidden rounded-full border-2 border-dashed bg-background shadow-sm transition sm:size-36",
-              previewUrl ? "border-border" : "border-border hover:border-primary",
+              hasPreview
+                ? "border-border"
+                : "border-border hover:border-primary",
               (visibleError || isDragReject) && "border-destructive",
             )}
           >
-            {previewUrl ? (
+            {hasPreview ? (
               <>
-                <img
-                  src={previewUrl}
+                <FilePreviewImage
+                  file={imageFile}
+                  fallbackPreview={fallbackPreview}
                   alt={`${label} preview`}
                   className="size-full rounded-full object-cover"
                 />
@@ -274,16 +302,19 @@ function FileUploadControl({
           {...getRootProps()}
           className={cn(
             "group/banner relative min-h-40 w-full overflow-hidden rounded-xl border border-dashed bg-background shadow-xs transition",
-            previewUrl ? "aspect-[16/5] border-border" : "h-40 border-border",
+            hasPreview
+              ? "aspect-[16/5] border-border"
+              : "h-40 border-border",
             isDragActive && "border-primary ring-4 ring-primary/15",
             (visibleError || isDragReject) && "border-destructive",
           )}
         >
           <input {...getInputProps()} />
-          {previewUrl ? (
+          {hasPreview ? (
             <>
-              <img
-                src={previewUrl}
+              <FilePreviewImage
+                file={imageFile}
+                fallbackPreview={fallbackPreview}
                 alt={`${label} preview`}
                 className="absolute inset-0 size-full object-cover"
               />

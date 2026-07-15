@@ -2,7 +2,7 @@ import type { Control } from "react-hook-form";
 import type { Accept } from "react-dropzone";
 import { IdCard, Info } from "lucide-react";
 import { FileUpload } from "../../../../components/form/FileUpload";
-import { DEFAULT_BANNER, type RestaurantRegisterFormValues } from "../types";
+import { type RestaurantRegisterFormValues } from "../types";
 
 const IMAGE_ACCEPT: Accept = {
   "image/jpeg": [".jpg", ".jpeg"],
@@ -58,7 +58,6 @@ export function VerificationStep({
             variant="logo"
             disabled={disabled}
           />
-
         </div>
 
         <div className="space-y-6 lg:border-l lg:border-border lg:pl-8">
@@ -77,7 +76,6 @@ export function VerificationStep({
             label="Restaurant Banner"
             accept={IMAGE_ACCEPT}
             buttonText="Upload Banner"
-            fallbackPreview={DEFAULT_BANNER}
             variant="banner"
             disabled={disabled}
           />

@@ -107,6 +107,7 @@ function RestaurantRegisterPage() {
     ) as unknown as Resolver<RestaurantRegisterFormValues>,
     defaultValues: initialValues,
     mode: "onChange",
+    shouldUnregister: false,
   });
 
   const watchedValues = useWatch({ control });
