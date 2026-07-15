@@ -102,54 +102,69 @@ export default function OwnerStatusPage() {
         : null;
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-background px-4 py-12 text-foreground sm:px-6">
-      <section className="w-full max-w-2xl overflow-hidden rounded-lg border border-border bg-card text-card-foreground shadow-sm">
-        <div className="border-b border-border bg-muted/30 px-6 py-8 text-center sm:px-10 sm:py-10">
+    <main className="min-h-dvh bg-background px-4 py-14 text-foreground sm:px-6 sm:py-20">
+      <div className="mx-auto w-full max-w-3xl">
+        <header className="text-center">
           <div
             className={`mx-auto flex size-14 items-center justify-center rounded-full ${content.iconBackgroundClassName} ${content.iconClassName}`}
           >
             <StatusIcon className="size-7" aria-hidden="true" />
           </div>
-          <p className={`mt-5 text-xs font-semibold uppercase ${content.iconClassName}`}>
+
+          <p
+            className={`mt-5 text-xs font-semibold uppercase tracking-wider ${content.iconClassName}`}
+          >
             {content.eyebrow}
           </p>
-          <h1 className="mt-2 text-2xl font-semibold sm:text-3xl">
+
+          <h1 className="mt-3 text-2xl font-semibold tracking-tight sm:text-3xl">
             {content.title}
           </h1>
-          <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-muted-foreground sm:text-base">
+
+          <p className="mx-auto mt-4 max-w-xl text-sm leading-6 text-muted-foreground sm:text-base">
             {content.description}
           </p>
-        </div>
+        </header>
 
-        <div className="space-y-4 p-6 sm:p-8">
-          <div className="flex gap-3 rounded-md border border-border bg-background p-4">
-            <FileSearch
-              className={`mt-0.5 size-5 shrink-0 ${content.iconClassName}`}
-              aria-hidden="true"
-            />
-            <div>
-              <h2 className="text-sm font-medium">{content.detailTitle}</h2>
-              <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                {reason || content.detailDescription}
-              </p>
-            </div>
-          </div>
+        <div className="my-10 h-px bg-border" />
 
-          <div className="flex gap-3 rounded-md border border-border bg-muted/30 p-4">
-            <CheckCircle2
-              className="mt-0.5 size-5 shrink-0 text-primary"
-              aria-hidden="true"
-            />
-            <div>
-              <h2 className="text-sm font-medium">Status saved securely</h2>
-              <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                You can leave this page and return later to check for updates
-                to {restaurant.name || "your restaurant"}.
-              </p>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <section className="rounded-lg border border-border bg-card p-5">
+            <div className="flex gap-3">
+              <FileSearch
+                className={`mt-0.5 size-5 shrink-0 ${content.iconClassName}`}
+                aria-hidden="true"
+              />
+
+              <div>
+                <h2 className="text-sm font-medium">{content.detailTitle}</h2>
+
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                  {reason || content.detailDescription}
+                </p>
+              </div>
             </div>
-          </div>
+          </section>
+
+          <section className="rounded-lg border border-border bg-muted/30 p-5">
+            <div className="flex gap-3">
+              <CheckCircle2
+                className="mt-0.5 size-5 shrink-0 text-primary"
+                aria-hidden="true"
+              />
+
+              <div>
+                <h2 className="text-sm font-medium">Status saved securely</h2>
+
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                  You can leave this page and return later to check for updates
+                  to {restaurant.name || "your restaurant"}.
+                </p>
+              </div>
+            </div>
+          </section>
         </div>
-      </section>
+      </div>
     </main>
   );
 }

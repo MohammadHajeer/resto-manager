@@ -11,33 +11,37 @@ export function OwnerStatusErrorState({
   isRetrying = false,
 }: OwnerStatusErrorStateProps) {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-background px-4 py-12 text-foreground">
-      <section
-        className="w-full max-w-lg rounded-lg border border-border bg-card p-6 text-center text-card-foreground shadow-sm sm:p-8"
-        role="alert"
-      >
-        <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-destructive/10 text-destructive">
-          <AlertCircle className="size-6" aria-hidden="true" />
+    <main
+      className="flex min-h-dvh items-center justify-center bg-background px-4 py-12 text-foreground"
+      role="alert"
+    >
+      <div className="flex w-full max-w-lg flex-col items-center text-center">
+        <div className="flex size-14 items-center justify-center rounded-full bg-destructive/10 text-destructive">
+          <AlertCircle className="size-7" aria-hidden="true" />
         </div>
-        <h1 className="mt-5 text-xl font-semibold">
+
+        <p className="mt-5 text-xs font-semibold uppercase tracking-wider text-destructive">
+          Unable to load status
+        </p>
+
+        <h1 className="mt-3 text-2xl font-semibold tracking-tight">
           We could not check your restaurant status
         </h1>
-        <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-muted-foreground">
-          Your account is still secure. Check your connection and try again
-          before continuing.
+
+        <p className="mt-3 max-w-md text-sm leading-6 text-muted-foreground sm:text-base">
+          Your account is still secure. Check your internet connection and try
+          again before continuing.
         </p>
-        <Button
-          className="mt-6"
-          onClick={onRetry}
-          disabled={isRetrying}
-        >
+
+        <Button className="mt-7" onClick={onRetry} disabled={isRetrying}>
           <RefreshCw
             className={isRetrying ? "animate-spin" : undefined}
             aria-hidden="true"
           />
+
           {isRetrying ? "Checking again..." : "Try again"}
         </Button>
-      </section>
+      </div>
     </main>
   );
 }
