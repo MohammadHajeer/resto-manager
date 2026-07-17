@@ -17,7 +17,7 @@ export function MenuItemIngredientsSection() {
     formState: { errors },
   } = useFormContext<MenuItemFormValues>();
 
-  const ingredients = watch("ingredients") ?? [];
+  const ingredients: string[] = watch("ingredients") ?? [];
 
   const handleAddIngredient = () => {
     const ingredient = ingredientInput.trim();

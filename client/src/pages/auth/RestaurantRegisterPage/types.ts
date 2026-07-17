@@ -199,9 +199,10 @@ export function mergePersistedValues(
     return defaultValues;
   }
 
-  const persistedCuisineTypes = persisted.restaurant.cuisineTypes.filter(
-    (cuisine) => cuisineOptionSet.has(cuisine),
-  );
+  const persistedCuisineTypes: string[] =
+    persisted.restaurant.cuisineTypes.filter(
+      (cuisine: string) => cuisineOptionSet.has(cuisine),
+    );
 
   return {
     ...defaultValues,

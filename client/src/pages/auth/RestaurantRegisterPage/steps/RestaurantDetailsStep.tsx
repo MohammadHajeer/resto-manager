@@ -111,7 +111,7 @@ export function RestaurantDetailsStep({
           control={control}
           name="restaurant.cuisineTypes"
           render={({ field, fieldState }) => {
-            const selectedCuisines = field.value ?? [];
+            const selectedCuisines: string[] = field.value ?? [];
 
             const toggleCuisine = (cuisine: string) => {
               const nextValue = selectedCuisines.includes(cuisine)
