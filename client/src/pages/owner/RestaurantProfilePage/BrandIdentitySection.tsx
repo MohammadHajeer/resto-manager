@@ -34,8 +34,8 @@ export default function BrandIdentitySection() {
         </p>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_260px]">
-        <div className="space-y-3">
+      <div className="grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1fr)_260px]">
+        <div className="min-w-0 space-y-3">
           <FileUpload
             control={control}
             name="bannerFile"
@@ -53,7 +53,7 @@ export default function BrandIdentitySection() {
           </p>
         </div>
 
-        <div className="flex flex-col items-center justify-center rounded-2xl border bg-muted/20 p-5 text-center">
+        <div className="min-w-0 flex flex-col items-center justify-center rounded-2xl border bg-muted/20 p-5 text-center">
           <FileUpload
             control={control}
             name="logoFile"

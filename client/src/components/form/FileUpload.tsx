@@ -210,7 +210,7 @@ function FileUploadControl({
     : `Remove existing ${isLogo ? "logo" : "banner"}`;
 
   return (
-    <div className="space-y-2">
+    <div className="min-w-0 space-y-2">
       <label className="block text-sm font-medium text-foreground">
         {label}
         {required && <span className="text-destructive"> *</span>}
@@ -303,7 +303,7 @@ function FileUploadControl({
           className={cn(
             "group/banner relative min-h-40 w-full overflow-hidden rounded-xl border border-dashed bg-background shadow-xs transition",
             hasPreview
-              ? "aspect-[16/5] border-border"
+              ? "border-border sm:aspect-[16/5]"
               : "h-40 border-border",
             isDragActive && "border-primary ring-4 ring-primary/15",
             (visibleError || isDragReject) && "border-destructive",
@@ -419,9 +419,9 @@ function FileUploadControl({
       )}
 
       {isImage && file && (
-        <p className="flex items-center justify-center gap-2 text-xs font-medium text-primary">
+        <p className="flex min-w-0 flex-wrap items-center justify-center gap-2 text-xs font-medium text-primary">
           <CheckCircle2 className="size-3.5" aria-hidden="true" />
-          <span className="max-w-64 truncate">{file.name}</span>
+          <span className="min-w-0 max-w-full truncate">{file.name}</span>
           <span>ready to submit</span>
         </p>
       )}
