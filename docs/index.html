@@ -6,6 +6,30 @@
     <meta name="theme-color" content="#f8faf9" />
     <title>RestoManager — KfW Product Demo</title>
     <link rel="icon" href="assets/brand/logo.png" />
+    <link rel="preload" as="image" href="assets/brand/logo.png" />
+    <link rel="preload" as="image" href="assets/screens/00-landing.png" />
+    <link rel="preload" as="image" href="assets/screens/01-login.png" />
+    <link rel="preload" as="image" href="assets/screens/02-register-verification.png" />
+    <link rel="preload" as="image" href="assets/screens/03-admin-dashboard.png" />
+    <link rel="preload" as="image" href="assets/screens/04-admin-pending.png" />
+    <link rel="preload" as="image" href="assets/screens/05-admin-review.png" />
+    <link rel="preload" as="image" href="assets/screens/06-admin-approve-dialog.png" />
+    <link rel="preload" as="image" href="assets/screens/07-admin-approved.png" />
+    <link rel="preload" as="image" href="assets/screens/08-owner-dashboard.png" />
+    <link rel="preload" as="image" href="assets/screens/09-owner-menu.png" />
+    <link rel="preload" as="image" href="assets/screens/10-owner-profile.png" />
+    <link rel="preload" as="image" href="assets/screens/11-owner-kitchen-wide.png" />
+    <link rel="preload" as="image" href="assets/screens/12-customer-discovery.png" />
+    <link rel="preload" as="image" href="assets/screens/13-customer-restaurant-menu.png" />
+    <link rel="preload" as="image" href="assets/screens/14-customer-customize.png" />
+    <link rel="preload" as="image" href="assets/screens/15-customer-cart.png" />
+    <link rel="preload" as="image" href="assets/screens/16-customer-checkout.png" />
+    <link rel="preload" as="image" href="assets/screens/17-customer-confirmation.png" />
+    <link rel="preload" as="image" href="assets/screens/19-kitchen-order-pending.png" />
+    <link rel="preload" as="image" href="assets/screens/20-kitchen-order-preparing.png" />
+    <link rel="preload" as="image" href="assets/screens/21-kitchen-order-ready.png" />
+    <link rel="preload" as="image" href="assets/screens/22-customer-tracking-ready.png" />
+    <link rel="preload" as="image" href="assets/screens/23-customer-orders.png" />
     <link rel="stylesheet" href="styles.css" />
     <script src="demo.js" defer></script>
   </head>
@@ -34,8 +58,11 @@
                 <span class="brand-mark brand-mark-large"><img src="assets/brand/logo.png" alt="RestoManager" /></span>
                 <span class="eyebrow">KfW product demonstration</span>
               </div>
-              <h1 id="start-title"><span>Three roles.</span> One connected order.</h1>
-              <p>Follow one real restaurant journey across authentication, administration, operations, and customer ordering.</p>
+              <h1 id="start-title">Resto<span>Manager</span></h1>
+              <p class="start-promise">One connected order journey</p>
+              <div class="start-route" aria-label="Admin to Restaurant Owner to Customer">
+                <span>Admin</span><i>→</i><span>Restaurant Owner</span><i>→</i><span>Customer</span>
+              </div>
               <button class="primary-action" id="startDemo" type="button">
                 Start Demo
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
@@ -83,7 +110,7 @@
             <h2 id="scene-3-title">Platform activity is visible at a glance.</h2>
             <ul class="talking-points"><li>Restaurants & customers</li><li>Pending reviews</li><li>Live order distribution</li></ul>
           </div>
-          <figure class="media-frame media-hero"><img src="assets/screens/03-admin-dashboard.png" alt="RestoManager admin dashboard" /><figcaption>Admin dashboard · real platform data</figcaption></figure>
+            <figure class="media-frame media-hero"><img src="assets/screens/03-admin-dashboard.png" alt="RestoManager admin dashboard" /><span class="screen-callout" style="--x: 46%; --y: 34%;">Pending restaurant applications</span><figcaption>Admin dashboard · real platform data</figcaption></figure>
         </section>
 
         <section class="scene" data-phase="admin" aria-labelledby="scene-4-title">
@@ -92,8 +119,8 @@
             <h2 id="scene-4-title">Every restaurant passes through a clear review queue.</h2>
           </div>
           <div class="media-pair wide-pair">
-            <figure class="media-frame"><img src="assets/screens/04-admin-pending.png" alt="Pending restaurant applications" /><figcaption>Pending registrations</figcaption></figure>
-            <figure class="media-frame"><img src="assets/screens/05-admin-review.png" alt="Restaurant review page for Mizu Table" /><figcaption>Profile, owner details & verification</figcaption></figure>
+              <figure class="media-frame"><img src="assets/screens/04-admin-pending.png" alt="Pending restaurant applications" /><span class="screen-callout" style="--x: 76%; --y: 72%;">Pending applications</span><figcaption>Pending registrations</figcaption></figure>
+              <figure class="media-frame"><img src="assets/screens/05-admin-review.png" alt="Restaurant review page for Mizu Table" /><span class="screen-callout" style="--x: 83%; --y: 34%;">Verification documents</span><figcaption>Profile, owner details & verification</figcaption></figure>
           </div>
         </section>
 
@@ -106,8 +133,15 @@
           </div>
           <div class="shot-sequence shot-sequence-three" aria-label="Restaurant approval screenshot sequence">
             <figure class="media-frame sequence-frame"><img src="assets/screens/05-admin-review.png" alt="Restaurant application review" /><figcaption>Review</figcaption></figure>
-            <figure class="media-frame sequence-frame"><img src="assets/screens/06-admin-approve-dialog.png" alt="Restaurant approval confirmation" /><figcaption>Confirm</figcaption></figure>
+            <figure class="media-frame sequence-frame"><img src="assets/screens/06-admin-approve-dialog.png" alt="Restaurant approval confirmation" /><span class="screen-callout" style="--x: 61%; --y: 72%;">Approval action</span><figcaption>Confirm</figcaption></figure>
             <figure class="media-frame sequence-frame"><img src="assets/screens/07-admin-approved.png" alt="Restaurant shown in approved state" /><figcaption>Approved</figcaption></figure>
+          </div>
+        </section>
+
+        <section class="scene scene-handoff" data-phase="owner" aria-labelledby="handoff-owner-title">
+          <div class="handoff-copy">
+            <span class="handoff-route">Hajeer <i>→</i> Manar</span>
+            <h2 id="handoff-owner-title">Restaurant Owner Experience</h2>
           </div>
         </section>
 
@@ -126,7 +160,7 @@
             <h2 id="scene-7-title">The storefront stays accurate from one workspace.</h2>
           </div>
           <div class="media-pair wide-pair">
-            <figure class="media-frame"><img src="assets/screens/09-owner-menu.png" alt="Owner menu management screen" /><figcaption>Categories, items, prices & availability</figcaption></figure>
+              <figure class="media-frame"><img src="assets/screens/09-owner-menu.png" alt="Owner menu management screen" /><span class="screen-callout" style="--x: 31%; --y: 36%;">Menu management</span><figcaption>Categories, items, prices & availability</figcaption></figure>
             <figure class="media-frame"><img src="assets/screens/10-owner-profile.png" alt="Owner restaurant profile management screen" /><figcaption>Brand, profile, hours & open status</figcaption></figure>
           </div>
         </section>
@@ -138,7 +172,14 @@
             <p>New orders, preparing orders, and ready orders stay visible in one live board.</p>
             <div class="status-row"><span>Pending</span><span>Preparing</span><span>Ready</span></div>
           </div>
-          <figure class="media-frame media-hero media-wide"><img src="assets/screens/11-owner-kitchen-wide.png" alt="Wide Kitchen Live View showing new, preparing, and ready orders" /><figcaption>Kitchen Live View · wide operational board</figcaption></figure>
+          <figure class="media-frame media-hero media-wide"><img src="assets/screens/11-owner-kitchen-wide.png" alt="Wide Kitchen Live View showing new, preparing, and ready orders" /><span class="screen-callout" style="--x: 24%; --y: 19%;">Kitchen Live View</span><span class="screen-callout" style="--x: 35%; --y: 42%;">Incoming orders</span><figcaption>Wide desktop view · full operational context</figcaption></figure>
+        </section>
+
+        <section class="scene scene-handoff" data-phase="customer" aria-labelledby="handoff-customer-title">
+          <div class="handoff-copy">
+            <span class="handoff-route">Manar <i>→</i> Dib</span>
+            <h2 id="handoff-customer-title">Customer Experience</h2>
+          </div>
         </section>
 
         <section class="scene" data-phase="customer" aria-labelledby="scene-9-title">
@@ -190,7 +231,7 @@
           </div>
           <div class="media-pair wide-pair masked-pair">
             <figure class="media-frame account-frame"><img src="assets/screens/23-customer-orders.png" alt="Customer active orders and order history" /><span class="privacy-panel"><b>Dib</b><small>Customer account</small></span><figcaption>Active orders & order history</figcaption></figure>
-            <figure class="media-frame account-frame"><img src="assets/screens/22-customer-tracking-ready.png" alt="Customer order tracking showing ready status" /><span class="privacy-panel"><b>RM-D4E383</b><small>Ready for delivery</small></span><figcaption>Order progress & details</figcaption></figure>
+              <figure class="media-frame account-frame"><img src="assets/screens/22-customer-tracking-ready.png" alt="Customer order tracking showing ready status" /><span class="privacy-panel"><b>RM-D4E383</b><small>Ready for delivery</small></span><span class="screen-callout" style="--x: 69%; --y: 43%;">Customer order status</span><figcaption>Order progress & details</figcaption></figure>
           </div>
         </section>
 
@@ -201,10 +242,10 @@
             <ol class="lifecycle"><li>Customer orders</li><li>Restaurant receives</li><li>Kitchen updates</li><li>Customer sees Ready</li></ol>
           </div>
           <div class="shot-sequence lifecycle-sequence" aria-label="Connected order lifecycle screenshot sequence">
-            <figure class="media-frame sequence-frame"><img src="assets/screens/19-kitchen-order-pending-closeup.png" alt="Kitchen receives the pending customer order" /><figcaption>01 · Received</figcaption></figure>
-            <figure class="media-frame sequence-frame"><img src="assets/screens/20-kitchen-order-preparing-closeup.png" alt="Kitchen moves the order to preparing" /><figcaption>02 · Preparing</figcaption></figure>
-            <figure class="media-frame sequence-frame"><img src="assets/screens/21-kitchen-order-ready-closeup.png" alt="Kitchen marks the order ready" /><figcaption>03 · Ready</figcaption></figure>
-            <figure class="media-frame sequence-frame account-frame"><img src="assets/screens/22-customer-tracking-ready.png" alt="Customer tracking reflects the ready status" /><span class="privacy-panel"><b>RM-D4E383</b><small>Customer view</small></span><figcaption>04 · Status visible</figcaption></figure>
+            <figure class="media-frame sequence-frame lifecycle-detail lifecycle-pending"><img src="assets/screens/19-kitchen-order-pending.png" alt="Kitchen receives the pending customer order" /><figcaption>01 · Received</figcaption></figure>
+            <figure class="media-frame sequence-frame lifecycle-detail lifecycle-preparing"><img src="assets/screens/20-kitchen-order-preparing.png" alt="Kitchen moves the order to preparing" /><figcaption>02 · Preparing</figcaption></figure>
+            <figure class="media-frame sequence-frame lifecycle-detail lifecycle-ready"><img src="assets/screens/21-kitchen-order-ready.png" alt="Kitchen marks the order ready" /><figcaption>03 · Ready</figcaption></figure>
+            <figure class="media-frame sequence-frame account-frame"><img src="assets/screens/22-customer-tracking-ready.png" alt="Customer tracking reflects the ready status" /><span class="privacy-panel"><b>RM-D4E383</b><small>Customer view</small></span><span class="screen-callout" style="--x: 70%; --y: 43%;">Ready</span><figcaption>04 · Status visible</figcaption></figure>
           </div>
         </section>
 
@@ -212,7 +253,7 @@
           <div class="completion-mark"><img src="assets/brand/logo.png" alt="" /></div>
           <span class="eyebrow">Demo Complete</span>
           <h2 id="scene-15-title">Three roles. <b>One connected order.</b></h2>
-          <p>RestoManager connects trust, restaurant operations, and the customer experience in one continuous platform.</p>
+          <p>Trust, restaurant operations, and the customer experience—connected in one continuous platform.</p>
           <button class="primary-action" id="returnPresentation" type="button">Return to Presentation</button>
           <span class="return-hint" id="returnHint">Close this window or use Alt + Tab to return to PowerPoint.</span>
         </section>
@@ -220,7 +261,7 @@
 
       <footer class="deck-chrome deck-footer">
         <div class="scene-name"><span id="scenePhase">AUTH</span><strong id="sceneTitle">One platform. One restaurant. One order journey.</strong></div>
-        <div class="keyboard-help"><kbd>←</kbd><kbd>→</kbd><kbd>Space</kbd><span>Navigate</span></div>
+        <div class="keyboard-help"><kbd>← ↑</kbd><kbd>→ ↓</kbd><kbd>Space</kbd><span>Navigate</span></div>
         <div class="nav-buttons">
           <button id="previousScene" type="button" aria-label="Previous scene"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6" /></svg></button>
           <button id="nextScene" type="button" aria-label="Next scene"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg></button>
