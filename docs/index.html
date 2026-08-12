@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f8faf9" />
+    <title>RestoManager — KfW Product Demo</title>
+    <link rel="icon" href="assets/brand/logo.png" />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="demo.js" defer></script>
+  </head>
+  <body>
+    <main class="deck" id="demoDeck" aria-label="RestoManager product demonstration">
+      <header class="deck-chrome deck-header" aria-label="Demo progress">
+        <div class="brand-lockup">
+          <span class="brand-mark"><img src="assets/brand/logo.png" alt="" /></span>
+          <span><strong><b>Resto</b>Manager</strong><small>KfW product demo</small></span>
+        </div>
+        <ol class="journey" aria-label="Demo journey">
+          <li data-phase-step="auth">Auth</li>
+          <li data-phase-step="admin">Admin</li>
+          <li data-phase-step="owner">Owner</li>
+          <li data-phase-step="customer">Customer</li>
+          <li data-phase-step="complete">Complete</li>
+        </ol>
+        <div class="scene-count" id="sceneCount">01 / 15</div>
+      </header>
+
+      <div class="scene-stack" aria-live="polite">
+        <section class="scene scene-start is-active" data-phase="auth" aria-labelledby="start-title">
+          <div class="start-grid">
+            <div class="start-copy">
+              <div class="start-brand">
+                <span class="brand-mark brand-mark-large"><img src="assets/brand/logo.png" alt="RestoManager" /></span>
+                <span class="eyebrow">KfW product demonstration</span>
+              </div>
+              <h1 id="start-title"><span>Three roles.</span> One connected order.</h1>
+              <p>Follow one real restaurant journey across authentication, administration, operations, and customer ordering.</p>
+              <button class="primary-action" id="startDemo" type="button">
+                Start Demo
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
+              </button>
+              <span class="key-hint"><kbd>Space</kbd> also starts the demo</span>
+            </div>
+            <div class="start-visual" aria-hidden="true">
+              <div class="orbit orbit-one"></div>
+              <div class="orbit orbit-two"></div>
+              <div class="role-card role-admin"><span>01</span><strong>Admin</strong><small>Trust & approval</small></div>
+              <div class="role-card role-owner"><span>02</span><strong>Owner</strong><small>Restaurant operations</small></div>
+              <div class="role-card role-customer"><span>03</span><strong>Customer</strong><small>Discovery & ordering</small></div>
+              <div class="connection-line"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="scene" data-phase="auth" aria-labelledby="scene-1-title">
+          <div class="scene-copy">
+            <span class="eyebrow">Introduction</span>
+            <h2 id="scene-1-title">One platform. One restaurant. One order journey.</h2>
+            <p>We will move through the same working product as Hajeer, Manar, and Dib.</p>
+            <div class="speaker-note"><span>Story</span>Trust opens the door. Operations fulfill the promise. The customer sees the result.</div>
+          </div>
+          <figure class="media-frame media-hero">
+            <img src="assets/screens/00-landing.png" alt="RestoManager public landing page" />
+            <figcaption>Public platform overview</figcaption>
+          </figure>
+        </section>
+
+        <section class="scene" data-phase="auth" aria-labelledby="scene-2-title">
+          <div class="scene-heading">
+            <span class="eyebrow">Hajeer · Authentication</span>
+            <h2 id="scene-2-title">Access begins with identity. Restaurants begin with a guided application.</h2>
+          </div>
+          <div class="media-pair">
+            <figure class="media-frame"><img src="assets/screens/01-login.png" alt="RestoManager login screen" /><figcaption>Role-aware sign in</figcaption></figure>
+            <figure class="media-frame"><img src="assets/screens/02-register-verification.png" alt="Restaurant registration verification step" /><figcaption>Four-step restaurant onboarding</figcaption></figure>
+          </div>
+        </section>
+
+        <section class="scene" data-phase="admin" aria-labelledby="scene-3-title">
+          <div class="scene-copy">
+            <span class="eyebrow">Hajeer · Admin overview</span>
+            <h2 id="scene-3-title">Platform activity is visible at a glance.</h2>
+            <ul class="talking-points"><li>Restaurants & customers</li><li>Pending reviews</li><li>Live order distribution</li></ul>
+          </div>
+          <figure class="media-frame media-hero"><img src="assets/screens/03-admin-dashboard.png" alt="RestoManager admin dashboard" /><figcaption>Admin dashboard · real platform data</figcaption></figure>
+        </section>
+
+        <section class="scene" data-phase="admin" aria-labelledby="scene-4-title">
+          <div class="scene-heading compact-heading">
+            <span class="eyebrow">Hajeer · Restaurant review</span>
+            <h2 id="scene-4-title">Every restaurant passes through a clear review queue.</h2>
+          </div>
+          <div class="media-pair wide-pair">
+            <figure class="media-frame"><img src="assets/screens/04-admin-pending.png" alt="Pending restaurant applications" /><figcaption>Pending registrations</figcaption></figure>
+            <figure class="media-frame"><img src="assets/screens/05-admin-review.png" alt="Restaurant review page for Mizu Table" /><figcaption>Profile, owner details & verification</figcaption></figure>
+          </div>
+        </section>
+
+        <section class="scene" data-phase="admin" aria-labelledby="scene-5-title">
+          <div class="scene-copy narrow-copy">
+            <span class="eyebrow">Hajeer · Decision</span>
+            <h2 id="scene-5-title">Approval unlocks the owner workspace.</h2>
+            <p>A real pending restaurant is reviewed, confirmed, and moved into the approved platform state.</p>
+            <span class="motion-label"><i></i> Real application state change</span>
+          </div>
+          <div class="shot-sequence shot-sequence-three" aria-label="Restaurant approval screenshot sequence">
+            <figure class="media-frame sequence-frame"><img src="assets/screens/05-admin-review.png" alt="Restaurant application review" /><figcaption>Review</figcaption></figure>
+            <figure class="media-frame sequence-frame"><img src="assets/screens/06-admin-approve-dialog.png" alt="Restaurant approval confirmation" /><figcaption>Confirm</figcaption></figure>
+            <figure class="media-frame sequence-frame"><img src="assets/screens/07-admin-approved.png" alt="Restaurant shown in approved state" /><figcaption>Approved</figcaption></figure>
+          </div>
+        </section>
+
+        <section class="scene" data-phase="owner" aria-labelledby="scene-6-title">
+          <div class="scene-copy">
+            <span class="eyebrow">Manar · Restaurant owner</span>
+            <h2 id="scene-6-title">The approved restaurant becomes an operating business.</h2>
+            <ul class="talking-points"><li>Open for orders</li><li>Menu health</li><li>Operational activity</li></ul>
+          </div>
+          <figure class="media-frame media-hero"><img src="assets/screens/08-owner-dashboard.png" alt="Cedar and Stone owner dashboard" /><figcaption>Cedar & Stone · owner overview</figcaption></figure>
+        </section>
+
+        <section class="scene" data-phase="owner" aria-labelledby="scene-7-title">
+          <div class="scene-heading compact-heading">
+            <span class="eyebrow">Manar · Restaurant controls</span>
+            <h2 id="scene-7-title">The storefront stays accurate from one workspace.</h2>
+          </div>
+          <div class="media-pair wide-pair">
+            <figure class="media-frame"><img src="assets/screens/09-owner-menu.png" alt="Owner menu management screen" /><figcaption>Categories, items, prices & availability</figcaption></figure>
+            <figure class="media-frame"><img src="assets/screens/10-owner-profile.png" alt="Owner restaurant profile management screen" /><figcaption>Brand, profile, hours & open status</figcaption></figure>
+          </div>
+        </section>
+
+        <section class="scene" data-phase="owner" aria-labelledby="scene-8-title">
+          <div class="scene-copy">
+            <span class="eyebrow">Manar · Kitchen</span>
+            <h2 id="scene-8-title">The kitchen is built around the work in motion.</h2>
+            <p>New orders, preparing orders, and ready orders stay visible in one live board.</p>
+            <div class="status-row"><span>Pending</span><span>Preparing</span><span>Ready</span></div>
+          </div>
+          <figure class="media-frame media-hero media-wide"><img src="assets/screens/11-owner-kitchen-wide.png" alt="Wide Kitchen Live View showing new, preparing, and ready orders" /><figcaption>Kitchen Live View · wide operational board</figcaption></figure>
+        </section>
+
+        <section class="scene" data-phase="customer" aria-labelledby="scene-9-title">
+          <div class="scene-copy">
+            <span class="eyebrow">Dib · Discovery</span>
+            <h2 id="scene-9-title">Approved restaurants become discoverable.</h2>
+            <p>Customers browse real restaurants, compare cuisines and availability, then open the menu that fits.</p>
+          </div>
+          <figure class="media-frame media-hero"><img src="assets/screens/12-customer-discovery.png" alt="Public restaurant discovery page" /><figcaption>Restaurant discovery & filtering</figcaption></figure>
+        </section>
+
+        <section class="scene" data-phase="customer" aria-labelledby="scene-10-title">
+          <div class="scene-copy">
+            <span class="eyebrow">Dib · Restaurant & menu</span>
+            <h2 id="scene-10-title">The owner’s work becomes the customer’s storefront.</h2>
+            <p>Cedar & Stone’s brand, hours, availability, categories, and menu appear together.</p>
+          </div>
+          <figure class="media-frame media-hero"><img src="assets/screens/13-customer-restaurant-menu.png" alt="Cedar and Stone public restaurant and menu page" /><figcaption>Cedar & Stone · public menu</figcaption></figure>
+        </section>
+
+        <section class="scene" data-phase="customer" aria-labelledby="scene-11-title">
+          <div class="scene-heading compact-heading">
+            <span class="eyebrow">Dib · Configure & review</span>
+            <h2 id="scene-11-title">The order stays clear from customization to cart.</h2>
+          </div>
+          <div class="media-pair wide-pair">
+            <figure class="media-frame"><img src="assets/screens/14-customer-customize.png" alt="Silky Hummus customization dialog" /><figcaption>Ingredients, add-ons & quantity</figcaption></figure>
+            <figure class="media-frame"><img src="assets/screens/15-customer-cart.png" alt="Customer cart with customized item" /><figcaption>Cart & order summary</figcaption></figure>
+          </div>
+        </section>
+
+        <section class="scene" data-phase="customer" aria-labelledby="scene-12-title">
+          <div class="scene-copy narrow-copy">
+            <span class="eyebrow">Dib · Place order</span>
+            <h2 id="scene-12-title">One final review. One confirmed order.</h2>
+            <p>The real order contains Silky Hummus, Extra sauce, delivery details, and a restaurant note.</p>
+            <span class="order-chip">RM-D4E383 · $6.75</span>
+          </div>
+          <div class="shot-sequence shot-sequence-two" aria-label="Order placement screenshot sequence">
+            <figure class="media-frame sequence-frame"><img src="assets/screens/16-customer-checkout.png" alt="Customer checkout review" /><figcaption>Review checkout</figcaption></figure>
+            <figure class="media-frame sequence-frame"><img src="assets/screens/17-customer-confirmation.png" alt="Customer order confirmation" /><figcaption>Order confirmed</figcaption></figure>
+          </div>
+        </section>
+
+        <section class="scene" data-phase="customer" aria-labelledby="scene-13-title">
+          <div class="scene-heading compact-heading">
+            <span class="eyebrow">Dib · Account & tracking</span>
+            <h2 id="scene-13-title">Current orders and history stay in one customer account.</h2>
+          </div>
+          <div class="media-pair wide-pair masked-pair">
+            <figure class="media-frame account-frame"><img src="assets/screens/23-customer-orders.png" alt="Customer active orders and order history" /><span class="privacy-panel"><b>Dib</b><small>Customer account</small></span><figcaption>Active orders & order history</figcaption></figure>
+            <figure class="media-frame account-frame"><img src="assets/screens/22-customer-tracking-ready.png" alt="Customer order tracking showing ready status" /><span class="privacy-panel"><b>RM-D4E383</b><small>Ready for delivery</small></span><figcaption>Order progress & details</figcaption></figure>
+          </div>
+        </section>
+
+        <section class="scene" data-phase="complete" aria-labelledby="scene-14-title">
+          <div class="scene-copy narrow-copy">
+            <span class="eyebrow">Connected lifecycle</span>
+            <h2 id="scene-14-title">The same order crosses both sides of the platform.</h2>
+            <ol class="lifecycle"><li>Customer orders</li><li>Restaurant receives</li><li>Kitchen updates</li><li>Customer sees Ready</li></ol>
+          </div>
+          <div class="shot-sequence lifecycle-sequence" aria-label="Connected order lifecycle screenshot sequence">
+            <figure class="media-frame sequence-frame"><img src="assets/screens/19-kitchen-order-pending-closeup.png" alt="Kitchen receives the pending customer order" /><figcaption>01 · Received</figcaption></figure>
+            <figure class="media-frame sequence-frame"><img src="assets/screens/20-kitchen-order-preparing-closeup.png" alt="Kitchen moves the order to preparing" /><figcaption>02 · Preparing</figcaption></figure>
+            <figure class="media-frame sequence-frame"><img src="assets/screens/21-kitchen-order-ready-closeup.png" alt="Kitchen marks the order ready" /><figcaption>03 · Ready</figcaption></figure>
+            <figure class="media-frame sequence-frame account-frame"><img src="assets/screens/22-customer-tracking-ready.png" alt="Customer tracking reflects the ready status" /><span class="privacy-panel"><b>RM-D4E383</b><small>Customer view</small></span><figcaption>04 · Status visible</figcaption></figure>
+          </div>
+        </section>
+
+        <section class="scene scene-complete" data-phase="complete" aria-labelledby="scene-15-title">
+          <div class="completion-mark"><img src="assets/brand/logo.png" alt="" /></div>
+          <span class="eyebrow">Demo Complete</span>
+          <h2 id="scene-15-title">Three roles. <b>One connected order.</b></h2>
+          <p>RestoManager connects trust, restaurant operations, and the customer experience in one continuous platform.</p>
+          <button class="primary-action" id="returnPresentation" type="button">Return to Presentation</button>
+          <span class="return-hint" id="returnHint">Close this window or use Alt + Tab to return to PowerPoint.</span>
+        </section>
+      </div>
+
+      <footer class="deck-chrome deck-footer">
+        <div class="scene-name"><span id="scenePhase">AUTH</span><strong id="sceneTitle">One platform. One restaurant. One order journey.</strong></div>
+        <div class="keyboard-help"><kbd>←</kbd><kbd>→</kbd><kbd>Space</kbd><span>Navigate</span></div>
+        <div class="nav-buttons">
+          <button id="previousScene" type="button" aria-label="Previous scene"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6" /></svg></button>
+          <button id="nextScene" type="button" aria-label="Next scene"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg></button>
+        </div>
+      </footer>
+    </main>
+  </body>
+</html>
