@@ -34,6 +34,7 @@ body {
   font-family: "Resto Inter", Inter, system-ui, sans-serif;
   color: var(--ink);
   -webkit-font-smoothing: antialiased;
+  user-select: none;
 }
 
 button { font: inherit; }
